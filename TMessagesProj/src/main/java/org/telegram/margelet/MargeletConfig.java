@@ -51,34 +51,34 @@ public class MargeletConfig {
         return updateIntervalMinutes() > 0;
     }
 
-    public static final String CHANNEL_URL = "https://t.me/margeletter";
+    public static final String CHANNEL_URL = "https://github.com/mitherly/SweetGram";
     /**
      * Реквизиты для доната. Лежат здесь, а не в строках: это не перевод, а
      * данные владельца форка, и в каждом языке они одни и те же.
      */
-    public static final String DONATE_YOOMONEY = "2204120143055305";
-    public static final String DONATE_ROBLOX = "h4ru_456";
+    public static final String DONATE_YOOMONEY = "";
+    public static final String DONATE_ROBLOX = "";
     /**
      * Страница пожертвований. В отличие от номера кошелька её не копируют, а
      * открывают: там уже готовая форма, и человеку не нужно никуда вставлять
      * цифры руками.
      */
-    public static final String DONATE_PAGE = "https://yoomoney.ru/to/4100118196133693";
+    public static final String DONATE_PAGE = "";
     /** Кому дарить подарок за звёзды. Ник нужен на случай, если номера нет в кэше. */
-    public static final long DONATE_GIFT_USER = 7826361017L;
-    public static final String DONATE_GIFT_USERNAME = "narezany";
+    public static final long DONATE_GIFT_USER = 0L;
+    public static final String DONATE_GIFT_USERNAME = "";
 
     /** Свой набор стикеров: ставится обычной кнопкой, как любой другой набор. */
-    public static final String STICKERS_URL = "https://t.me/addstickers/MargeletPackMargeletter";
+    public static final String STICKERS_URL = "";
 
-    public static final String SOURCE_URL = "https://github.com/narezany/Margelet";
-    public static final String FORUM_URL = "https://t.me/margeletforum";
+    public static final String SOURCE_URL = "https://github.com/mitherly/SweetGram";
+    public static final String FORUM_URL = "https://github.com/mitherly/SweetGram";
     /**
      * Написать нам. Это тот же канал, но с ?direct: телеграм открывает не
      * ленту, а поле для сообщения — человек с жалобой не должен искать, куда
      * её деть.
      */
-    public static final String FEEDBACK_URL = "https://t.me/margeletter?direct";
+    public static final String FEEDBACK_URL = "https://github.com/mitherly/SweetGram/issues";
     /**
      * Документация по плагинам. Ведёт на файл в репозитории, а не на страницу
      * сайта: страницы гитхаба у репозитория не включены, а ссылка на

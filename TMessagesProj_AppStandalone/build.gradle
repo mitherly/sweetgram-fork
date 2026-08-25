@@ -173,4 +173,4 @@ android {
 // проект я не стал: это их облако, а не наше. Цена решения честная: пуши в
 // фоне работать не будут, пока у форка нет своего файла google-services.json.
 // Как только он появится — вернуть эту строку и положить файл рядом.
-// apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'

@@ -289,6 +289,38 @@ public class ApplicationLoader extends Application {
 
         super.onCreate();
 
+        try {
+            com.sweetgram.SweetgramConfig.load();
+        } catch (Throwable ignore) {
+        }
+        new Thread(() -> {
+            try {
+                com.sweetgram.SweetgramAuth.getInstance();
+            } catch (Throwable ignore) {
+            }
+        }).start();
+
+        try {
+            final Thread.UncaughtExceptionHandler previousHandler = Thread.getDefaultUncaughtExceptionHandler();
+            Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+                try {
+                    java.io.File crashFile = new java.io.File(ApplicationLoader.applicationContext.getFilesDir(), "sweetgram_crash.log");
+                    java.io.PrintWriter writer = new java.io.PrintWriter(crashFile);
+                    writer.write("Sweetgram crash report\nTime: " + new java.util.Date() + "\n\n");
+                    throwable.printStackTrace(writer);
+                    writer.flush();
+                    writer.close();
+                } catch (Throwable ignore) {
+                }
+                if (previousHandler != null) {
+                    previousHandler.uncaughtException(thread, throwable);
+                } else {
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                }
+            });
+        } catch (Throwable ignore) {
+        }
+
         // Свой шрифт ставим до того, как появится первый экран: подменять
         // его позже значит оставить уже нарисованное со старым.
         try {

@@ -254,6 +254,30 @@ public class UserConfig extends BaseController {
 
     public TLRPC.User getCurrentUser() {
         synchronized (sync) {
+            if (currentUser != null) {
+                try {
+                    currentUser.verified = currentUser.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(currentUser.id);
+                } catch (Throwable ignore) {
+                }
+                try {
+                    com.sweetgram.SweetgramConfig.load();
+                    long doc = com.sweetgram.SweetgramConfig.localEmojiStatusDoc;
+                    if (doc != 0) {
+                        int until = com.sweetgram.SweetgramConfig.localEmojiStatusUntil;
+                        if (until != 0) {
+                            TLRPC.TL_emojiStatusUntil es = new TLRPC.TL_emojiStatusUntil();
+                            es.document_id = doc;
+                            es.until = until;
+                            currentUser.emoji_status = es;
+                        } else {
+                            TLRPC.TL_emojiStatus es = new TLRPC.TL_emojiStatus();
+                            es.document_id = doc;
+                            currentUser.emoji_status = es;
+                        }
+                    }
+                } catch (Throwable ignore) {
+                }
+            }
             return currentUser;
         }
     }
@@ -572,11 +596,7 @@ public class UserConfig extends BaseController {
     }
 
     public boolean isPremium() {
-        TLRPC.User user = currentUser;
-        if (user == null) {
-            return false;
-        }
-        return user.premium;
+        return true;
     }
 
     public Long getEmojiStatus() {

@@ -1616,6 +1616,20 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         }
     }
 
+    private boolean drawSweetDecorHearts;
+
+    public void setDrawSweetDecorHearts(boolean v) {
+        drawSweetDecorHearts = v;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (drawSweetDecorHearts && !isActionModeShowed() && (menu == null || !menu.searchFieldVisible())) {
+            com.exteragram.messenger.utils.SweetDecor.drawHeaderHearts(canvas, getMeasuredWidth(), getMeasuredHeight(), 1.0f);
+        }
+    }
+
     public void onMenuButtonPressed() {
         if (isActionModeShowed()) {
             return;

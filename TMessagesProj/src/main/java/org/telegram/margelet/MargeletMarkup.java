@@ -86,7 +86,7 @@ public class MargeletMarkup {
      * Заголовок, который форк дописывает в начало оформленного сообщения.
      * В самом форке он спрятан, у остальных виден — так и задумано владельцем.
      */
-    public static final String HEADER = "<! Message looks better with @margeletter! >";
+    public static final String HEADER = "<! Message looks better with Sweetgram! >";
 
     /** Размер: от 0,6 до 2,0 обычного. Границы жёсткие с обеих сторон. */
     private static final float SIZE_MIN = 0.6f;

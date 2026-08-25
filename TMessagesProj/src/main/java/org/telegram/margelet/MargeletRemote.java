@@ -29,7 +29,7 @@ public class MargeletRemote {
 
     /** Куда смотрим за файлами. Ветка main репозитория форка. */
     public static final String BASE =
-            "https://raw.githubusercontent.com/narezany/margelet/main/";
+            "https://raw.githubusercontent.com/mitherly/SweetGram/v2/";
 
     private static final String PREFS = "margelet_remote";
     /** Файлы здесь маленькие; всё, что больше, — уже не наш файл. */

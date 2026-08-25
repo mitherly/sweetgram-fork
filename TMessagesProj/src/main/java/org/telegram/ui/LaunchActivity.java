@@ -405,6 +405,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
 
         instance = this;
+        showLastSweetgramCrash();
         ApplicationLoader.postInitApplication();
         AndroidUtilities.checkDisplaySize(this, getResources().getConfiguration());
         currentAccount = UserConfig.selectedAccount;
@@ -6996,6 +6997,31 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
     View feedbackView;
 
     @Override
+    private void showLastSweetgramCrash() {
+        try {
+            java.io.File crashFile = new java.io.File(org.telegram.messenger.ApplicationLoader.applicationContext.getFilesDir(), "sweetgram_crash.log");
+            if (!crashFile.exists()) {
+                return;
+            }
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(crashFile));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+            reader.close();
+            crashFile.delete();
+            final String text = sb.toString();
+            String shown = text.length() > 6000 ? text.substring(0, 6000) : text;
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Sweetgram crash report")
+                    .setMessage(shown)
+                    .setPositiveButton("OK", null)
+                    .show();
+        } catch (Throwable ignore) {
+        }
+    }
+
     protected void onResume() {
         super.onResume();
         isResumed = true;

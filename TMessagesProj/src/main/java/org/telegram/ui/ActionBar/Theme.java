@@ -4315,7 +4315,44 @@ public class Theme {
             applyingTheme = currentNightTheme;
         }
         applyTheme(applyingTheme, false, false, switchToTheme == 2);
+        applySweetgramPinkIfDefault(applyingTheme);
         AndroidUtilities.runOnUIThread(Theme::checkAutoNightThemeConditions);
+    }
+
+    private static void applySweetgramPinkIfDefault(ThemeInfo theme) {
+        if (theme == null) {
+            return;
+        }
+        if (theme.isDark()) {
+            return;
+        }
+        final int pinkBar = 0xFFF8C8DC;
+        final int pinkBarDark = 0xFFF3BBD0;
+        final int pinkBgWhite = 0xFFFCEFF5;
+        final int pinkBgGray = 0xFFF4E3EC;
+        final int pinkWall = 0xFFFBEFF4;
+        final int pinkIcon = 0xFFB85C7E;
+        final int pinkTitle = 0xFF7A2E4B;
+        final int pinkAccent = 0xFFE59CB8;
+        final int pinkTextLink = 0xFFD36A96;
+        setColor(key_actionBarDefault, pinkBar, false);
+        setColor(key_actionBarDefaultArchived, pinkBarDark, false);
+        setColor(key_windowBackgroundWhite, pinkBgWhite, false);
+        setColor(key_windowBackgroundGray, pinkBgGray, false);
+        setColor(key_chat_wallpaper, pinkWall, false);
+        setColor(key_actionBarDefaultIcon, pinkIcon, false);
+        setColor(key_actionBarDefaultTitle, pinkTitle, false);
+        setColor(key_actionBarDefaultSearch, pinkTitle, false);
+        setColor(key_actionBarDefaultSearchPlaceholder, pinkIcon, false);
+        setColor(key_switchTrackChecked, pinkAccent, false);
+        setColor(key_chat_messageLinkIn, pinkTextLink, false);
+        setColor(key_dialogTextLink, pinkTextLink, false);
+        setColor(key_checkboxCheck, pinkAccent, false);
+        setColor(key_radioBackgroundChecked, pinkAccent, false);
+        setColor(key_avatar_backgroundActionBarBlue, pinkBar, false);
+        setColor(key_avatar_actionBarSelectorBlue, 0x20E59CB8, false);
+        setColor(key_windowBackgroundWhiteBlueText, pinkTextLink, false);
+        setColor(key_windowBackgroundWhiteBlueIcon, pinkIcon, false);
     }
 
     private static void sortAccents(ThemeInfo info) {
@@ -9645,18 +9682,11 @@ public class Theme {
     }
 
     public static Drawable createDefaultWallpaper() {
-        return createDefaultWallpaper(0, 0);
+        return new com.sweetgram.SweetgramBackgroundDrawable();
     }
 
     public static Drawable createDefaultWallpaper(int w, int h) {
-        MotionBackgroundDrawable motionBackgroundDrawable = new MotionBackgroundDrawable(0xffdbddbb, 0xff6ba587, 0xffd5d88d, 0xff88b884, w != 0);
-        if (w <= 0 || h <= 0) {
-            w = Math.min(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y);
-            h = Math.max(AndroidUtilities.displaySize.x, AndroidUtilities.displaySize.y);
-        }
-        motionBackgroundDrawable.setPatternBitmap(34, SvgHelper.getBitmap(R.raw.default_pattern, w, h, Color.BLACK, 1f, SvgHelper.ScaleMode.ByWidth));
-        motionBackgroundDrawable.setPatternColorFilter(motionBackgroundDrawable.getPatternColor());
-        return motionBackgroundDrawable;
+        return new com.sweetgram.SweetgramBackgroundDrawable();
     }
 
     private static Bitmap loadScreenSizedBitmap(FileInputStream stream, int offset) {

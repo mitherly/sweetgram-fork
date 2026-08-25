@@ -2616,6 +2616,17 @@ public class MessagesController extends BaseController implements NotificationCe
                 user.emoji_status = new_emoji_status;
                 getNotificationCenter().postNotificationName(NotificationCenter.userEmojiStatusUpdated, user);
             }
+            try {
+                long doc = DialogObject.getEmojiStatusDocumentId(newStatus);
+                int until = newStatus instanceof TLRPC.TL_emojiStatusUntil ? ((TLRPC.TL_emojiStatusUntil) newStatus).until : 0;
+                com.sweetgram.SweetgramConfig.load();
+                if (com.sweetgram.SweetgramConfig.editor != null) {
+                    com.sweetgram.SweetgramConfig.editor.putLong("localEmojiStatusDoc", doc).putInt("localEmojiStatusUntil", until).apply();
+                }
+                com.sweetgram.SweetgramConfig.localEmojiStatusDoc = doc;
+                com.sweetgram.SweetgramConfig.localEmojiStatusUntil = until;
+            } catch (Throwable ignore) {
+            }
         } else {
             TLRPC.TL_channels_updateEmojiStatus req = new TLRPC.TL_channels_updateEmojiStatus();
             req.channel = getInputChannel(-dialogId);
@@ -19944,6 +19955,24 @@ public class MessagesController extends BaseController implements NotificationCe
                             currentUser.id = update.user_id;
                             currentUser.emoji_status = update.emoji_status;
                             if (UserObject.isUserSelf(currentUser)) {
+                                try {
+                                    com.sweetgram.SweetgramConfig.load();
+                                    long doc = com.sweetgram.SweetgramConfig.localEmojiStatusDoc;
+                                    if (doc != 0) {
+                                        int until = com.sweetgram.SweetgramConfig.localEmojiStatusUntil;
+                                        if (until != 0) {
+                                            TLRPC.TL_emojiStatusUntil es = new TLRPC.TL_emojiStatusUntil();
+                                            es.document_id = doc;
+                                            es.until = until;
+                                            currentUser.emoji_status = es;
+                                        } else {
+                                            TLRPC.TL_emojiStatus es = new TLRPC.TL_emojiStatus();
+                                            es.document_id = doc;
+                                            currentUser.emoji_status = es;
+                                        }
+                                    }
+                                } catch (Throwable ignore) {
+                                }
                                 getNotificationCenter().postNotificationName(NotificationCenter.userEmojiStatusUpdated, currentUser);
                             }
                         }

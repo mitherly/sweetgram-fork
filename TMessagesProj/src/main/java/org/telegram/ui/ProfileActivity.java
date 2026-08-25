@@ -2487,6 +2487,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         actionBar.setItemsBackgroundColor(peerColor != null ? 0x20ffffff : getThemedColor(Theme.key_avatar_actionBarSelectorBlue), false);
         actionBar.setItemsColor(getThemedColor(Theme.key_actionBarDefaultIcon), false);
         actionBar.setItemsColor(getThemedColor(Theme.key_actionBarDefaultIcon), true);
+        actionBar.setDrawSweetDecorHearts(true);
         actionBar.setCastShadows(false);
         actionBar.setAddToContainer(false);
         actionBar.setClipContent(true);
@@ -11506,9 +11507,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     if (user.scam || user.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(user.scam ? 0 : 1));
                         nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.ScamMessage);
-                    } else if (user.verified) {
-                        nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
-                        nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                    } else if (user.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
+                        if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
+                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id)));
+                            nameTextViewRightDrawable2ContentDescription = com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id);
+                        } else {
+                            nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                            nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                        }
                     } else if (getMessagesController().isDialogMuted(dialogId != 0 ? dialogId : userId, topicId)) {
                         nameTextView[a].setRightDrawable2(getThemedDrawable(Theme.key_drawable_muteIconDrawable));
                         nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.NotificationsMuted);
@@ -11547,8 +11553,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 } else if (a == 1) {
                     if (user.scam || user.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(user.scam ? 0 : 1));
-                    } else if (user.verified) {
-                        nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                    } else if (user.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
+                        if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
+                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id)));
+                        } else {
+                            nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                        }
                     } else if (org.telegram.margelet.MargeletBadge.has(user.id)) {
                         // Второй заголовок — тот, что виден на развёрнутой шапке
                         // профиля. В первый раз я поправил только первый, и
@@ -11849,9 +11859,14 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     if (chat.scam || chat.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(chat.scam ? 0 : 1));
                         nameTextViewRightDrawableContentDescription = LocaleController.getString(R.string.ScamMessage);
-                    } else if (chat.verified) {
-                        nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
-                        nameTextViewRightDrawableContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                    } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
+                        if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
+                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id)));
+                            nameTextViewRightDrawableContentDescription = com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id);
+                        } else {
+                            nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                            nameTextViewRightDrawableContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                        }
                     } else if (org.telegram.margelet.MargeletBadge.has(org.telegram.margelet.MargeletBadge.chatPeer(chat.id))) {
                         // Свои площадки форка. Тот же слот и то же правило:
                         // занимаем его, только если он свободен.
@@ -11885,8 +11900,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 } else if (!copyFromChatActivity) {
                     if (chat.scam || chat.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(chat.scam ? 0 : 1));
-                    } else if (chat.verified) {
-                        nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                    } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
+                        if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
+                        nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id)));
+                        } else {
+                            nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                        }
                     } else if (getMessagesController().isDialogMuted(-chatId, topicId)) {
                         nameTextView[a].setRightDrawable2(getThemedDrawable(Theme.key_drawable_muteIconDrawable));
                     } else if (org.telegram.margelet.MargeletBadge.has(org.telegram.margelet.MargeletBadge.chatPeer(chat.id))) {
