@@ -626,6 +626,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int settingsSectionRow2;
     private int notificationRow;
     private int languageRow;
+    private int margeletRow;   // свой раздел настроек форка
+    private int margeletIdRow;  // строка с айди в профиле
+    // Блок значков. Их может быть несколько, поэтому не одна строка, а отрезок:
+    // начало включительно, конец нет — как у списка участников рядом.
+    private int margeletBadgesStartRow;
+    private int margeletBadgesEndRow;
+    private int margeletBadgeSectionRow;
+
+    /** Значок, которому досталась эта строка блока. */
+    private org.telegram.margelet.MargeletBadge.Badge margeletBadgeAt(int position) {
+        final java.util.List<org.telegram.margelet.MargeletBadge.Badge> badges =
+                org.telegram.margelet.MargeletBadge.all(userId != 0 ? userId : org.telegram.margelet.MargeletBadge.chatPeer(chatId));
+        final int index = position - margeletBadgesStartRow;
+        return index >= 0 && index < badges.size() ? badges.get(index) : null;
+    }
     private int privacyRow;
     private int dataRow;
     private int chatRow;
@@ -4536,6 +4551,15 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 presentFragment(new PrivacySettingsActivity().setCurrentPassword(currentPassword));
             } else if (position == dataRow) {
                 presentFragment(new DataSettingsActivity());
+            } else if (margeletBadgesStartRow != -1 && position >= margeletBadgesStartRow && position < margeletBadgesEndRow) {
+                org.telegram.margelet.MargeletBadge.show(getContext(), margeletBadgeAt(position));
+            } else if (position == margeletIdRow) {
+                // Нажатие копирует айди: строка нужна ровно для этого.
+                AndroidUtilities.addToClipboard(String.valueOf(userId != 0 ? userId : chatId));
+                BulletinFactory.of(ProfileActivity.this).createCopyBulletin(
+                        LocaleController.getString(R.string.TextCopied)).show();
+            } else if (position == margeletRow) {
+                presentFragment(new MargeletSettingsActivity());
             } else if (position == chatRow) {
                 presentFragment(new ThemeActivity(ThemeActivity.THEME_TYPE_BASIC));
             } else if (position == filtersRow) {
@@ -10469,6 +10493,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         settingsSectionRow2 = -1;
         notificationRow = -1;
         languageRow = -1;
+        margeletRow = -1;
+        margeletIdRow = -1;
+        margeletBadgesStartRow = -1;
+        margeletBadgesEndRow = -1;
+        margeletBadgeSectionRow = -1;
         premiumRow = -1;
         starsRow = -1;
         tonRow = -1;
@@ -10638,6 +10667,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
 
                 settingsSectionRow2 = rowCount++;
+                margeletRow = rowCount++;
                 chatRow = rowCount++;
                 privacyRow = rowCount++;
                 notificationRow = rowCount++;
@@ -10733,8 +10763,21 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (isBot && user != null && user.bot_has_main_app) {
                     botAppRow = rowCount++;
                 }
+                if (org.telegram.margelet.MargeletConfig.showIds() && userId != 0) {
+                    margeletIdRow = rowCount++;
+                }
                 infoEndRow = rowCount - 1;
                 infoSectionRow = rowCount++;
+
+                // Свой блок, а не строчка среди прочих: значок к сведениям о
+                // человеке отношения не имеет, он от форка.
+                final int userBadges = org.telegram.margelet.MargeletBadge.all(userId).size();
+                if (userBadges > 0) {
+                    margeletBadgesStartRow = rowCount;
+                    rowCount += userBadges;
+                    margeletBadgesEndRow = rowCount;
+                    margeletBadgeSectionRow = rowCount++;
+                }
 
                 if (user != null && user.linked_community_id != 0) {
                     linkedCommunityRow = rowCount++;
@@ -10885,8 +10928,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 notificationsRow = rowCount++;
             }
+            if (org.telegram.margelet.MargeletConfig.showIds() && chatId != 0) {
+                margeletIdRow = rowCount++;
+            }
             if (rowCount > 0) {
                 infoSectionRow = rowCount++;
+            }
+            final int chatBadges = org.telegram.margelet.MargeletBadge.all(org.telegram.margelet.MargeletBadge.chatPeer(chatId)).size();
+            if (chatBadges > 0) {
+                margeletBadgesStartRow = rowCount;
+                rowCount += chatBadges;
+                margeletBadgesEndRow = rowCount;
+                margeletBadgeSectionRow = rowCount++;
             }
 
             if (currentChat != null && currentChat.linked_community_id != 0) {
@@ -11420,7 +11473,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     nameTextView[a].setRightDrawable2(titleTextView.getRightDrawable2());
                 } else if (a == 0 && user.id != getUserConfig().getClientUserId() && !MessagesController.isSupportUser(user) && user.phone != null && user.phone.length() != 0 && getContactsController().contactsDict.get(user.id) == null &&
                         (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
-                    nameTextView[a].setText(PhoneFormat.getInstance().format("+" + user.phone));
+                    nameTextView[a].setText(org.telegram.margelet.MargeletPrivacy.phone(PhoneFormat.getInstance().format("+" + user.phone), user.id));
                 } else {
                     nameTextView[a].setText(newString);
                 }
@@ -11459,9 +11512,23 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (getMessagesController().isDialogMuted(dialogId != 0 ? dialogId : userId, topicId)) {
                         nameTextView[a].setRightDrawable2(getThemedDrawable(Theme.key_drawable_muteIconDrawable));
                         nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.NotificationsMuted);
+                    } else if (user != null && org.telegram.margelet.MargeletBadge.has(user.id)) {
+                        // Значок форка ставим только в пустой слот: галочку
+                        // «проверено» или пометку «скам» затирать нельзя, они
+                        // говорят о человеке важнее, чем наше украшение.
+                        final long badgeUserId = user.id;
+                        nameTextView[a].setRightDrawable2(
+                                org.telegram.margelet.MargeletBadge.iconDrawable(getContext(), badgeUserId));
+                        nameTextViewRightDrawable2ContentDescription = org.telegram.margelet.MargeletBadge.title(badgeUserId);
+                        // У второго значка нет своего обработчика нажатия — в
+                        // SimpleTextView он есть только у первого. Поэтому
+                        // нажимается всё имя целиком.
+                        nameTextView[a].setOnClickListener(v -> org.telegram.margelet.MargeletBadge.show(getContext(), badgeUserId));
                     } else {
                         nameTextView[a].setRightDrawable2(null);
                         nameTextViewRightDrawable2ContentDescription = null;
+                        nameTextView[a].setOnClickListener(null);
+                        nameTextView[a].setClickable(false);
                     }
                     if (user != null/* && !getMessagesController().premiumFeaturesBlocked()*/ && !MessagesController.isSupportUser(user) && DialogObject.getEmojiStatusDocumentId(user.emoji_status) != 0) {
                         rightIconIsStatus = true;
@@ -11482,8 +11549,18 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextView[a].setRightDrawable2(getScamDrawable(user.scam ? 0 : 1));
                     } else if (user.verified) {
                         nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                    } else if (org.telegram.margelet.MargeletBadge.has(user.id)) {
+                        // Второй заголовок — тот, что виден на развёрнутой шапке
+                        // профиля. В первый раз я поправил только первый, и
+                        // владелец у себя значка не увидел.
+                        final long badgeUserId = user.id;
+                        nameTextView[a].setRightDrawable2(
+                                org.telegram.margelet.MargeletBadge.iconDrawable(getContext(), badgeUserId));
+                        nameTextView[a].setOnClickListener(v -> org.telegram.margelet.MargeletBadge.show(getContext(), badgeUserId));
                     } else {
                         nameTextView[a].setRightDrawable2(null);
+                        nameTextView[a].setOnClickListener(null);
+                        nameTextView[a].setClickable(false);
                     }
                     if (/*!getMessagesController().premiumFeaturesBlocked() && */user != null && !MessagesController.isSupportUser(user) && DialogObject.getEmojiStatusDocumentId(user.emoji_status) != 0) {
                         rightIconIsStatus = true;
@@ -11775,6 +11852,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (chat.verified) {
                         nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
                         nameTextViewRightDrawableContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                    } else if (org.telegram.margelet.MargeletBadge.has(org.telegram.margelet.MargeletBadge.chatPeer(chat.id))) {
+                        // Свои площадки форка. Тот же слот и то же правило:
+                        // занимаем его, только если он свободен.
+                        final long badgePeerId = org.telegram.margelet.MargeletBadge.chatPeer(chat.id);
+                        nameTextView[a].setRightDrawable2(org.telegram.margelet.MargeletBadge.iconDrawable(getContext(), badgePeerId));
+                        nameTextViewRightDrawableContentDescription = org.telegram.margelet.MargeletBadge.title(badgePeerId);
+                        nameTextView[a].setOnClickListener(v -> org.telegram.margelet.MargeletBadge.show(getContext(), badgePeerId));
                     } else {
                         nameTextView[a].setRightDrawable2(null);
                         nameTextViewRightDrawableContentDescription = null;
@@ -11805,6 +11889,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
                     } else if (getMessagesController().isDialogMuted(-chatId, topicId)) {
                         nameTextView[a].setRightDrawable2(getThemedDrawable(Theme.key_drawable_muteIconDrawable));
+                    } else if (org.telegram.margelet.MargeletBadge.has(org.telegram.margelet.MargeletBadge.chatPeer(chat.id))) {
+                        final long badgePeerId = org.telegram.margelet.MargeletBadge.chatPeer(chat.id);
+                        nameTextView[a].setRightDrawable2(org.telegram.margelet.MargeletBadge.iconDrawable(getContext(), badgePeerId));
+                        nameTextView[a].setOnClickListener(v -> org.telegram.margelet.MargeletBadge.show(getContext(), badgePeerId));
                     } else {
                         nameTextView[a].setRightDrawable2(null);
                     }
@@ -13456,7 +13544,24 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     TextDetailCell detailCell = (TextDetailCell) holder.itemView;
                     boolean containsQr = false;
                     boolean containsGift = false;
-                    if (position == birthdayRow) {
+                    // Значок форка рисуется у своей же строки: строка про
+                    // значок без значка выглядит странно.
+                    Drawable margeletIcon = null;
+                    if (margeletBadgesStartRow != -1 && position >= margeletBadgesStartRow && position < margeletBadgesEndRow) {
+                        final org.telegram.margelet.MargeletBadge.Badge badge = margeletBadgeAt(position);
+                        if (badge != null) {
+                            detailCell.setTextAndValue(badge.title(),
+                                    LocaleController.getString(R.string.MargeletBadgeRow),
+                                    position < margeletBadgesEndRow - 1);
+                            margeletIcon = org.telegram.margelet.MargeletBadge
+                                    .iconDrawable(detailCell.getContext(), badge);
+                        }
+                    } else if (position == margeletIdRow) {
+                        // Айди показываем как есть, без знака у каналов: в таком
+                        // виде его ждут боты и ссылки, а «-100…» это внутренняя
+                        // запись клиента.
+                        detailCell.setTextAndValue(String.valueOf(userId != 0 ? userId : chatId), "ID", false);
+                    } else if (position == birthdayRow) {
                         TLRPC.UserFull userFull = getMessagesController().getUserFull(userId);
                         if (userFull != null && userFull.birthday != null) {
                             final boolean today = BirthdayController.isToday(userFull);
@@ -13491,7 +13596,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             text = PhoneFormat.getInstance().format("+" + vcardPhone);
                             phoneNumber = vcardPhone;
                         } else if (user != null && !TextUtils.isEmpty(user.phone)) {
-                            text = PhoneFormat.getInstance().format("+" + user.phone);
+                            text = org.telegram.margelet.MargeletPrivacy.phone(PhoneFormat.getInstance().format("+" + user.phone), user.id);
                             phoneNumber = user.phone;
                         } else {
                             text = LocaleController.getString(R.string.PhoneHidden);
@@ -13585,7 +13690,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         TLRPC.User user = UserConfig.getInstance(currentAccount).getCurrentUser();
                         String value;
                         if (user != null && user.phone != null && user.phone.length() != 0) {
-                            value = PhoneFormat.getInstance().format("+" + user.phone);
+                            value = org.telegram.margelet.MargeletPrivacy.phone(PhoneFormat.getInstance().format("+" + user.phone), user.id);
                         } else {
                             value = LocaleController.getString(R.string.NumberUnknown);
                         }
@@ -13610,13 +13715,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                             if (username == null || TextUtils.isEmpty(username)) {
                                 text = LocaleController.getString(R.string.UsernameEmpty);
                             } else {
-                                text = "@" + username;
+                                text = "@" + org.telegram.margelet.MargeletPrivacy.username(username, user == null ? 0 : user.id);
                             }
                             value = alsoUsernamesString(username, user.usernames, value);
                         } else {
                             username = UserObject.getPublicUsername(user);
                             if (user != null && !TextUtils.isEmpty(username)) {
-                                text = "@" + username;
+                                text = "@" + org.telegram.margelet.MargeletPrivacy.username(username, user.id);
                             } else {
                                 text = LocaleController.getString(R.string.UsernameEmpty);
                             }
@@ -13624,7 +13729,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         detailCell.setTextAndValue(text, value, true);
                         detailCell.setContentDescriptionValueFirst(true);
                     }
-                    if (containsGift) {
+                    if (margeletIcon != null) {
+                        // Свой цвет, без перекраски под тему: значок тем и
+                        // отличается, что у каждого он свой.
+                        detailCell.setImage(margeletIcon,
+                                LocaleController.getString(R.string.MargeletBadgeRow));
+                        detailCell.setImageClickListener(null);
+                    } else if (containsGift) {
                         Drawable drawable = ContextCompat.getDrawable(detailCell.getContext(), R.drawable.msg_input_gift);
                         drawable.setColorFilter(new PorterDuffColorFilter(dontApplyPeerColor(getThemedColor(Theme.key_switch2TrackChecked), false), PorterDuff.Mode.MULTIPLY));
                         if (UserObject.areGiftsDisabled(userInfo)) {
@@ -13839,6 +13950,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         textCell.setTextAndIcon(LocaleController.getString(R.string.PrivacySettings), R.drawable.msg2_secret, true);
                     } else if (position == dataRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.DataSettings), R.drawable.msg2_data, true);
+                    } else if (position == margeletRow) {
+                        textCell.setTextAndIcon("Margelet", R.drawable.msg2_animations, true);
                     } else if (position == chatRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.ChatSettings), R.drawable.msg2_discussion, true);
                     } else if (position == filtersRow) {
@@ -14286,7 +14399,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         position == clearLogsRow || position == switchBackendRow || position == setAvatarRow ||
                         position == addToGroupButtonRow || position == premiumRow || position == premiumGiftingRow ||
                         position == businessRow || position == liteModeRow || position == birthdayRow || position == channelRow ||
-                        position == starsRow || position == tonRow || position == linkedCommunityRow;
+                        position == starsRow || position == tonRow || position == linkedCommunityRow ||
+                        position == margeletRow || position == margeletIdRow
+                        || (margeletBadgesStartRow != -1 && position >= margeletBadgesStartRow && position < margeletBadgesEndRow);
             }
             if (holder.itemView instanceof UserCell) {
                 UserCell userCell = (UserCell) holder.itemView;
@@ -14314,7 +14429,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             if (position == infoHeaderRow || position == membersHeaderRow || position == settingsSectionRow2 ||
                     position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow || position == botPermissionsHeader) {
                 return VIEW_TYPE_HEADER;
-            } else if (position == phoneRow || position == locationRow || position == numberRow || position == birthdayRow) {
+            } else if (position == phoneRow || position == locationRow || position == numberRow || position == birthdayRow || position == margeletIdRow
+                    || (margeletBadgesStartRow != -1 && position >= margeletBadgesStartRow && position < margeletBadgesEndRow)) {
                 return VIEW_TYPE_TEXT_DETAIL;
             } else if (position == usernameRow || position == setUsernameRow) {
                 return VIEW_TYPE_TEXT_DETAIL_MULTILINE;
@@ -14332,7 +14448,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     position == clearLogsRow || position == switchBackendRow || position == setAvatarRow || position == addToGroupButtonRow ||
                     position == addToContactsRow || position == liteModeRow || position == premiumGiftingRow || position == businessRow ||
                     position == botStarsBalanceRow || position == botTonBalanceRow || position == channelBalanceRow || position == botPermissionLocation ||
-                    position == botPermissionBiometry || position == botPermissionEmojiStatus || position == tonRow
+                    position == botPermissionBiometry || position == botPermissionEmojiStatus || position == tonRow ||
+                    position == margeletRow
             ) {
                 return VIEW_TYPE_TEXT;
             } else if (position == notificationsDividerRow) {
@@ -14346,7 +14463,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     position == helpSectionCell || position == setAvatarSectionRow || position == passwordSuggestionSectionRow ||
                     position == phoneSuggestionSectionRow || position == premiumSectionsRow || position == reportDividerRow ||
                     position == channelDividerRow || position == graceSuggestionSectionRow || position == balanceDividerRow ||
-                    position == botPermissionsDivider || position == channelBalanceSectionRow || position == unofficialSecurityRiskDividerRow
+                    position == botPermissionsDivider || position == channelBalanceSectionRow || position == unofficialSecurityRiskDividerRow ||
+                    position == margeletBadgeSectionRow
             ) {
                 return VIEW_TYPE_SHADOW;
             } else if (position >= membersStartRow && position < membersEndRow) {

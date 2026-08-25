@@ -1431,6 +1431,13 @@ public class LocaleController {
     }
 
     private String getStringInternal(String key, String fallback, int fallbackRes, int res) {
+        // Имя приложения подменяем здесь, а не в strings.xml: телеграм тянет
+        // строки с сервера и своим языковым пакетом перекрывает всё, что
+        // лежит в ресурсах. Это единственное место, через которое проходят
+        // оба пути — и ресурс, и облачная строка.
+        if ("AppName".equals(key) || "AppNameBeta".equals(key)) {
+            return org.telegram.margelet.MargeletConfig.APP_NAME;
+        }
         String value = BuildVars.USE_CLOUD_STRINGS ? localeValues.get(key) : null;
         if (value == null) {
             if (BuildVars.USE_CLOUD_STRINGS && fallback != null) {
@@ -1452,7 +1459,9 @@ public class LocaleController {
         if (value == null) {
             value = "LOC_ERR:" + key;
         }
-        return value;
+        // Имя подменяем и внутри фраз: на экране до входа написано, что
+        // «Telegram — быстрый и безопасный мессенджер», и это тоже строка.
+        return org.telegram.margelet.MargeletStrings.rename(value);
     }
 
     public static String getServerString(String key) {
@@ -2692,6 +2701,20 @@ public class LocaleController {
             int dateDay = rightNow.get(Calendar.DAY_OF_YEAR);
             int dateYear = rightNow.get(Calendar.YEAR);
             int dateHour = rightNow.get(Calendar.HOUR_OF_DAY);
+
+            if (org.telegram.margelet.MargeletConfig.relativeOnlineTime()) {
+                long currentTime = System.currentTimeMillis();
+                long diff = Math.max(0, (currentTime - date) / 1000);
+                if (diff < 60) {
+                    return LocaleController.formatString(R.string.LastSeenFormatted, LocaleController.getString(R.string.LessMinuteAgo));
+                } else if (diff < 3600) {
+                    int minutes = (int) (diff / 60);
+                    return LocaleController.formatString(R.string.LastSeenFormatted, LocaleController.formatPluralString("MinutesAgo", minutes, minutes));
+                } else if (diff < 86400 && dateDay == day && year == dateYear) {
+                    int hours = (int) (diff / 3600);
+                    return LocaleController.formatString(R.string.LastSeenFormatted, LocaleController.formatPluralString("HoursAgo", hours, hours));
+                }
+            }
 
             if (dateDay == day && year == dateYear) {
                 return LocaleController.formatString(R.string.LastSeenFormatted, LocaleController.formatString("TodayAtFormatted", R.string.TodayAtFormatted, getInstance().getFormatterDay().format(new Date(date))));

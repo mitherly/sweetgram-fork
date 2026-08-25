@@ -157,6 +157,83 @@ public class EditTextCaption extends EditTextBoldCursor implements FloatingToolb
         applyTextStyleToSelection(new TextStyleSpan(run));
     }
 
+    /**
+     * Своё оформление форка на выделенный кусок.
+     *
+     * Телеграмовская разметка идёт через MediaDataController: она едет на
+     * сервер отдельным списком и должна складываться с чужой. Наша живёт
+     * только в тексте, поэтому вешается на выделение напрямую. Прежнее
+     * оформление того же вида снимается — иначе они копятся друг на друге.
+     */
+    public int margeletSelectionStart() {
+        return selectionStart >= 0 ? selectionStart : getSelectionStart();
+    }
+
+    public int margeletSelectionEnd() {
+        return selectionEnd >= 0 ? selectionEnd : getSelectionEnd();
+    }
+
+    public void makeSelectedMargelet(int kind, int value) {
+        makeSelectedMargelet(kind, value, margeletSelectionStart(), margeletSelectionEnd());
+        selectionStart = selectionEnd = -1;
+    }
+
+    /** Кнопка: невидимая пометка для отправки плюс видимая плашка. */
+    public void makeSelectedButton(int value, String url, int start, int end) {
+        final android.text.Editable editable = getText();
+        if (editable == null || start < 0 || end <= start) {
+            return;
+        }
+        for (Object span : editable.getSpans(start, end, org.telegram.margelet.MargeletSpans.Button.class)) {
+            editable.removeSpan(span);
+        }
+        for (org.telegram.margelet.MargeletSpans.Base span :
+                editable.getSpans(start, end, org.telegram.margelet.MargeletSpans.Base.class)) {
+            if (span.kind() == org.telegram.margelet.MargeletMarkup.KIND_BUTTON) {
+                editable.removeSpan(span);
+            }
+        }
+        editable.setSpan(new org.telegram.margelet.MargeletSpans.ButtonMark(value, url),
+                start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        editable.setSpan(new org.telegram.margelet.MargeletSpans.Button(value, url),
+                start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        org.telegram.ui.MargeletMarkupAlert.warnOnce(getContext());
+        invalidate();
+    }
+
+    public void makeSelectedMargelet(int kind, int value, int start, int end) {
+        final android.text.Editable editable = getText();
+        if (editable == null || start < 0 || end <= start) {
+            return;
+        }
+        for (org.telegram.margelet.MargeletSpans.Base span :
+                editable.getSpans(start, end, org.telegram.margelet.MargeletSpans.Base.class)) {
+            if (span.kind() == kind) {
+                editable.removeSpan(span);
+            }
+        }
+        if (kind == org.telegram.margelet.MargeletMarkup.KIND_OUTLINE) {
+            // Обводка, как и кнопка, рисуется разметкой, занимающей место
+            // собой: такая не попадает в список меток, поэтому рядом кладём
+            // невидимую пометку — она и уедет с сообщением.
+            for (Object drawn : editable.getSpans(start, end,
+                    org.telegram.margelet.MargeletSpans.Outline.class)) {
+                editable.removeSpan(drawn);
+            }
+            editable.setSpan(new org.telegram.margelet.MargeletSpans.OutlineMark(value),
+                    start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            editable.setSpan(new org.telegram.margelet.MargeletSpans.Outline(value),
+                    start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else {
+            final Object span = org.telegram.margelet.MargeletSpans.create(kind, value);
+            if (span != null) {
+                editable.setSpan(span, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+        org.telegram.ui.MargeletMarkupAlert.warnOnce(getContext());
+        invalidate();
+    }
+
     public void makeSelectedSpoiler() {
         TextStyleSpan.TextStyleRun run = new TextStyleSpan.TextStyleRun();
         run.flags |= TextStyleSpan.FLAG_STYLE_SPOILER;
@@ -808,6 +885,28 @@ public class EditTextCaption extends EditTextBoldCursor implements FloatingToolb
             return true;
         } else if (itemId == R.id.menu_spoiler) {
             makeSelectedSpoiler();
+            return true;
+        } else if (itemId == R.id.menu_margelet_size) {
+            // Отрезок запоминаем прямо сейчас. Пока открыт диалог, выделение
+            // снимается вместе с меню, и к нажатию «Готово» его уже нет —
+            // именно поэтому размер не применялся вовсе.
+            org.telegram.ui.MargeletMarkupAlert.showSize(getContext(), this,
+                    margeletSelectionStart(), margeletSelectionEnd());
+            return true;
+        } else if (itemId == R.id.menu_margelet_dim) {
+            makeSelectedMargelet(org.telegram.margelet.MargeletMarkup.KIND_DIM, 7);
+            return true;
+        } else if (itemId == R.id.menu_margelet_rainbow) {
+            makeSelectedMargelet(org.telegram.margelet.MargeletMarkup.KIND_RAINBOW, 0);
+            return true;
+        } else if (itemId == R.id.menu_margelet_outline) {
+            makeSelectedMargelet(org.telegram.margelet.MargeletMarkup.KIND_OUTLINE, 0);
+            return true;
+        } else if (itemId == R.id.menu_margelet_button) {
+            // Отрезок, как и у размера, запоминаем до открытия окна: пока оно
+            // открыто, выделения уже нет.
+            org.telegram.ui.MargeletMarkupAlert.showButton(getContext(), this,
+                    margeletSelectionStart(), margeletSelectionEnd());
             return true;
         } else if (itemId == R.id.menu_quote) {
             makeSelectedQuote();

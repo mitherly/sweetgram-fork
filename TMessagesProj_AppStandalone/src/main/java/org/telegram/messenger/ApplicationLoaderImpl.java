@@ -108,9 +108,13 @@ public class ApplicationLoaderImpl extends ApplicationLoader {
         return true;
     }
 
+    /**
+     * Полоска обновления внизу экрана. Отдаём свою: телеграмовская умеет
+     * качать только документ из переписки, а наш apk лежит на гитхабе.
+     */
     @Override
     public IUpdateLayout takeUpdateLayout(Activity activity, ViewGroup sideMenuContainer) {
-        return new UpdateLayout(activity, sideMenuContainer);
+        return new org.telegram.ui.MargeletUpdateLayout(activity, sideMenuContainer);
     }
 
     @Override

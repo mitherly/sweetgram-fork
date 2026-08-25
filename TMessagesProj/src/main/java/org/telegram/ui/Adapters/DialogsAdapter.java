@@ -1207,7 +1207,12 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
     }
 
     public void moveDialogs(RecyclerListView recyclerView, int fromPosition, int toPosition) {
-        ArrayList<TLRPC.Dialog> dialogs = parentFragment.getDialogsArray(currentAccount, dialogsType, folderId, false);
+        // Тот же список, что видит экран: со строкой канала форка наверху.
+        // Иначе отсчёты строк и отсчёты списка разъедутся на единицу, и
+        // перетаскивание закреплённого чата переставит соседний.
+        ArrayList<TLRPC.Dialog> dialogs = org.telegram.margelet.MargeletChannel.onTop(currentAccount,
+                parentFragment.getDialogsArray(currentAccount, dialogsType, folderId, false),
+                dialogsType, folderId);
         int fromIndex = fixPosition(fromPosition);
         int toIndex = fixPosition(toPosition);
         TLRPC.Dialog fromDialog = dialogs.get(fromIndex);
@@ -1623,6 +1628,9 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             if (array == null) {
                 array = new ArrayList<>();
             }
+            // Канал форка первой строкой. Список берётся копией: настоящий
+            // принадлежит телеграму, и дописывать в него своё нельзя.
+            array = org.telegram.margelet.MargeletChannel.onTop(currentAccount, array, dialogsType, folderId);
         }
 
         dialogsCount = array.size();

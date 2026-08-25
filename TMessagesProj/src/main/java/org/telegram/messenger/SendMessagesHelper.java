@@ -4257,6 +4257,14 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     public void sendMessage(SendMessageParams sendMessageParams) {
+        if (sendMessageParams.message != null && org.telegram.margelet.MargeletHooks.hasSend()) {
+            final String hooked = org.telegram.margelet.MargeletHooks.sending(
+                    sendMessageParams.message, sendMessageParams.peer);
+            if (hooked == null) {
+                return;
+            }
+            sendMessageParams.message = hooked;
+        }
         final SendMessageChatArguments sendMessageChatArguments = sendMessageParams.sendMessageChatArguments != null ?
                 sendMessageParams.sendMessageChatArguments : SendMessageChatArguments.EMPTY;
         String message = sendMessageParams.message;

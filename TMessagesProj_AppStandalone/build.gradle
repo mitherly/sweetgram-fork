@@ -1,4 +1,7 @@
 apply plugin: 'com.android.application'
+// Питон для плагинов. Ставится только в этой сборке: остальные варианты
+// приложения тащить с собой движок питона незачем.
+apply plugin: 'com.chaquo.python'
 
 repositories {
     mavenCentral()
@@ -79,11 +82,12 @@ android {
             debuggable false
             jniDebuggable false
             signingConfig signingConfigs.release
-            applicationIdSuffix ".web"
+            // Суффикс убран: имя пакета теперь наше целиком, cat.narezany.margelet,
+            // и приписка про веб-версию телеграма к нему не относится.
             minifyEnabled true
             multiDexEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro'
-            ndk.debugSymbolLevel = 'FULL'
+            ndk.debugSymbolLevel = 'NONE'
         }
     }
 
@@ -99,7 +103,9 @@ android {
     productFlavors {
         afat {
             ndk {
-                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+                // Только arm64: библиотека нативную часть под остальные три
+                // больше не собирает, да и телефон у владельца один.
+                abiFilters "arm64-v8a"
             }
             ext {
                 abiVersionCode = 9
@@ -127,6 +133,13 @@ android {
     }
 
     defaultConfig {
+        // Питон только под ту же архитектуру, что и всё остальное.
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+        python {
+            version "3.11"
+        }
         minSdkVersion 21
         targetSdkVersion 35
         versionName APP_VERSION_NAME
@@ -154,4 +167,10 @@ android {
     }
 }
 
-apply plugin: 'com.google.gms.google-services'
+// Плагин отключён вместе со сменой имени пакета. Лежащий в исходниках
+// google-services.json описывает firebase-проект самого телеграма, и наш
+// пакет в нём не значится — сборка на этом и падала. Дописывать себя в чужой
+// проект я не стал: это их облако, а не наше. Цена решения честная: пуши в
+// фоне работать не будут, пока у форка нет своего файла google-services.json.
+// Как только он появится — вернуть эту строку и положить файл рядом.
+// apply plugin: 'com.google.gms.google-services'

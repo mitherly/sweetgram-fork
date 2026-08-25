@@ -2401,7 +2401,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP && (pressedLinkType == 1 || pressedCopyCode != null)) {
             int x = (int) getEventX(event);
             int y = (int) getEventY(event);
-            if (x >= textX && y >= textY && x <= textX + currentMessageObject.textWidth && y <= textY + currentMessageObject.textHeight(transitionParams)) {
+            // У кнопки форка плашка шире и выше строки, а рамка проверки
+            // считается по тексту. Без запаса край плашки оказывается «вне
+            // сообщения», и нажатие туда просто не доходит до разбора.
+            final int margeletSlack = org.telegram.margelet.MargeletSpans
+                    .hasButton(currentMessageObject.messageText) ? dp(12) : 0;
+            if (x >= textX - margeletSlack && y >= textY && x <= textX + currentMessageObject.textWidth + margeletSlack && y <= textY + currentMessageObject.textHeight(transitionParams) + margeletSlack) {
                 y -= textY;
                 int blockNum = 0;
                 for (int a = 0; a < currentMessageObject.textLayoutBlocks.size(); a++) {
@@ -2432,10 +2437,39 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     }
 
                     final int line = block.textLayout.getLineForVertical(y);
-                    final int off = block.charactersOffset + block.textLayout.getOffsetForHorizontal(line, x);
+                    int off = block.charactersOffset + block.textLayout.getOffsetForHorizontal(line, x);
+
+                    // Кнопка форка: плашку рисуем мы и точно знаем, где она
+                    // лежит, поэтому по прямоугольнику находим её саму, а
+                    // дальше подменяем отсчёт знака на середину её отрезка.
+                    //
+                    // Именно подменяем, а не обрабатываем нажатие сами. Свой
+                    // обработчик я уже написал — и стало хуже: он забирал
+                    // касание себе, а до «отпустил» дело не доходило, потому
+                    // что тот путь заводится только после того, как нажатие
+                    // распознали как ссылку. Кнопка перестала и подсвечиваться,
+                    // и открываться. Теперь всю работу делает телеграмовский
+                    // код, а от нас — только верный отсчёт.
+                    final org.telegram.margelet.MargeletSpans.Button margeletButton =
+                            org.telegram.margelet.MargeletSpans.buttonAt(
+                                    currentMessageObject.messageText, x, y - block.padTop);
+                    if (margeletButton != null && currentMessageObject.messageText instanceof Spannable) {
+                        final Spannable text = (Spannable) currentMessageObject.messageText;
+                        final int from = text.getSpanStart(margeletButton);
+                        final int to = text.getSpanEnd(margeletButton);
+                        if (from >= 0 && to > from) {
+                            off = (from + to) / 2;
+                        }
+                    }
 
                     final float left = block.textLayout.getLineLeft(line);
-                    if (left <= x && left + block.textLayout.getLineWidth(line) >= x) {
+                    // Проверку «касание внутри ширины строки» для кнопки
+                    // пропускаем: мы уже нашли её по нарисованному
+                    // прямоугольнику, а ширина строки считается по знакам и
+                    // правый край плашки в неё не всегда попадает. Из-за этого
+                    // левая половина кнопки нажималась, а правая нет.
+                    if (margeletButton != null
+                            || left <= x && left + block.textLayout.getLineWidth(line) >= x) {
                         Spannable buffer = (Spannable) currentMessageObject.messageText;
                         CharacterStyle[] link = buffer.getSpans(off, off, ClickableSpan.class);
                         boolean isMono = false;
@@ -2655,10 +2689,38 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     }
 
                     final int line = block.textLayout.getLineForVertical(y);
-                    final int off = block.charactersOffset + block.textLayout.getOffsetForHorizontal(line, x);
+                    int off = block.charactersOffset + block.textLayout.getOffsetForHorizontal(line, x);
+
+                    // Кнопка форка в подписи. Ровно то же, что и в тексте
+                    // сообщения, — и добавлено сюда потому, что здесь этого не
+                    // было вовсе: кнопка в подписи к картинке нажималась не
+                    // целиком, а только своим правым краем.
+                    //
+                    // Причина не в плашке. Перед подписью кнопки стоит метка с
+                    // адресом — несколько сотен невидимых знаков нулевой
+                    // ширины, и все они лежат на одном и том же месте, у левого
+                    // края плашки. Нажатие слева переводилось в отсчёт знака
+                    // внутри этой метки, то есть до начала ссылки, и не
+                    // попадало никуда. Справа отсчёт приходился уже на саму
+                    // подпись, и там ссылка находилась — оттого и работала
+                    // только правая половина.
+                    final org.telegram.margelet.MargeletSpans.Button margeletButton =
+                            org.telegram.margelet.MargeletSpans.buttonAt(currentCaption, x, y - block.padTop);
+                    if (margeletButton != null && currentCaption instanceof Spannable) {
+                        final Spannable text = (Spannable) currentCaption;
+                        final int from = text.getSpanStart(margeletButton);
+                        final int to = text.getSpanEnd(margeletButton);
+                        if (from >= 0 && to > from) {
+                            off = (from + to) / 2;
+                        }
+                    }
 
                     final float left = block.textLayout.getLineLeft(line);
-                    if (left <= x && left + block.textLayout.getLineWidth(line) >= x) {
+                    // Ширину строки для кнопки не проверяем: её нашли по
+                    // нарисованному прямоугольнику, а ширина считается по
+                    // знакам, и правый край плашки в неё не попадает.
+                    if (margeletButton != null
+                            || left <= x && left + block.textLayout.getLineWidth(line) >= x) {
                         Spannable buffer = (Spannable) currentCaption;
                         CharacterStyle[] link = buffer.getSpans(off, off, ClickableSpan.class);
                         boolean isMono = false;
@@ -18476,6 +18538,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
         if (currentMessageObject.messageOwner.video_processing_pending) {
             timeString = formatString(R.string.ScheduledTimeApprox, timeString);
+        }
+        if (currentMessageObject.deleted && org.telegram.margelet.MargeletConfig.antiDelete()) {
+            timeString = "🗑 " + timeString;
         }
         if (signString != null) {
             if (messageObject.messageOwner.via_business_bot_id != 0) {

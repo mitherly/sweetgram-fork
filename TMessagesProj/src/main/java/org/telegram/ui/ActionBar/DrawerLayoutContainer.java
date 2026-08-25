@@ -31,6 +31,7 @@ public class DrawerLayoutContainer extends FrameLayout {
     private INavigationLayout parentActionBarLayout;
     private ActionBarLayout actionBarLayout;
     private boolean inLayout;
+    private org.telegram.margelet.drawer.DrawerContainer drawerContainer;
 
     public DrawerLayoutContainer(Context context) {
         super(context);
@@ -47,17 +48,44 @@ public class DrawerLayoutContainer extends FrameLayout {
         this.actionBarLayout = actionBarLayout;
     }
 
+    public void setDrawerContainer(org.telegram.margelet.drawer.DrawerContainer container) {
+        if (drawerContainer == container) {
+            return;
+        }
+        if (drawerContainer != null) {
+            removeView(drawerContainer);
+        }
+        drawerContainer = container;
+        if (drawerContainer != null) {
+            addView(drawerContainer, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        }
+    }
+
+    public org.telegram.margelet.drawer.DrawerContainer getDrawerContainer() {
+        return drawerContainer;
+    }
+
     public boolean isDrawCurrentPreviewFragmentAbove() {
         return false;
     }
 
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (drawerContainer != null && drawerContainer.handleEdgeSwipeTouch(ev)) {
+            return true;
+        }
         return false;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return parentActionBarLayout.checkTransitionAnimation();
+        if (drawerContainer != null && drawerContainer.getVisibility() == VISIBLE) {
+            return false;
+        }
+        if (drawerContainer != null && drawerContainer.handleEdgeSwipeIntercept(ev)) {
+            return true;
+        }
+        return parentActionBarLayout != null && parentActionBarLayout.checkTransitionAnimation();
     }
 
     @Override

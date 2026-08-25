@@ -8053,6 +8053,24 @@ public class MessageObject {
         }
         text = FormattedDateSpan.restoreFormatedDateEntities(text);
         Spannable spannable = (Spannable) text;
+        // Своё оформление форка: метки лежат в самом тексте невидимыми
+        // знаками. Разбираем до раннего выхода ниже — сообщение может быть
+        // оформлено только по-нашему, без единой телеграмовской разметки.
+        //
+        // Кнопки дописываются в СПИСОК разметки до его обработки: ссылку тогда
+        // строит сам телеграм, своим обычным кодом, а не я своим.
+        //
+        // Список может прийти пустым указателем — у сообщения без единого
+        // жирного слова разметки нет вовсе. Тогда заводим свой: иначе кнопка
+        // в таком сообщении осталась бы без ссылки, а это как раз самый частый
+        // случай — «просто текст и кнопка».
+        if (org.telegram.margelet.MargeletMarkup.has(text)) {
+            if (entities == null) {
+                entities = new ArrayList<>();
+            }
+            org.telegram.margelet.MargeletMarkup.injectEntities(text, entities);
+        }
+        org.telegram.margelet.MargeletMarkup.apply(spannable);
         URLSpan[] spans = spannable.getSpans(0, text.length(), URLSpan.class);
         boolean hasUrls = spans != null && spans.length > 0;
         if (entities == null || entities.isEmpty()) {

@@ -261,6 +261,12 @@ public class AndroidUtilities {
     public static ThreadLocal<byte[]> bufferLocal = new ThreadLocal<>();
 
     public static Typeface bold() {
+        // Свой шрифт: иначе жирный остался бы системным, потому что при
+        // включённом системном жирном сюда getTypeface не заходит вовсе.
+        final Typeface margelet = org.telegram.margelet.MargeletFonts.replace(TYPEFACE_ROBOTO_MEDIUM);
+        if (margelet != null) {
+            return margelet;
+        }
         if (mediumTypeface == null) {
             if (SharedConfig.useSystemBoldFont && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 mediumTypeface = Typeface.create(null, 500, false);
@@ -2391,6 +2397,13 @@ public class AndroidUtilities {
     }
 
     public static Typeface getTypeface(String assetPath) {
+        // Свой шрифт форка. Подменяем здесь, потому что это единственное
+        // место, где телеграм берёт шрифты: перехватишь его — сменится всё
+        // приложение разом, а не те экраны, до которых дошли руки.
+        final Typeface margelet = org.telegram.margelet.MargeletFonts.replace(assetPath);
+        if (margelet != null) {
+            return margelet;
+        }
         synchronized (typefaceCache) {
             if (!typefaceCache.containsKey(assetPath)) {
                 try {
@@ -3614,6 +3627,10 @@ public class AndroidUtilities {
     }
 
     public static boolean addToClipboard(CharSequence str) {
+        // Служебные знаки своего оформления и строку со ссылкой на форк в
+        // буфер не кладём: человек копирует текст, а не нашу разметку.
+        // Оформление уносит отдельный пункт «Копировать с оформлением».
+        str = org.telegram.margelet.MargeletMarkup.strip(str);
         try {
             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
 
@@ -4270,6 +4287,15 @@ public class AndroidUtilities {
 
     public static boolean openForView(File f, String fileName, String mimeType, final Activity activity, Theme.ResourcesProvider resourcesProvider, boolean restrict) {
         if (f != null && f.exists()) {
+            // Плагин форка. Открывать его системе нечем — это наш формат, —
+            // поэтому вместо «нет приложения для этого файла» предлагаем
+            // поставить. Перехват стоит здесь, потому что через это место
+            // проходит открытие любого файла: и из переписки, и из кэша.
+            if (!restrict && activity != null && fileName != null
+                    && fileName.toLowerCase().endsWith(".marp")
+                    && org.telegram.margelet.MargeletPlugins.offerInstall(activity, f)) {
+                return true;
+            }
             String realMimeType = null;
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

@@ -536,11 +536,11 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         titleView.setText(UserObject.getUserName(user));
         final StringBuilder sb = new StringBuilder();
         if (user != null) {
-            sb.append(PhoneFormat.getInstance().format("+" + user.phone));
+            sb.append(org.telegram.margelet.MargeletPrivacy.phone(PhoneFormat.getInstance().format("+" + user.phone), user.id));
         }
         final String username = UserObject.getPublicUsername(user);
         if (username != null) {
-            sb.append(" • @").append(username);
+            sb.append(" • @").append(org.telegram.margelet.MargeletPrivacy.username(username, user == null ? 0 : user.id));
         }
         subtitleView.setText(sb);
 
@@ -688,6 +688,10 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             items.add(UItem.asShadow(null));
         }
 
+        // Свой раздел стоит первым — так просил владелец. Номер строки взят
+        // с запасом от чужих: телеграм нумерует их подряд, и если однажды у
+        // них появится одиннадцатая, наша тысяча первая с ней не столкнётся.
+        items.add(SettingCell.Factory.of(1001, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_features, "Margelet", "Настройки форка"));
         items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account, getString(R.string.SettingsAccount), getString(R.string.SettingsAccountInfo)));
         items.add(SettingCell.Factory.of(2, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_chat, getString(R.string.SettingsChat), getString(R.string.SettingsChatInfo)));
         items.add(SettingCell.Factory.of(3, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_privacy, getString(R.string.SettingsPrivacySecurity), getString(R.string.SettingsPrivacySecurityInfo)));
@@ -835,6 +839,9 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 break;
             case 10:
                 presentSettingFragment(new LanguageSelectActivity());
+                break;
+            case 1001:
+                presentSettingFragment(new MargeletSettingsActivity());
                 break;
 
             case 11:

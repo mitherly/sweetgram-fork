@@ -377,6 +377,7 @@ public class Switch extends View {
             return;
         }
 
+        boolean isM3 = org.telegram.margelet.MargeletConfig.m3SwitchStyle();
         int width = AndroidUtilities.dp(31);
         int thumb = AndroidUtilities.dp(20);
         int x = (getMeasuredWidth() - width) / 2;
@@ -384,6 +385,12 @@ public class Switch extends View {
         int tx = x + AndroidUtilities.dp(7) + (int) (AndroidUtilities.dp(17) * progress);
         int ty = getMeasuredHeight() / 2;
 
+        if (isM3) {
+            width = AndroidUtilities.dp(40);
+            x = (getMeasuredWidth() - width) / 2;
+            y = (getMeasuredHeight() - AndroidUtilities.dpf2(24)) / 2;
+            tx = x + AndroidUtilities.dp(12) + (int) (AndroidUtilities.dp(16) * progress);
+        }
 
         int color1;
         int color2;
@@ -445,9 +452,14 @@ public class Switch extends View {
             paint.setColor(color);
             paint2.setColor(color);
 
-            rectF.set(x, y, x + width, y + AndroidUtilities.dpf2(14));
-            canvasToDraw.drawRoundRect(rectF, AndroidUtilities.dpf2(7), AndroidUtilities.dpf2(7), paint);
-            canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dpf2(10), paint);
+            if (isM3) {
+                rectF.set(x, y, x + width, y + AndroidUtilities.dpf2(24));
+                canvasToDraw.drawRoundRect(rectF, AndroidUtilities.dpf2(12), AndroidUtilities.dpf2(12), paint);
+            } else {
+                rectF.set(x, y, x + width, y + AndroidUtilities.dpf2(14));
+                canvasToDraw.drawRoundRect(rectF, AndroidUtilities.dpf2(7), AndroidUtilities.dpf2(7), paint);
+                canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dpf2(10), paint);
+            }
 
             if (a == 0 && rippleDrawable != null) {
                 rippleDrawable.setBounds(tx - AndroidUtilities.dp(18), ty - AndroidUtilities.dp(18), tx + AndroidUtilities.dp(18), ty + AndroidUtilities.dp(18));
@@ -494,7 +506,12 @@ public class Switch extends View {
             alpha = (int) (a1 + (a2 - a1) * colorProgress);
             paint.setColor(((alpha & 0xff) << 24) | ((red & 0xff) << 16) | ((green & 0xff) << 8) | (blue & 0xff));
 
-            canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dp(8), paint);
+            if (isM3) {
+                float thumbRadius = AndroidUtilities.dpf2(7.0f + 4.0f * progress);
+                canvasToDraw.drawCircle(tx, ty, thumbRadius, paint);
+            } else {
+                canvasToDraw.drawCircle(tx, ty, AndroidUtilities.dp(8), paint);
+            }
 
             if (a == 0) {
                 if (iconDrawable != null) {
@@ -512,15 +529,15 @@ public class Switch extends View {
                         }
                     }
                 } else if (drawIconType == 1) {
-                    tx -= AndroidUtilities.dp(10.8f) - AndroidUtilities.dp(1.3f) * progress;
-                    ty -= AndroidUtilities.dp(8.5f) - AndroidUtilities.dp(0.5f) * progress;
-                    int startX2 = (int) AndroidUtilities.dpf2(4.6f) + tx;
-                    int startY2 = (int) (AndroidUtilities.dpf2(9.5f) + ty);
+                    int txIcon = tx - (int) (AndroidUtilities.dp(10.8f) - AndroidUtilities.dp(1.3f) * progress);
+                    int tyIcon = ty - (int) (AndroidUtilities.dp(8.5f) - AndroidUtilities.dp(0.5f) * progress);
+                    int startX2 = (int) AndroidUtilities.dpf2(4.6f) + txIcon;
+                    int startY2 = (int) (AndroidUtilities.dpf2(9.5f) + tyIcon);
                     int endX2 = startX2 + AndroidUtilities.dp(2);
                     int endY2 = startY2 + AndroidUtilities.dp(2);
 
-                    int startX = (int) AndroidUtilities.dpf2(7.5f) + tx;
-                    int startY = (int) AndroidUtilities.dpf2(5.4f) + ty;
+                    int startX = (int) AndroidUtilities.dpf2(7.5f) + txIcon;
+                    int startY = (int) AndroidUtilities.dpf2(5.4f) + tyIcon;
                     int endX = startX + AndroidUtilities.dp(7);
                     int endY = startY + AndroidUtilities.dp(7);
 
@@ -530,8 +547,8 @@ public class Switch extends View {
                     endY = (int) (endY + (endY2 - endY) * progress);
                     canvasToDraw.drawLine(startX, startY, endX, endY, paint2);
 
-                    startX = (int) AndroidUtilities.dpf2(7.5f) + tx;
-                    startY = (int) AndroidUtilities.dpf2(12.5f) + ty;
+                    startX = (int) AndroidUtilities.dpf2(7.5f) + txIcon;
+                    startY = (int) AndroidUtilities.dpf2(12.5f) + tyIcon;
                     endX = startX + AndroidUtilities.dp(7);
                     endY = startY - AndroidUtilities.dp(7);
                     canvasToDraw.drawLine(startX, startY, endX, endY, paint2);

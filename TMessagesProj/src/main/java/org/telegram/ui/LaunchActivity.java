@@ -443,6 +443,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (Build.VERSION.SDK_INT >= 24) {
             AndroidUtilities.isInMultiwindow = isInMultiWindowMode();
         }
+        // Первый запуск: включаем тёмно-зелёную тему до того, как из темы
+        // начнут строиться кисти и картинки, иначе первый экран нарисуется
+        // старыми цветами и перекрасится уже на глазах.
+        org.telegram.margelet.MargeletTheme.applyOnFirstLaunch();
         Theme.createCommonChatResources();
         Theme.createDialogsResources(this);
         if (SharedConfig.passcodeHash.length() != 0 && SharedConfig.appLocked) {
@@ -455,6 +459,25 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         frameLayout.setClipToPadding(false);
         frameLayout.setClipChildren(false);
         setContentView(frameLayout);
+        // «Приступ»: пока режим включён, дерево окна перерисовывается по кадрам,
+        // иначе переливаться будет только то, что и так шевелится.
+        org.telegram.margelet.MargeletSeizure.attach(frameLayout);
+        // Пример плагина кладём один раз и выключенным; питон поднимется
+        // только если человек сам что-то включил.
+        org.telegram.margelet.MargeletPlugins.preinstallExample();
+        org.telegram.margelet.MargeletPluginHost.start();
+        // Список значков перечитывается с гитхаба при каждом запуске: правка в
+        // репозитории должна доезжать до людей без новой сборки. Ответа никто
+        // не ждёт — пока он едет, показывается прошлый список.
+        org.telegram.margelet.MargeletBadge.refresh();
+        // Проверка обновления форка: узнав про новую версию, показываем
+        // полоску внизу списка чатов. Молча ничего не качается и не ставится.
+        if (org.telegram.margelet.MargeletConfig.updatesChecked()) {
+            org.telegram.margelet.MargeletUpdate.check(() ->
+                    org.telegram.messenger.NotificationCenter.getGlobalInstance()
+                            .postNotificationName(org.telegram.messenger.NotificationCenter.appUpdateAvailable));
+        }
+        org.telegram.margelet.MargeletUpdate.schedule();
         rootAnimatedInsetsListener = new WindowAnimatedInsetsProvider(frameLayout);
         pipActivityController.addPipListener(new IPipActivityListener() {
             final ActivityVisibilityController activityVisibilityController = createActivityVisibilityController(false);
@@ -539,6 +562,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         setupActionBarLayout();
         drawerLayoutContainer.setParentActionBarLayout(actionBarLayout);
         actionBarLayout.setDrawerLayoutContainer(drawerLayoutContainer);
+        syncDrawerContainerEnabled();
         actionBarLayout.setFragmentStack(mainFragmentsStack);
         actionBarLayout.setFragmentStackChangedListener(() -> {
             checkSystemBarColors(true, false);
@@ -1412,6 +1436,20 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         }
         termsOfServiceView.show(account, tos);
         termsOfServiceView.animate().alpha(1f).setDuration(150).setInterpolator(AndroidUtilities.decelerateInterpolator).setListener(null).start();
+    }
+
+    public void syncDrawerContainerEnabled() {
+        if (drawerLayoutContainer == null) {
+            return;
+        }
+        boolean classicDrawer = org.telegram.margelet.MargeletConfig.classicDrawer();
+        if (classicDrawer) {
+            if (drawerLayoutContainer.getDrawerContainer() == null) {
+                drawerLayoutContainer.setDrawerContainer(new org.telegram.margelet.drawer.DrawerContainer(this));
+            }
+        } else if (drawerLayoutContainer.getDrawerContainer() != null) {
+            drawerLayoutContainer.setDrawerContainer(null);
+        }
     }
 
     public void showPasscodeActivity(boolean fingerprint, boolean animated, int x, int y, Runnable onShow, Runnable onStart) {
@@ -7292,6 +7330,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         } else if (id == NotificationCenter.didSetPasscode) {
             flagSecureReason.invalidate();
         } else if (id == NotificationCenter.reloadInterface) {
+            syncDrawerContainerEnabled();
             boolean last = mainFragmentsStack.size() > 1 && mainFragmentsStack.get(mainFragmentsStack.size() - 1) instanceof ProfileActivity;
             if (last) {
                 ProfileActivity profileActivity = (ProfileActivity) mainFragmentsStack.get(mainFragmentsStack.size() - 1);

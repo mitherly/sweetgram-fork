@@ -153,8 +153,12 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
 
     @Override
     public View createView(Context context) {
-        logoDrawable = context.getResources().getDrawable(R.drawable.telegram_logo).mutate();
-        logoDrawable.setBounds(0, dp(8.666f), dp(115), dp(35));
+        // Заголовок первой страницы — это картинка со словом «Telegram»,
+        // вставленная в текст. Рисуем вместо неё название форка: та же
+        // подстановка, только буквами. Ширину берём по самой надписи, иначе
+        // короткое имя окажется прижатым влево внутри чужой ширины.
+        logoDrawable = new org.telegram.margelet.MargeletWordmark(26);
+        logoDrawable.setBounds(0, dp(8.666f), logoDrawable.getIntrinsicWidth(), dp(35));
         SpannableStringBuilder ssb = new SpannableStringBuilder(LocaleController.getString(R.string.Page1Title));
         ssb.setSpan(new ImageSpan(logoDrawable), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         titles[0] = ssb;
@@ -790,10 +794,23 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
             loadTexture(R.drawable.intro_powerful_star, 18);
             loadTexture(R.drawable.intro_private_door, 19);
             loadTexture(R.drawable.intro_private_screw, 20);
-            loadTexture(R.drawable.intro_tg_plane, 21);
+            loadTexture(v -> {
+                int size = dp(ICON_HEIGHT_DP);
+                Bitmap bm = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+                Canvas c = new Canvas(bm);
+                Drawable d = androidx.core.content.ContextCompat.getDrawable(ApplicationLoader.applicationContext, R.drawable.margelet_badge_plane);
+                if (d != null) {
+                    int planeSize = dp(110);
+                    int left = (size - planeSize) / 2;
+                    int top = (size - planeSize) / 2;
+                    d.setBounds(left, top, left + planeSize, top + planeSize);
+                    d.draw(c);
+                }
+                return bm;
+            }, 21);
             loadTexture(v -> {
                 Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                paint.setColor(ThemeColors.TELEGRAM_COLOR); // It's logo color, it should not be colored by the theme
+                paint.setColor(0xFF8DD1B0); // Margelet branding green color
                 int size = dp(ICON_HEIGHT_DP);
                 Bitmap bm = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
                 Canvas c = new Canvas(bm);

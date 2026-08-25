@@ -111,6 +111,25 @@
 -keep class ru.noties.jlatexmath.** { *; }
 -dontwarn org.scilab.forge.jlatexmath.**
 
+# Плагины. Эти два класса зовут по имени: MargeletPython — из библиотеки,
+# где движка питона нет, а MargeletPluginHost — из самого питона. Для
+# сжимателя оба выглядят никому не нужными, и без этого он их выкинет.
+-keep class org.telegram.margelet.MargeletPython { *; }
+-keep class org.telegram.margelet.MargeletPluginHost { *; }
+# Питон зовёт эти методы по имени: сокращатель о таких вызовах не знает и
+# переименовал бы их, а узнали бы мы об этом только в собранной сборке.
+-keep class org.telegram.margelet.MargeletHooks { *; }
+-keep class org.telegram.margelet.MargeletHooks$Button { *; }
+# Плагин реализует этот интерфейс из питона, то есть по имени. В этой сборке
+# он уцелел и без правила — проверено в собранном APK, — но держаться на
+# везении такие вещи не должны.
+-keep class org.telegram.margelet.hook.** { *; }
+-keep interface org.telegram.margelet.hook.** { *; }
+-keep class de.robv.android.xposed.** { *; }
+-keep interface de.robv.android.xposed.** { *; }
+-keep class com.chaquo.python.** { *; }
+-dontwarn com.chaquo.python.**
+
 # Use -keep to explicitly keep any other classes shrinking would remove
 -dontoptimize
 -dontobfuscate

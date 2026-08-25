@@ -34,12 +34,17 @@ public class LauncherIconController {
     }
 
     public enum LauncherIcon {
-        DEFAULT("DefaultIcon", R.drawable.icon_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconDefault),
-        VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.mipmap.icon_6_foreground_sa, R.string.AppIconVintage),
-        AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconAqua),
-        PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.icon_3_foreground_sa, R.string.AppIconPremium, true),
-        TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.mipmap.icon_5_foreground_sa, R.string.AppIconTurbo, true),
-        NOX("NoxIcon", R.mipmap.icon_2_background_sa, R.mipmap.icon_foreground_sa, R.string.AppIconNox, true);
+        // Иконки форка. Ключи и порядок оставлены телеграмовскими: на них
+        // завязаны псевдонимы в манифесте, а переименование ключа означало бы,
+        // что у всех, кто уже выбрал иконку, она пропала. Меняется содержимое:
+        // свой самолётик на своём цвете, названия по цвету, и ни одной за
+        // премиум — это наши иконки, продавать их некому.
+        DEFAULT("DefaultIcon", R.drawable.icon_background_sa, R.mipmap.margelet_foreground, R.string.MargeletIconGreen),
+        VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.mipmap.margelet_foreground, R.string.MargeletIconRose),
+        AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.mipmap.margelet_foreground, R.string.MargeletIconSand),
+        PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.mipmap.margelet_foreground, R.string.MargeletIconLavender),
+        TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.mipmap.margelet_foreground, R.string.MargeletIconSea),
+        NOX("NoxIcon", R.drawable.icon_2_background_sa, R.mipmap.margelet_foreground, R.string.MargeletIconNight);
 
         public final String key;
         public final int background;

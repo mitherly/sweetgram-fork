@@ -11,6 +11,10 @@ buildscript {
         classpath 'com.huawei.agconnect:agcp:1.9.1.301'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20"
+        // Питон для плагинов форка. Плагин — исходник на питоне, а не
+        // скомпилированный код: так требование «не обфусцировать» выполняется
+        // самой природой языка, читать плагин может кто угодно.
+        classpath 'com.chaquo.python:gradle:15.0.1'
     }
 }
 repositories {

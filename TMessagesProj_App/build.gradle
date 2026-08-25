@@ -67,10 +67,19 @@ android {
             shrinkResources false
             multiDexEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro', '../TMessagesProj/proguard-rules-beta.pro'
-            ndk.debugSymbolLevel = 'FULL'
+            // Отладочные символы нативных библиотек нужны только для
+            // расшифровки крэшей в консоли гугла — их сотни мегабайт, и на
+            // здешнем диске это была разница между сборкой и «нет места».
+            ndk.debugSymbolLevel = 'NONE'
         }
 
         standalone {
+            // У модуля с формулами есть только debug и release, а этот тип
+            // сборки называется иначе — без явной подмены gradle не знает,
+            // какой вариант чужого модуля брать, и падает на разрешении
+            // зависимостей. В самой библиотеке такая строка уже стояла,
+            // в приложении её не было.
+            matchingFallbacks = ['release']
             debuggable false
             jniDebuggable false
             signingConfig signingConfigs.release
@@ -79,7 +88,8 @@ android {
             shrinkResources false
             multiDexEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro'
-            ndk.debugSymbolLevel = 'FULL'
+            // Символы не кладём: см. debug — здесь та же экономия места.
+            ndk.debugSymbolLevel = 'NONE'
         }
 
         release {
@@ -136,7 +146,10 @@ android {
         }
         afat {
             ndk {
-                abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+                // Только arm64: телефон у нас один, а каждая лишняя архитектура
+                // это ещё одна полная сборка нативной части — время и место,
+                // которого в контейнере впритык.
+                abiFilters "arm64-v8a"
             }
             sourceSets.debug {
                 manifest.srcFile '../TMessagesProj/config/debug/AndroidManifest_SDK23.xml'

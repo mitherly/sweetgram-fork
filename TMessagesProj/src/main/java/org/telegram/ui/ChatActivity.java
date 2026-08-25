@@ -1199,6 +1199,9 @@ public class ChatActivity extends BaseFragment implements
     public final static int OPTION_DELETE = 1;
     public final static int OPTION_FORWARD = 2;
     public final static int OPTION_COPY = 3;
+    /** Свой пункт меню. Номер с запасом от чужих: они нумеруются подряд. */
+    public final static int OPTION_MARGELET_TAGS = 1001;
+    public final static int OPTION_MARGELET_COPY = 1002;
     public final static int OPTION_SAVE_TO_GALLERY = 4;
     public final static int OPTION_APPLY_LOCALIZATION_OR_THEME = 5;
     public final static int OPTION_SHARE = 6;
@@ -1689,6 +1692,12 @@ public class ChatActivity extends BaseFragment implements
     private final static int chat_menu_topic_create = 73;
 
     private final static int id_chat_compose_panel = 1000;
+
+    /**
+     * Кнопки плагинов в меню чата. Номер один на всех, порядковый номер
+     * кнопки прибавляется сверху: сколько их будет, заранее не знает никто.
+     */
+    private final static int margelet_plugin_button = 3000;
 
     RecyclerListView.OnItemLongClickListenerExtended onItemLongClickListener = new RecyclerListView.OnItemLongClickListenerExtended() {
         @Override
@@ -3695,6 +3704,11 @@ public class ChatActivity extends BaseFragment implements
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(final int id) {
+                if (id >= margelet_plugin_button) {
+                    org.telegram.margelet.MargeletHooks.buttonClicked(
+                            id - margelet_plugin_button, ChatActivity.this);
+                    return;
+                }
                 if (id == -1) {
                     if (isInPollAddOptionMode()) {
                         pollAddOptionModeClose();
@@ -4513,6 +4527,16 @@ public class ChatActivity extends BaseFragment implements
         if (currentChat != null && forumTopic != null && chatMode == 0) {
             closeTopicItem = headerItem.lazilyAddSubItem(topic_close, R.drawable.msg_topic_close, LocaleController.getString(R.string.CloseTopic));
             closeTopicItem.setVisibility(currentChat != null && ChatObject.canManageTopic(currentAccount, currentChat, forumTopic) && forumTopic != null && !forumTopic.closed ? View.VISIBLE : View.GONE);
+        }
+        // Строчки плагинов идут последними, после всего своего: чужой код не
+        // должен раздвигать привычные пункты меню.
+        if (headerItem != null && chatMode == MODE_DEFAULT) {
+            final java.util.List<org.telegram.margelet.MargeletHooks.Button> pluginButtons =
+                    org.telegram.margelet.MargeletHooks.buttons();
+            for (int i = 0; i < pluginButtons.size(); i++) {
+                headerItem.lazilyAddSubItem(margelet_plugin_button + i,
+                        R.drawable.msg_settings_old, pluginButtons.get(i).title);
+            }
         }
         menu.setVisibility(inMenuMode ? View.GONE : View.VISIBLE);
 
@@ -10880,18 +10904,33 @@ public class ChatActivity extends BaseFragment implements
     }
 
     private void updatePagedownButtonsPosition() {
+        // Когда поле ввода наверху, снизу его больше нет — и вычитать его
+        // высоту из низа экрана не за что. Без этого кнопка «вниз» и счётчики
+        // висели над пустым местом.
+        final boolean inputOnTop = chatInputViewsContainer.isInputOnTop();
         if (sideControlsButtonsLayout != null) {
             float baseTranslationY2 = -windowInsetsStateHolder.getAnimatedMaxBottomInset()
-                - chatInputViewsContainer.getInputBubbleHeight()
+                - (inputOnTop ? 0 : chatInputViewsContainer.getInputBubbleHeight())
                 - getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM)
                 - dp(ChatInputViewsContainer.INPUT_BUBBLE_BOTTOM + 4);
             sideControlsButtonsLayout.setTranslationY(baseTranslationY2);
         }
 
         if (suggestEmojiPanel != null) {
-            float baseTranslationY2 = -windowInsetsStateHolder.getAnimatedMaxBottomInset()
-                - dp(ChatInputViewsContainer.INPUT_BUBBLE_BOTTOM + 7);
-            suggestEmojiPanel.setTranslationY(baseTranslationY2);
+            if (inputOnTop) {
+                // Подсказки эмодзи должны стоять у поля, а не у низа экрана.
+                // Панель лежит с привязкой к низу, поэтому поднимаем её на всю
+                // высоту содержимого и опускаем под поле сверху.
+                final View parent = (View) suggestEmojiPanel.getParent();
+                final float bottom = parent == null ? 0 : parent.getHeight();
+                suggestEmojiPanel.setTranslationY(
+                    -bottom + chatListViewPaddingTop + chatInputViewsContainer.getInputBubbleHeight()
+                        + suggestEmojiPanel.getHeight() + dp(ChatInputViewsContainer.INPUT_BUBBLE_BOTTOM));
+            } else {
+                float baseTranslationY2 = -windowInsetsStateHolder.getAnimatedMaxBottomInset()
+                    - dp(ChatInputViewsContainer.INPUT_BUBBLE_BOTTOM + 7);
+                suggestEmojiPanel.setTranslationY(baseTranslationY2);
+            }
         }
     }
 
@@ -12018,13 +12057,23 @@ public class ChatActivity extends BaseFragment implements
         if (isInsideContainer && parentChatActivity == null) {
             paddingBottom = AndroidUtilities.navigationBarHeight;
         } else {
+            // Место под поле ввода: снизу, если оно снизу. Когда оно наверху,
+            // тот же запас переезжает в верхний отступ — иначе последние
+            // сообщения оказались бы под островом, а внизу зияла бы дыра.
             paddingBottom = blurredViewBottomOffset + dp(9 + 7)
-                + inputIslandHeightCurrent
+                + (chatInputViewsContainer.isInputOnTop() ? 0 : inputIslandHeightCurrent)
                 + getTopicTabsSideSize(TopicsTabsView.Position.BOTTOM)
                 + windowInsetsStateHolder.getAnimatedMaxBottomInset();
         }
 
-        final int paddingTop = (int) chatListViewPaddingTop;
+        int paddingTop = (int) chatListViewPaddingTop;
+        // Остров с полем ввода должен стоять под всем, что уже занято сверху:
+        // шапкой, закреплёнными, вкладками тем. Это ровно то, что посчитано в
+        // chatListViewPaddingTop, поэтому просто отдаём ему это число.
+        chatInputViewsContainer.setChatTopInset(chatListViewPaddingTop);
+        if (chatInputViewsContainer.isInputOnTop()) {
+            paddingTop += (int) (inputIslandHeightCurrent + dp(9 + 7));
+        }
         if (topicsTabs != null) {
             topicsTabs.setSideMenuBackgroundMarginTop(0);//Math.max(0, paddingTop - blurredViewTopOffset - dp(5)));
         }
@@ -19520,7 +19569,7 @@ public class ChatActivity extends BaseFragment implements
                 avatarContainer.setTitle(LocaleController.getString(R.string.SavedMessages));
             } else if (!MessagesController.isSupportUser(currentUser) && getContactsController().contactsDict.get(currentUser.id) == null && (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
                 if (!TextUtils.isEmpty(currentUser.phone)) {
-                    avatarContainer.setTitle(PhoneFormat.getInstance().format("+" + currentUser.phone), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
+                    avatarContainer.setTitle(org.telegram.margelet.MargeletPrivacy.phone(PhoneFormat.getInstance().format("+" + currentUser.phone), currentUser.id), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
                 } else {
                     avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(currentUser))), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
                 }
@@ -26320,6 +26369,17 @@ public class ChatActivity extends BaseFragment implements
                     }
                 }
                 obj.deleted = true;
+                if (org.telegram.margelet.MargeletConfig.antiDelete() && !obj.isOutOwner()) {
+                    // Оставляем сообщение в списке и обновляем ячейку со значком корзины 🗑
+                    int idx = chatAdapter != null && chatAdapter.isFiltered && filteredMessagesDict != null ? chatAdapter.filteredMessages.indexOf(filteredMessagesDict.get(mid)) : (messages != null ? messages.indexOf(obj) : -1);
+                    if (idx != -1 && chatAdapter != null && !chatAdapter.isFrozen) {
+                        try {
+                            chatAdapter.notifyItemChanged(chatAdapter.messagesStartRow + idx);
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                    continue;
+                }
                 if (obj.scheduled && sent) {
                     obj.scheduledSent = true;
                 }
@@ -27587,6 +27647,13 @@ public class ChatActivity extends BaseFragment implements
         }
         if (includeSpoilers) {
             menu.add(R.id.menu_groupbolditalic, R.id.menu_spoiler, order++, LocaleController.getString(R.string.Spoiler));
+        final String wand = "\uD83E\uDE84 ";
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_size, order++, wand + LocaleController.getString(R.string.MargeletMarkupSize));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_dim, order++, wand + LocaleController.getString(R.string.MargeletMarkupDim));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_rainbow, order++, wand + LocaleController.getString(R.string.MargeletMarkupRainbow));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_outline, order++, wand + LocaleController.getString(R.string.MargeletMarkupOutline));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_button, order++,
+                wand + LocaleController.getString(R.string.MargeletMarkupButton));
         }
 
         SpannableStringBuilder stringBuilder = new SpannableStringBuilder(LocaleController.getString(R.string.Bold));
@@ -29727,6 +29794,10 @@ public class ChatActivity extends BaseFragment implements
     @Override
     public void onResume() {
         super.onResume();
+        // Плагинам сообщаем, что переписка открыта: раньше события не было, и
+        // тем, кому нужен открытый чат, приходилось спрашивать самим по
+        // несколько раз в секунду.
+        org.telegram.margelet.MargeletPluginHost.chatOpened(this);
         checkShowBlur(false);
         activityResumeTime = System.currentTimeMillis();
         if (openImport && getSendMessagesHelper().getImportingHistory(dialog_id) != null) {
@@ -33372,6 +33443,19 @@ public class ChatActivity extends BaseFragment implements
                         AndroidUtilities.addToClipboard(getMessageContent(selectedObject, 0, false));
                     }
                 }
+                createUndoView();
+                if (undoView == null) {
+                    return;
+                }
+                undoView.showWithAction(0, UndoView.ACTION_MESSAGE_COPIED, null);
+                break;
+            }
+            case OPTION_MARGELET_TAGS: {
+                MargeletTagsAlert.show(this, selectedObject);
+                break;
+            }
+            case OPTION_MARGELET_COPY: {
+                org.telegram.margelet.MargeletCopy.copy(selectedObject);
                 createUndoView();
                 if (undoView == null) {
                     return;

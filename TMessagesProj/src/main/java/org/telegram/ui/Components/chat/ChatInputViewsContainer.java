@@ -17,6 +17,9 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
+import org.telegram.margelet.MargeletConfig;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.blur3.BlurredBackgroundWithFadeDrawable;
 import org.telegram.ui.Components.blur3.drawable.BlurredBackgroundDrawable;
@@ -31,6 +34,38 @@ public class ChatInputViewsContainer extends FrameLayout {
 
     private WindowInsetsProvider windowInsetsProvider;
 
+    /**
+     * Поле ввода сверху вместо низа. Читаем один раз при создании: менять
+     * сторону у живого чата нельзя — половина размеров уже посчитана от той,
+     * что была. Настройка применяется к следующему открытому чату.
+     */
+    private final boolean inputOnTop = MargeletConfig.inputOnTop();
+
+    /**
+     * Сколько занято сверху. Правильное значение знает только сам чат: кроме
+     * шапки там бывает панель закреплённых сообщений, вкладки тем, строка
+     * поиска. Поэтому чат его сюда и передаёт; своя оценка остаётся запасной,
+     * на случай если передать не успели.
+     *
+     * Владелец увидел это сразу: поле сверху налезало на «Закреплённые».
+     */
+    private float chatTopInset;
+
+    public void setChatTopInset(float value) {
+        if (chatTopInset != value) {
+            chatTopInset = value;
+            checkViewsPositions();
+            invalidate();
+        }
+    }
+
+    private int topOffset() {
+        if (chatTopInset > 0) {
+            return Math.round(chatTopInset);
+        }
+        return AndroidUtilities.statusBarHeight + ActionBar.getCurrentActionBarHeight();
+    }
+
     private final View fadeView;
     private final FrameLayout inputIslandBubbleContainer;
     private final FrameLayout inAppKeyboardBubbleContainer;
@@ -40,7 +75,8 @@ public class ChatInputViewsContainer extends FrameLayout {
 
         inputIslandBubbleContainer = new FrameLayout(context);
         addView(inputIslandBubbleContainer,
-            LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.BOTTOM));
+            LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT,
+                inputOnTop ? Gravity.TOP : Gravity.BOTTOM));
 
         inAppKeyboardBubbleContainer = new FrameLayout(context) {
             @Override
@@ -182,7 +218,11 @@ public class ChatInputViewsContainer extends FrameLayout {
     }
 
     private void checkViewsPositions() {
-        inputIslandBubbleContainer.setTranslationY(-maxBottomInset - dp(INPUT_BUBBLE_BOTTOM));
+        // Сверху остров стоит на месте: клавиатура растёт снизу и его не
+        // трогает. Снизу он всё это время уезжал вверх на высоту клавиатуры.
+        inputIslandBubbleContainer.setTranslationY(inputOnTop
+            ? topOffset() + dp(INPUT_BUBBLE_BOTTOM)
+            : -maxBottomInset - dp(INPUT_BUBBLE_BOTTOM));
         inAppKeyboardBubbleContainer.setTranslationY(inAppKeyboardBubbleContainer.getMeasuredHeight() - imeBottomInset);
     }
 
@@ -231,7 +271,15 @@ public class ChatInputViewsContainer extends FrameLayout {
     }
 
     public float getInputBubbleBottom() {
+        if (inputOnTop) {
+            return topOffset() + dp(INPUT_BUBBLE_BOTTOM) + inputBubbleHeight;
+        }
         return getMeasuredHeight() - maxBottomInset - dp(INPUT_BUBBLE_BOTTOM);
+    }
+
+    /** Стоит ли поле сверху — нужно снаружи, чтобы посчитать отступы списка. */
+    public boolean isInputOnTop() {
+        return inputOnTop;
     }
 
     @Override
@@ -257,7 +305,9 @@ public class ChatInputViewsContainer extends FrameLayout {
             Math.max(getMeasuredHeight(), getMeasuredHeight() - (int) imeBottomInset + dp(INPUT_KEYBOARD_RADIUS * 2))
         );
 
-        final int blurTop = getMeasuredHeight() - currentBlurredHeight;
+        final int blurTop = inputOnTop
+            ? topOffset() + dp(INPUT_BUBBLE_BOTTOM)
+            : getMeasuredHeight() - currentBlurredHeight;
 
         tmpRect.set(
             Math.round(inputBubbleOffsetLeft),

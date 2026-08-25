@@ -289,6 +289,13 @@ public class ApplicationLoader extends Application {
 
         super.onCreate();
 
+        // Свой шрифт ставим до того, как появится первый экран: подменять
+        // его позже значит оставить уже нарисованное со старым.
+        try {
+            org.telegram.margelet.MargeletFonts.applyGlobally();
+        } catch (Throwable ignored) {
+        }
+
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("app start time = " + (startTime = SystemClock.elapsedRealtime()));
             try {

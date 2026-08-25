@@ -4,3 +4,8 @@ include ':TMessagesProj_AppHuawei'
 include ':TMessagesProj_AppHockeyApp'
 include ':TMessagesProj_AppStandalone'
 include ':TMessagesProj_AppTests'
+
+// Модуль формул лежит подмодулем и своего include в корне не имел —
+// сборка падала на «Project with path ':jlatexmath' could not be found».
+include ':jlatexmath'
+project(':jlatexmath').projectDir = new File(rootDir, 'TMessagesProj/lib/jlatexmath/jlatexmath')

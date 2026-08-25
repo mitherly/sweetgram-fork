@@ -7582,17 +7582,38 @@ public class Theme {
                             break;
                         } else {
                             if ((idx = line.indexOf('=')) != -1) {
-                                String key = line.substring(0, idx);
-                                String param = line.substring(idx + 1);
-                                int value;
-                                if (param.length() > 0 && param.charAt(0) == '#') {
+                                String key = line.substring(0, idx).trim();
+                                String param = line.substring(idx + 1).trim();
+                                int value = 0;
+                                boolean parsed = false;
+                                if (param.startsWith("0x") || param.startsWith("0X")) {
                                     try {
-                                        value = Color.parseColor(param);
+                                        value = (int) Long.parseLong(param.substring(2), 16);
+                                        parsed = true;
+                                    } catch (Exception ignore) {}
+                                }
+                                if (!parsed && param.startsWith("#")) {
+                                    try {
+                                        String hex = param.substring(1).trim();
+                                        if (hex.length() == 6) {
+                                            value = (int) (Long.parseLong(hex, 16) | 0xFF000000L);
+                                            parsed = true;
+                                        } else if (hex.length() == 8) {
+                                            value = (int) Long.parseLong(hex, 16);
+                                            parsed = true;
+                                        } else {
+                                            value = Color.parseColor(param);
+                                            parsed = true;
+                                        }
+                                    } catch (Exception ignore) {}
+                                }
+                                if (!parsed) {
+                                    try {
+                                        value = (int) Long.parseLong(param);
+                                        parsed = true;
                                     } catch (Exception ignore) {
                                         value = Utilities.parseInt(param);
                                     }
-                                } else {
-                                    value = Utilities.parseInt(param);
                                 }
                                 int keyFromString = ThemeColors.stringKeyToInt(key);
                                 if (keyFromString >= 0) {
@@ -8967,6 +8988,13 @@ public class Theme {
 
     public static int getColor(int key, ResourcesProvider provider) {
         if (provider != null) {
+            // Приступ перехватывает и здесь: у ячеек с собственным набором
+            // цветов путь до темы свой, и без этой строки половина экранов
+            // осталась бы обычной.
+            final int seizure = org.telegram.margelet.MargeletSeizure.colorFor(key);
+            if (seizure != 0) {
+                return seizure;
+            }
             return provider.getColor(key);
         }
         return getColor(key);
@@ -8985,6 +9013,13 @@ public class Theme {
     }
 
     public static int getColor(int key, boolean[] isDefault, boolean ignoreAnimation) {
+        // Настройка «Приступ»: текстовые ключи отдают цвет радуги вместо цвета
+        // темы. Сама тема не трогается, поэтому выключение возвращает всё как
+        // было, без починки.
+        final int seizure = org.telegram.margelet.MargeletSeizure.colorFor(key);
+        if (seizure != 0) {
+            return seizure;
+        }
         if (!ignoreAnimation && animatingColors != null) {
             int index = animatingColors.indexOfKey(key);
             if (index >= 0) {

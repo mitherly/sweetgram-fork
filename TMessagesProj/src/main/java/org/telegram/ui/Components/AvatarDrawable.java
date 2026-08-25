@@ -583,14 +583,17 @@ public class AvatarDrawable extends Drawable {
         canvas.save();
         canvas.translate(bounds.left, bounds.top);
 
-        if (drawAvatarBackground) {
+        if (drawAvatarBackground && avatarType != AVATAR_TYPE_ARCHIVED) {
             if (rotate45Background) {
                 canvas.save();
                 canvas.rotate(-45, size / 2.0f, size / 2.0f);
             }
-            if (roundRadius > 0) {
-                AndroidUtilities.rectTmp.set(0, 0, size, size);
-                canvas.drawRoundRect(AndroidUtilities.rectTmp, roundRadius, roundRadius, backgroundPaint);
+            float customRadius = org.telegram.margelet.MargeletAvatars.getAvatarCorners(size, false);
+            AndroidUtilities.rectTmp.set(0, 0, size, size);
+            if (customRadius == 0) {
+                canvas.drawRect(AndroidUtilities.rectTmp, backgroundPaint);
+            } else if (customRadius < size / 2.0f) {
+                canvas.drawRoundRect(AndroidUtilities.rectTmp, customRadius, customRadius, backgroundPaint);
             } else {
                 canvas.drawCircle(size / 2.0f, size / 2.0f, size / 2.0f, backgroundPaint);
             }
@@ -600,9 +603,18 @@ public class AvatarDrawable extends Drawable {
         }
 
         if (avatarType == AVATAR_TYPE_ARCHIVED) {
+            float customRadius = org.telegram.margelet.MargeletAvatars.getAvatarCorners(size, false);
             if (archivedAvatarProgress != 0) {
                 backgroundPaint.setColor(ColorUtils.setAlphaComponent(getThemedColor(Theme.key_avatar_backgroundArchived), alpha));
-                canvas.drawCircle(size / 2.0f, size / 2.0f, size / 2.0f * archivedAvatarProgress, backgroundPaint);
+                AndroidUtilities.rectTmp.set(0, 0, size * archivedAvatarProgress, size * archivedAvatarProgress);
+                if (customRadius == 0) {
+                    canvas.drawRect(AndroidUtilities.rectTmp, backgroundPaint);
+                } else if (customRadius < size / 2.0f) {
+                    float r = customRadius * archivedAvatarProgress;
+                    canvas.drawRoundRect(AndroidUtilities.rectTmp, r, r, backgroundPaint);
+                } else {
+                    canvas.drawCircle(size / 2.0f, size / 2.0f, size / 2.0f * archivedAvatarProgress, backgroundPaint);
+                }
                 if (Theme.dialogs_archiveAvatarDrawableRecolored) {
                     Theme.dialogs_archiveAvatarDrawable.beginApplyLayerColors();
                     Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow1", Theme.getNonAnimatedColor(Theme.key_avatar_backgroundArchived));

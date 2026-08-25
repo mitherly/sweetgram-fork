@@ -1,5 +1,11 @@
 <resources>
     <item name="menu_spoiler" type="id"/>
+    <!-- Своё оформление форка: размер, затемнение, радуга, обводка. -->
+    <item name="menu_margelet_size" type="id"/>
+    <item name="menu_margelet_dim" type="id"/>
+    <item name="menu_margelet_rainbow" type="id"/>
+    <item name="menu_margelet_outline" type="id"/>
+    <item name="menu_margelet_button" type="id"/>
     <item name="menu_quote" type="id"/>
     <item name="menu_regular" type="id"/>
     <item name="menu_bold" type="id"/>

@@ -665,7 +665,7 @@ public class Emoji {
         }
         ArrayList<EmojiSpanRange> emojis = parseEmojis(s, emojiOnly);
         if (emojis.isEmpty()) {
-            return cs;
+            return org.telegram.margelet.MargeletZalgo.filterSpannable(cs);
         }
 
         AnimatedEmojiSpan[] animatedEmojiSpans = s.getSpans(0, s.length(), AnimatedEmojiSpan.class);
@@ -673,41 +673,41 @@ public class Emoji {
         EmojiSpan span;
         Drawable drawable;
         int limitCount = (SharedConfig.getDevicePerformanceClass() >= SharedConfig.PERFORMANCE_CLASS_HIGH ? 100 : 50) - minusLimit;
-        for (int i = 0; i < emojis.size(); ++i) {
+        for (int i = 0; i < emojis.size(); i++) {
+            EmojiSpanRange range = emojis.get(i);
+            if (animatedEmojiSpans != null && animatedEmojiSpans.length > 0) {
+                boolean found = false;
+                for (int a = 0; a < animatedEmojiSpans.length; a++) {
+                    AnimatedEmojiSpan animatedEmojiSpan = animatedEmojiSpans[a];
+                    if (animatedEmojiSpan != null && s.getSpanStart(animatedEmojiSpan) == range.start && s.getSpanEnd(animatedEmojiSpan) == range.end) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    continue;
+                }
+            }
+            if (imageSpans != null && imageSpans.length > 0) {
+                boolean found = false;
+                for (int a = 0; a < imageSpans.length; a++) {
+                    ColoredImageSpan imageSpan = imageSpans[a];
+                    if (imageSpan != null && s.getSpanStart(imageSpan) == range.start && s.getSpanEnd(imageSpan) == range.end) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    continue;
+                }
+            }
             try {
-                EmojiSpanRange emojiRange = emojis.get(i);
-                if (animatedEmojiSpans != null && animatedEmojiSpans.length > 0) {
-                    boolean hasAnimated = false;
-                    for (int j = 0; j < animatedEmojiSpans.length; ++j) {
-                        AnimatedEmojiSpan animatedSpan = animatedEmojiSpans[j];
-                        if (animatedSpan != null && s.getSpanStart(animatedSpan) == emojiRange.start && s.getSpanEnd(animatedSpan) == emojiRange.end) {
-                            hasAnimated = true;
-                            break;
-                        }
-                    }
-                    if (hasAnimated) {
-                        continue;
-                    }
-                }
-                if (imageSpans != null && imageSpans.length > 0) {
-                    boolean hasImage = false;
-                    for (int j = 0; j < imageSpans.length; ++j) {
-                        ColoredImageSpan imageSpan = imageSpans[j];
-                        if (imageSpan != null && s.getSpanStart(imageSpan) == emojiRange.start && s.getSpanEnd(imageSpan) == emojiRange.end) {
-                            hasImage = true;
-                            break;
-                        }
-                    }
-                    if (hasImage) {
-                        continue;
-                    }
-                }
-                drawable = Emoji.getEmojiDrawable(emojiRange.code);
+                drawable = Emoji.getEmojiDrawable(range.code);
                 if (drawable != null) {
                     span = new EmojiSpan(drawable, alignment, fontMetrics);
-                    span.emoji = emojiRange.code == null ? null : emojiRange.code.toString();
+                    span.emoji = range.code == null ? null : range.code.toString();
                     span.scale = scale;
-                    s.setSpan(span, emojiRange.start, emojiRange.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    s.setSpan(span, range.start, range.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             } catch (Exception e) {
                 FileLog.e(e);
@@ -716,7 +716,7 @@ public class Emoji {
                 break;
             }
         }
-        return s;
+        return org.telegram.margelet.MargeletZalgo.filterSpannable(s);
     }
 
     public static CharSequence replaceWithRestrictedEmoji(CharSequence cs, TextView textView, Runnable update) {

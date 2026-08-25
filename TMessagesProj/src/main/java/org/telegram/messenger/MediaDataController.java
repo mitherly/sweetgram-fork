@@ -129,6 +129,12 @@ public class MediaDataController extends BaseController {
             ITALIC_PATTERN = Pattern.compile("__(.+?)__"),
             SPOILER_PATTERN = Pattern.compile("\\|\\|(.+?)\\|\\|"),
             STRIKE_PATTERN = Pattern.compile("~~(.+?)~~");
+    // Своё, чего в телеграме нет: подчёркивание и цитаты. Цитата ловится по
+    // строке целиком, поэтому режим многострочный, а свёрнутая идёт первой —
+    // иначе одиночная «>» съест начало двойной.
+    private static Pattern UNDERLINE_PATTERN = Pattern.compile("\\+\\+(.+?)\\+\\+"),
+            QUOTE_COLLAPSED_PATTERN = Pattern.compile(">>>([\\s\\S]+?)<<<"),
+            QUOTE_PATTERN = Pattern.compile(">>([\\s\\S]+?)<<");
 
     public static String SHORTCUT_CATEGORY = "org.telegram.messenger.SHORTCUT_SHARE";
 
@@ -7206,6 +7212,15 @@ public class MediaDataController extends BaseController {
         if (message == null || message[0] == null) {
             return null;
         }
+        // Своё оформление форка — в невидимые метки, до подсчёта отсчётов.
+        //
+        // Раньше это делалось только на отправке обычного текста, и подпись к
+        // фотографии оформление теряла: у неё другой путь. Владелец это и
+        // поймал. Общее у всех путей — вот это место: везде, где телеграм
+        // превращает размеченный текст в текст плюс список разметки, он зовёт
+        // getEntities. Значит, и метки ставить надо здесь, а не в каждом
+        // экране по отдельности.
+        message[0] = org.telegram.margelet.MargeletMarkup.encode(message[0]);
         ArrayList<TLRPC.MessageEntity> entities = null;
         int index;
         int start = -1;
@@ -7490,11 +7505,43 @@ public class MediaDataController extends BaseController {
         CharSequence cs = message[0];
         if (entities == null) entities = new ArrayList<>();
         if (parseMarkdown) {
-            cs = parsePattern(cs, BOLD_PATTERN, entities, obj -> new TLRPC.TL_messageEntityBold());
-            cs = parsePattern(cs, ITALIC_PATTERN, entities, obj -> new TLRPC.TL_messageEntityItalic());
-            cs = parsePattern(cs, SPOILER_PATTERN, entities, obj -> new TLRPC.TL_messageEntitySpoiler());
-            if (allowStrike) {
+            // Каждый вид разметки значками можно выключить у себя: тогда
+            // звёздочки останутся звёздочками. Настройка форка, по умолчанию
+            // всё включено.
+            if (org.telegram.margelet.MargeletConfig.markdownEnabled("bold")) {
+                cs = parsePattern(cs, BOLD_PATTERN, entities, obj -> new TLRPC.TL_messageEntityBold());
+            }
+            if (org.telegram.margelet.MargeletConfig.markdownEnabled("italic")) {
+                cs = parsePattern(cs, ITALIC_PATTERN, entities, obj -> new TLRPC.TL_messageEntityItalic());
+            }
+            if (org.telegram.margelet.MargeletConfig.markdownEnabled("spoiler")) {
+                cs = parsePattern(cs, SPOILER_PATTERN, entities, obj -> new TLRPC.TL_messageEntitySpoiler());
+            }
+            if (allowStrike && org.telegram.margelet.MargeletConfig.markdownEnabled("strike")) {
                 cs = parsePattern(cs, STRIKE_PATTERN, entities, obj -> new TLRPC.TL_messageEntityStrike());
+            }
+            // Своё: подчёркивание и цитаты. В телеграме значков для них нет,
+            // поэтому и разбирает их только форк — у остальных останутся
+            // плюсы и «больше».
+            //
+            // У цитаты знак стоит и в начале, и в конце. Сначала я сделал по
+            // образцу почты — знак в начале каждой строки, — и получилось
+            // плохо: при копировании многострочная цитата рассыпалась на
+            // строки с повторяющимся знаком, а конца у неё не было вовсе.
+            // Владелец сразу предложил правильное: пусть будет начало и конец.
+            if (org.telegram.margelet.MargeletConfig.markdownEnabled("underline")) {
+                cs = parsePattern(cs, UNDERLINE_PATTERN, entities, obj -> new TLRPC.TL_messageEntityUnderline());
+            }
+            if (org.telegram.margelet.MargeletConfig.markdownEnabled("quote_collapsed")) {
+                cs = parsePattern(cs, QUOTE_COLLAPSED_PATTERN, entities, obj -> {
+                    final TLRPC.TL_messageEntityBlockquote quote = new TLRPC.TL_messageEntityBlockquote();
+                    quote.collapsed = true;
+                    quote.flags |= 1;
+                    return quote;
+                });
+            }
+            if (org.telegram.margelet.MargeletConfig.markdownEnabled("quote")) {
+                cs = parsePattern(cs, QUOTE_PATTERN, entities, obj -> new TLRPC.TL_messageEntityBlockquote());
             }
         }
 

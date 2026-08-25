@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Значок форка у имени. Тот же знак, что и у создателя, только лавандовый: цвет
+    поля другой, всё остальное совпадает. Координаты пересчитаны из поля
+    108 на 108 в поле 24 на 24: на таком размере положение самолёта и
+    решает, выглядит знак ровным или съехавшим.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#B7A8E0"
+        android:pathData="M5,0 L19,0 A5,5 0 0 1 24,5 L24,19 A5,5 0 0 1 19,24 L5,24 A5,5 0 0 1 0,19 L0,5 A5,5 0 0 1 5,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,6.64 L6.12,14.99 L11.57,13.14 Z" />
+    <path
+        android:fillColor="#EEF3FA"
+        android:pathData="M12,6.64 L17.88,14.99 L12.43,13.14 Z" />
+    <path
+        android:fillColor="#CCD5E9"
+        android:pathData="M12,6.64 L11.57,13.14 L12,14.25 L12.43,13.14 Z" />
+</vector>
