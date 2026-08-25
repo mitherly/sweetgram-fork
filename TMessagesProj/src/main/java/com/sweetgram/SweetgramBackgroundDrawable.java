@@ -1,4 +1,4 @@
-package com.radolyn.ayugram.sweetgram;
+package com.sweetgram;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
