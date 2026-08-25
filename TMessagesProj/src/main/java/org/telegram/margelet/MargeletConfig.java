@@ -177,11 +177,10 @@ public class MargeletConfig {
      * нет: внутри форка она и так ни к чему, она для тех, у кого форка нет.
      */
     public static boolean showWatermarks() {
-        return prefs().getBoolean("watermarks", false);
+        return false;
     }
 
     public static void setShowWatermarks(boolean on) {
-        prefs().edit().putBoolean("watermarks", on).apply();
     }
 
     /**
@@ -226,7 +225,7 @@ public class MargeletConfig {
      * По умолчанию да: форк живёт тем, что о нём узнают.
      */
     public static boolean watermarkOnSend() {
-        return prefs().getBoolean("watermark_send", false);
+        return false;
     }
 
     public static void setWatermarkOnSend(boolean on) {

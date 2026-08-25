@@ -138,11 +138,6 @@ public class MargeletBadge {
      * свежей установке — вшитый.
      */
     public static void refresh() {
-        MargeletRemote.fetch(FILE, CACHE_KEY, text -> {
-            if (text != null) {
-                parsed = null;      // приехало новое — разберём при первом спросе
-            }
-        });
     }
 
     /**
@@ -243,20 +238,7 @@ public class MargeletBadge {
      * два одинаковых «Кот в Margelet» там выглядят ошибкой. Ею и были.
      */
     public static Badge[] list() {
-        final List<Badge> kinds = new ArrayList<>();
-        for (Badge badge : badges()) {
-            boolean seen = false;
-            for (Badge already : kinds) {
-                if (already.title().equals(badge.title())) {
-                    seen = true;
-                    break;
-                }
-            }
-            if (!seen) {
-                kinds.add(badge);
-            }
-        }
-        return kinds.toArray(new Badge[0]);
+        return new Badge[0];
     }
 
     /** Старший значок — тот, что стоит у имени. Первый в таблице и есть старший. */
@@ -274,114 +256,28 @@ public class MargeletBadge {
 
     /** Все значки этого человека или чата, по старшинству. */
     public static List<Badge> all(long peerId) {
-        final List<Badge> found = new ArrayList<>();
-        if (!MargeletConfig.badgesEnabled()) {
-            return found;
-        }
-        for (Badge badge : badges()) {
-            if (badge.peerId == peerId) {
-                found.add(badge);
-            }
-        }
-        return found;
+        return new ArrayList<>();
     }
 
     public static boolean has(long peerId) {
-        return of(peerId) != null;
+        return false;
     }
 
-    /**
-     * Картинка значка у имени или null, если такого в таблице нет.
-     *
-     * Картинка одна на всех, а цвет поля свой у каждого значка: он приезжает
-     * из файла строкой вида «8DD1B0», и заводить по вектору на каждый новый
-     * цвет незачем. Поле рисуется скруглённым квадратом, самолётик кладётся
-     * сверху отдельным слоем.
-     */
     public static Drawable iconDrawable(Context context, long peerId) {
-        return iconDrawable(context, of(peerId));
+        return null;
     }
 
     public static Drawable iconDrawable(Context context, Badge badge) {
-        if (context == null || badge == null) {
-            return null;
-        }
-        try {
-            final GradientDrawable field = new GradientDrawable();
-            field.setShape(GradientDrawable.RECTANGLE);
-            // Скругление то же, что было в векторе: пять частей из двадцати
-            // четырёх, пересчитанные в точки экрана.
-            field.setCornerRadius(AndroidUtilities.dp(24) * 5f / 24f);
-            field.setColor(badge.color);
-            final Drawable plane = ContextCompat.getDrawable(context, R.drawable.margelet_badge_plane);
-            if (plane == null) {
-                return field;
-            }
-            return new LayerDrawable(new Drawable[]{field, plane});
-        } catch (Throwable t) {
-            return null;
-        }
+        return null;
     }
 
-    /**
-     * Название значка. Отдаётся строкой, а не CharSequence: в профиле оно
-     * ложится в поле описания для озвучки, а там объявлен String.
-     */
     public static String title(long peerId) {
-        final Badge badge = of(peerId);
-        return badge == null ? null : badge.title();
+        return "";
     }
 
     public static void show(Context context, long peerId) {
-        show(context, of(peerId));
     }
 
     public static void show(Context context, Badge badge) {
-        if (context == null || badge == null) {
-            return;
-        }
-        try {
-            final LinearLayout layout = new LinearLayout(context);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setGravity(Gravity.CENTER_HORIZONTAL);
-
-            // Объёмный значок: сам крутится, можно крутить пальцем. Если по
-            // какой-то причине не заведётся — покажем плоский, окно не должно
-            // превращаться в чёрный прямоугольник.
-            View spinner;
-            try {
-                spinner = new MargeletPlane3D(context, badge.color);
-            } catch (Throwable t) {
-                final ImageView icon = new ImageView(context);
-                icon.setImageDrawable(iconDrawable(context, badge));
-                final RotateAnimation spin = new RotateAnimation(0, 360,
-                        Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                spin.setDuration(2600);
-                spin.setRepeatCount(Animation.INFINITE);
-                spin.setInterpolator(new LinearInterpolator());
-                icon.startAnimation(spin);
-                spinner = icon;
-            }
-            layout.addView(spinner, LayoutHelper.createLinear(150, 150, Gravity.CENTER_HORIZONTAL, 0, 4, 0, 12));
-
-            final TextView text = new TextView(context);
-            text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
-            text.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
-            text.setGravity(Gravity.CENTER);
-            text.setText(badge.about());
-            layout.addView(text, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT,
-                    LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL, 8, 0, 8, 0));
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(context)
-                    .setTitle(badge.title())
-                    .setView(layout);
-            if (badge.url != null) {
-                builder.setPositiveButton(LocaleController.getString(R.string.MargeletBadgeChannel),
-                        (d, w) -> Browser.openUrl(context, badge.url));
-            }
-            builder.setNegativeButton(LocaleController.getString(R.string.Close), null).show();
-        } catch (Exception ignored) {
-            // Украшение не повод ронять профиль.
-        }
     }
 }
