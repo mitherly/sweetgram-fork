@@ -56,7 +56,7 @@ public class DrawerMenuView extends ScrollView {
 
         addDivider();
 
-        addItem(R.drawable.settings_features, "Margelet", () -> {
+        addItem(R.drawable.settings_features, "Sweetgram", () -> {
             fragment.presentFragment(new MargeletSettingsActivity());
         });
         addItem(R.drawable.settings_devices, LocaleController.getString(R.string.MargeletPlugins), () -> {

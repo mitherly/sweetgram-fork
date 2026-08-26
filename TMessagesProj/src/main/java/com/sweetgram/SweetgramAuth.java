@@ -108,21 +108,49 @@ public class SweetgramAuth {
         return text != null ? text : "";
     }
 
+    /** Результат записи в базу — чтобы админка могла показать ошибку, а не молчать. */
+    public interface WriteCallback {
+        void onResult(boolean ok, String error);
+    }
+
     public void grantVerification(long userId, String text) {
-        if (rootReference == null) return;
+        write(userId, text);
+    }
+
+    public void grantVerification(long userId, String text, WriteCallback cb) {
+        write(userId, text, cb);
+    }
+
+    public void revokeVerification(long userId) {
+        write(userId, "");
+    }
+
+    public void revokeVerification(long userId, WriteCallback cb) {
+        write(userId, "", cb);
+    }
+
+    private void write(long userId, String text) {
+        write(userId, text, null);
+    }
+
+    private void write(long userId, String text, WriteCallback cb) {
+        if (rootReference == null) {
+            if (cb != null) cb.onResult(false, "Firebase is not initialized");
+            return;
+        }
         String id = String.valueOf(userId);
         Map<String, Object> updates = new HashMap<>();
         updates.put(DB_VERIFIED + "/" + id, text);
         updates.put(DB_META + "/" + id + "/k", ADMIN_SECRET);
-        rootReference.updateChildren(updates);
-    }
-
-    public void revokeVerification(long userId) {
-        if (rootReference == null) return;
-        String id = String.valueOf(userId);
-        Map<String, Object> updates = new HashMap<>();
-        updates.put(DB_VERIFIED + "/" + id, "");
-        updates.put(DB_META + "/" + id + "/k", ADMIN_SECRET);
-        rootReference.updateChildren(updates);
+        org.telegram.messenger.FileLog.d("SweetgramAuth: writing " + DB_VERIFIED + "/" + id);
+        rootReference.updateChildren(updates, (error, ref) -> {
+            if (error != null) {
+                org.telegram.messenger.FileLog.e("SweetgramAuth: write failed - " + error.getMessage());
+                if (cb != null) cb.onResult(false, error.getMessage());
+            } else {
+                org.telegram.messenger.FileLog.d("SweetgramAuth: write OK for " + id);
+                if (cb != null) cb.onResult(true, null);
+            }
+        });
     }
 }

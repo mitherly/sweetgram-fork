@@ -923,6 +923,11 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public boolean isPremiumUser(TLRPC.User currentUser) {
+        // Локальный премиум: считаем премиумом самого себя, чтобы были
+        // доступны клиентские фичи (эмодзи-статус и т.п.) без подписки.
+        if (currentUser != null && currentUser.id == UserConfig.getInstance(currentAccount).clientUserId) {
+            return true;
+        }
         return currentUser != null && currentUser.premium && !isSupportUser(currentUser);
     }
 

@@ -53,7 +53,7 @@ public class MargeletSettingsActivity extends UniversalFragment {
 
     @Override
     protected CharSequence getTitle() {
-        return "Margelet";
+        return "Sweetgram";
     }
 
     @Override

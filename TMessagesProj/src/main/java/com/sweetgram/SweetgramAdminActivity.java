@@ -108,8 +108,15 @@ public class SweetgramAdminActivity extends BaseFragment {
         try {
             long userId = Long.parseLong(userIdStr);
             String text = verificationTextEditText.getText().toString();
-            SweetgramAuth.getInstance().grantVerification(userId, text.isEmpty() ? "Verified" : text);
-            Toast.makeText(getParentActivity(), "Granted to " + userId, Toast.LENGTH_SHORT).show();
+            SweetgramAuth.getInstance().grantVerification(userId, text.isEmpty() ? "Verified" : text,
+                    (ok, error) -> org.telegram.messenger.AndroidUtilities.runOnUIThread(() -> {
+                        if (getParentActivity() == null) return;
+                        if (ok) {
+                            Toast.makeText(getParentActivity(), "Granted to " + userId + ", reopen profile", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getParentActivity(), "FAILED: " + error, Toast.LENGTH_LONG).show();
+                        }
+                    }));
             userIdEditText.setText("");
             verificationTextEditText.setText("");
         } catch (NumberFormatException e) {
@@ -125,8 +132,15 @@ public class SweetgramAdminActivity extends BaseFragment {
         }
         try {
             long userId = Long.parseLong(userIdStr);
-            SweetgramAuth.getInstance().revokeVerification(userId);
-            Toast.makeText(getParentActivity(), "Revoked from " + userId, Toast.LENGTH_SHORT).show();
+            SweetgramAuth.getInstance().revokeVerification(userId,
+                    (ok, error) -> org.telegram.messenger.AndroidUtilities.runOnUIThread(() -> {
+                        if (getParentActivity() == null) return;
+                        if (ok) {
+                            Toast.makeText(getParentActivity(), "Revoked from " + userId, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getParentActivity(), "FAILED: " + error, Toast.LENGTH_LONG).show();
+                        }
+                    }));
             userIdEditText.setText("");
         } catch (NumberFormatException e) {
             Toast.makeText(getParentActivity(), "Invalid User ID", Toast.LENGTH_SHORT).show();
