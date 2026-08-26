@@ -14,75 +14,89 @@ import androidx.annotation.Nullable;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.Theme;
 
+/**
+ * Значок верификации Sweetgram: розовый кружок с белым контуром
+ * самолётика и текст подписи рядом.
+ */
 public class SweetgramVerifiedDrawable extends Drawable {
 
-    private Paint paint;
-    private Paint textPaint;
-    private Path starPath;
-    private String text;
+    private final Paint circlePaint;
+    private final Paint planePaint;
+    private final Paint textPaint;
+    private final Path planePath = new Path();
+    private final String text;
     private float textWidth;
 
     public SweetgramVerifiedDrawable(String text) {
         this.text = text;
 
-        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Theme.getColor(Theme.key_profile_verifiedBackground));
+        circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        circlePaint.setColor(0xFFE59CB8);
+
+        planePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        planePaint.setStyle(Paint.Style.STROKE);
+        planePaint.setStrokeWidth(AndroidUtilities.dp(1.4f));
+        planePaint.setStrokeJoin(Paint.Join.ROUND);
+        planePaint.setStrokeCap(Paint.Cap.ROUND);
+        planePaint.setColor(0xFFFFFFFF);
 
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(Theme.getColor(Theme.key_profile_verifiedBackground));
         textPaint.setTextSize(AndroidUtilities.dp(14));
         textPaint.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-        
+
         if (this.text != null && !this.text.isEmpty()) {
             textWidth = textPaint.measureText(this.text);
-        } else {
-            textWidth = 0;
         }
-
-        starPath = new Path();
     }
 
-    private void updateStarPath(float cx, float cy, float radius) {
-        starPath.reset();
-        int points = 5;
-        double angle = Math.PI / points;
-        for (int i = 0; i < points * 2; i++) {
-            double r = (i % 2 == 0) ? radius : radius / 2.5;
-            float x = (float) (cx + Math.cos(i * angle - Math.PI / 2) * r);
-            float y = (float) (cy + Math.sin(i * angle - Math.PI / 2) * r);
-            if (i == 0) {
-                starPath.moveTo(x, y);
-            } else {
-                starPath.lineTo(x, y);
-            }
-        }
-        starPath.close();
+    /** Контур бумажного самолётика вписан в круг диаметром size. */
+    private void updatePlanePath(float cx, float cy, float size) {
+        // Точки силуэта самолётика относительно радиуса круга.
+        float s = size / 2f;
+        float noseX = cx + s * 0.78f, noseY = cy - s * 0.72f;
+        float tailX = cx - s * 0.80f, tailY = cy + s * 0.06f;
+        float foldX = cx - s * 0.26f, foldY = cy + s * 0.30f;
+        float tipX = cx - s * 0.08f, tipY = cy + s * 0.78f;
+
+        planePath.reset();
+        planePath.moveTo(noseX, noseY);
+        planePath.lineTo(tailX, tailY);
+        planePath.lineTo(foldX, foldY);
+        planePath.close();
+        planePath.moveTo(foldX, foldY);
+        planePath.lineTo(tipX, tipY);
+        planePath.lineTo(noseX, noseY);
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
         Rect bounds = getBounds();
-        float starRadius = AndroidUtilities.dp(8);
-        float cx = bounds.left + starRadius;
+        float radius = AndroidUtilities.dp(8);
+        float cx = bounds.left + radius;
         float cy = bounds.centerY();
 
-        updateStarPath(cx, cy, starRadius);
-        canvas.drawPath(starPath, paint);
+        canvas.drawCircle(cx, cy, radius, circlePaint);
+
+        updatePlanePath(cx, cy, radius * 2f);
+        canvas.drawPath(planePath, planePaint);
 
         if (textWidth > 0) {
-            canvas.drawText(text, cx + starRadius + AndroidUtilities.dp(4), cy + AndroidUtilities.dp(5), textPaint);
+            canvas.drawText(text, cx + radius + AndroidUtilities.dp(4), cy + AndroidUtilities.dp(5), textPaint);
         }
     }
 
     @Override
     public void setAlpha(int alpha) {
-        paint.setAlpha(alpha);
+        circlePaint.setAlpha(alpha);
+        planePaint.setAlpha(alpha);
         textPaint.setAlpha(alpha);
     }
 
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
-        paint.setColorFilter(colorFilter);
+        circlePaint.setColorFilter(colorFilter);
+        planePaint.setColorFilter(colorFilter);
         textPaint.setColorFilter(colorFilter);
     }
 
@@ -95,7 +109,7 @@ public class SweetgramVerifiedDrawable extends Drawable {
     public int getIntrinsicWidth() {
         int w = AndroidUtilities.dp(16);
         if (textWidth > 0) {
-            w += AndroidUtilities.dp(4) + textWidth;
+            w += AndroidUtilities.dp(4) + (int) textWidth;
         }
         return w;
     }
