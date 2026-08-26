@@ -2618,7 +2618,7 @@ public class MessagesController extends BaseController implements NotificationCe
             }
             try {
                 long doc = DialogObject.getEmojiStatusDocumentId(newStatus);
-                int until = newStatus instanceof TLRPC.TL_emojiStatusUntil ? ((TLRPC.TL_emojiStatusUntil) newStatus).until : 0;
+                int until = newStatus instanceof TLRPC.TL_emojiStatusUntil_layer197 ? ((TLRPC.TL_emojiStatusUntil_layer197) newStatus).until : 0;
                 com.sweetgram.SweetgramConfig.load();
                 if (com.sweetgram.SweetgramConfig.editor != null) {
                     com.sweetgram.SweetgramConfig.editor.putLong("localEmojiStatusDoc", doc).putInt("localEmojiStatusUntil", until).apply();
@@ -19961,7 +19961,7 @@ public class MessagesController extends BaseController implements NotificationCe
                                     if (doc != 0) {
                                         int until = com.sweetgram.SweetgramConfig.localEmojiStatusUntil;
                                         if (until != 0) {
-                                            TLRPC.TL_emojiStatusUntil es = new TLRPC.TL_emojiStatusUntil();
+                                            TLRPC.TL_emojiStatusUntil_layer197 es = new TLRPC.TL_emojiStatusUntil_layer197();
                                             es.document_id = doc;
                                             es.until = until;
                                             currentUser.emoji_status = es;

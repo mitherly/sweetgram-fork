@@ -6996,7 +6996,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     View feedbackView;
 
-    @Override
     private void showLastSweetgramCrash() {
         try {
             java.io.File crashFile = new java.io.File(org.telegram.messenger.ApplicationLoader.applicationContext.getFilesDir(), "sweetgram_crash.log");
