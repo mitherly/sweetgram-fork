@@ -51,7 +51,7 @@ public class MargeletConfig {
         return updateIntervalMinutes() > 0;
     }
 
-    public static final String CHANNEL_URL = "https://github.com/mitherly/SweetGram";
+    public static final String CHANNEL_URL = "https://t.me/SweetGramOfficial";
     /**
      * Реквизиты для доната. Лежат здесь, а не в строках: это не перевод, а
      * данные владельца форка, и в каждом языке они одни и те же.
@@ -71,35 +71,14 @@ public class MargeletConfig {
     /** Свой набор стикеров: ставится обычной кнопкой, как любой другой набор. */
     public static final String STICKERS_URL = "";
 
-    public static final String SOURCE_URL = "https://github.com/mitherly/SweetGram";
-    public static final String FORUM_URL = "https://github.com/mitherly/SweetGram";
+    public static final String SOURCE_URL = "https://github.com/mitherly/sweetgram-fork";
+    public static final String FORUM_URL = "https://github.com/mitherly/sweetgram-fork";
     /**
      * Написать нам. Это тот же канал, но с ?direct: телеграм открывает не
      * ленту, а поле для сообщения — человек с жалобой не должен искать, куда
      * её деть.
      */
-    public static final String FEEDBACK_URL = "https://github.com/mitherly/SweetGram/issues";
-    /**
-     * Документация по плагинам. Ведёт на файл в репозитории, а не на страницу
-     * сайта: страницы гитхаба у репозитория не включены, а ссылка на
-     * несуществующий сайт — просто обман.
-     *
-     * Язык берётся из приложения. Английская — та, что без суффикса: она же
-     * открывается по ссылке из README, и с неё есть переходы на остальные.
-     */
-    public static String pluginsDocsUrl() {
-        final String base = "https://github.com/narezany/Margelet/blob/main/docs/plugins";
-        String language = null;
-        try {
-            language = org.telegram.messenger.LocaleController.getInstance()
-                    .getCurrentLocale().getLanguage();
-        } catch (Exception ignored) {
-        }
-        if ("ru".equals(language) || "zh".equals(language)) {
-            return base + "." + language + ".md";
-        }
-        return base + ".md";
-    }
+    public static final String FEEDBACK_URL = "https://github.com/mitherly/sweetgram-fork/issues";
 
     private static SharedPreferences prefs() {
         return ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);

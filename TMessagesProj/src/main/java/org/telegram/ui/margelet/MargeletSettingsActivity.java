@@ -115,10 +115,10 @@ public class MargeletSettingsActivity extends UniversalFragment {
                 LocaleController.getString(R.string.MargeletDonateInfo)));
         items.add(SettingsActivity.SettingCell.Factory.of(ID_CHANNEL,
                 IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom,
-                R.drawable.settings_channel, LocaleController.getString(R.string.MargeletChannel), "t.me/margeletter"));
+                R.drawable.settings_channel, LocaleController.getString(R.string.MargeletChannel), "t.me/SweetGramOfficial"));
         items.add(SettingsActivity.SettingCell.Factory.of(ID_FORUM,
                 IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom,
-                R.drawable.settings_group, LocaleController.getString(R.string.MargeletForum), "t.me/margeletforum"));
+                R.drawable.settings_group, LocaleController.getString(R.string.MargeletForum), "github.com/mitherly/sweetgram-fork"));
         items.add(SettingsActivity.SettingCell.Factory.of(ID_FEEDBACK,
                 IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom,
                 R.drawable.msg_message, LocaleController.getString(R.string.MargeletFeedback),

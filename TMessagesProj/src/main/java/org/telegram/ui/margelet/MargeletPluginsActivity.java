@@ -87,7 +87,6 @@ public class MargeletPluginsActivity extends UniversalFragment {
         items.add(UItem.asButton(ID_INSTALL, LocaleController.getString(R.string.MargeletPluginInstall)));
         items.add(UItem.asButton(ID_CONSOLE, LocaleController.getString(R.string.MargeletPluginConsole)));
         items.add(UItem.asShadow(null));
-        items.add(UItem.asButton(ID_DOCS, LocaleController.getString(R.string.MargeletPluginDocs)));
         items.add(UItem.asButton(ID_FORUM, LocaleController.getString(R.string.MargeletPluginLibrary)));
         items.add(UItem.asShadow(null));
     }
@@ -102,8 +101,6 @@ public class MargeletPluginsActivity extends UniversalFragment {
             pickFile();
         } else if (item.id == ID_CONSOLE) {
             presentFragment(new MargeletPluginConsoleActivity());
-        } else if (item.id == ID_DOCS) {
-            Browser.openUrl(getContext(), MargeletConfig.pluginsDocsUrl());
         } else if (item.id == ID_FORUM) {
             Browser.openUrl(getContext(), MargeletConfig.FORUM_URL);
         } else if (item.id >= ID_PLUGIN) {

@@ -20,17 +20,13 @@ import java.util.ArrayList;
 public class MargeletChannel {
 
     /**
-     * Номер канала в том виде, в каком его понимает список чатов.
-     *
-     * Здесь я ошибся ровно один раз и заметно: написал «минус триллион минус
-     * номер», как принято в ботовом интерфейсе телеграма. В самом приложении
-     * не так — номер переписки канала это просто минус номер канала
-     * (DialogObject.getPeerDialogId). Из-за этого моя строка не совпадала с
-     * настоящей перепиской, и у подписчиков канал оказывался в списке дважды.
+     * Юзернейм нашего канала. Номер канал получает сам, через резолв имени:
+     * так не нужно вшивать цифры, которые легко перепутать.
      */
-    public static final long CHANNEL_ID = 4426743212L;
-    public static final long DIALOG_ID = -CHANNEL_ID;
+    public static final String CHANNEL_USERNAME = "SweetGramOfficial";
 
+    /** Номер канала после резолва юзернейма, до первого ответа — ноль. */
+    private static volatile long channelId;
     private static TLRPC.TL_dialog own;
     private static long askedAt;
 
@@ -45,11 +41,15 @@ public class MargeletChannel {
         if (array == null || dialogsType != 0 || folderId != 0 || !MargeletConfig.channelOnTop()) {
             return array;
         }
+        final long id = channelId;
         TLRPC.Dialog existing = null;
-        for (TLRPC.Dialog dialog : array) {
-            if (dialog != null && dialog.id == DIALOG_ID) {
-                existing = dialog;
-                break;
+        if (id != 0) {
+            final long dialogId = -id;
+            for (TLRPC.Dialog dialog : array) {
+                if (dialog != null && dialog.id == dialogId) {
+                    existing = dialog;
+                    break;
+                }
             }
         }
         if (existing == null && !load(account)) {
@@ -84,21 +84,19 @@ public class MargeletChannel {
      */
     private static boolean load(int account) {
         final MessagesController controller = MessagesController.getInstance(account);
-        if (controller.getChat(CHANNEL_ID) == null) {
+        if (channelId == 0 || controller.getChat(channelId) == null) {
             // Спрашиваем не один раз навсегда, а не чаще раза в десять секунд.
-            //
-            // Первая версия спрашивала однажды — и ломалась ровно там, ради
-            // чего всё затевалось: пока человек подписан, канал и так в
-            // памяти, а стоит выйти — он оттуда пропадает, и единственная
-            // попытка к тому моменту давно потрачена. Строка не появлялась
-            // именно у тех, кому она нужна.
             final long now = android.os.SystemClock.elapsedRealtime();
             if (now - askedAt > 10_000L) {
                 askedAt = now;
-                controller.getUserNameResolver().resolve("margeletter", id -> {
-                    // Ответ сам по себе не нужен: важно, что канал теперь в
-                    // памяти. Но список уже нарисован без него, и сам себя он
-                    // не пересоберёт — просим перерисовать.
+                controller.getUserNameResolver().resolve(CHANNEL_USERNAME, id -> {
+                    // Запоминаем номер: без него строку не с чем сравнивать,
+                    // если человек уже подписан и переписка есть в списке.
+                    if (id != 0) {
+                        channelId = id;
+                    }
+                    // Список уже нарисован без канала, сам себя он не
+                    // пересоберёт — просим перерисовать.
                     org.telegram.messenger.AndroidUtilities.runOnUIThread(() ->
                             org.telegram.messenger.NotificationCenter.getInstance(account)
                                     .postNotificationName(org.telegram.messenger.NotificationCenter.dialogsNeedReload));
@@ -106,9 +104,9 @@ public class MargeletChannel {
             }
             return false;
         }
-        if (own == null) {
+        if (own == null || own.id != -channelId) {
             own = new TLRPC.TL_dialog();
-            own.id = DIALOG_ID;
+            own.id = -channelId;
             own.folder_id = 0;
         }
         return true;

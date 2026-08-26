@@ -329,7 +329,7 @@
     <string name="MargeletIconSand">Песочная</string>
     <string name="MargeletIconSea">Морская</string>
     <string name="MargeletIconRose">Розовая</string>
-    <string name="MargeletCatAddYours">Хочешь свою кошку в Sweetgram? Напиши @narezany</string>
+    <string name="MargeletCatAddYours">Want your cat in Sweetgram?</string>
     <string name="MargeletCatAskText">Привет! Хочу добавить свою кошку в Sweetgram. Описание: </string>
     <string name="MargeletCatAskTail"> — фото прикладываю.</string>
     <string name="MargeletCatOne">грецкий орех</string>
@@ -346,15 +346,15 @@
     <string name="MargeletGiftsAbout">Подарки, убранные из каталога, дописываются в конец списка. Покупку всё равно подтверждает сервер.</string>
     <string name="MargeletGiftsAuthor">Автор приёма: @binbash_0</string>
     <string name="MargeletSource">Исходный код</string>
-    <string name="MargeletSourceInfo">github.com/narezany/Sweetgram</string>
+    <string name="MargeletSourceInfo">github.com/mitherly/sweetgram-fork</string>
     <string name="MargeletProfiles">Профили</string>
     <string name="MargeletProfilesInfo">Что ещё показывать в профиле</string>
     <string name="MargeletShowIds">Показывать айди</string>
     <string name="MargeletShowIdsAbout">Строка с числовым айди в профилях людей, ботов, групп и каналов. Нажатие копирует.</string>
     <string name="MargeletBadgeTitle">Создатель Sweetgram</string>
-    <string name="MargeletBadgeAbout">Нарезанный сделал Sweetgram, поэтому у него такой значок.</string>
-    <string name="MargeletBadgeFriendTitle">Лучший друг нареза</string>
-    <string name="MargeletBadgeFriendAbout">Лучший друг Нарезанного. Отсюда и значок.</string>
+    <string name="MargeletBadgeAbout">Sweetgram badge.</string>
+    <string name="MargeletBadgeFriendTitle">Sweetgram team</string>
+    <string name="MargeletBadgeFriendAbout">Sweetgram team member.</string>
     <string name="MargeletBadgeChannelTitle">Канал Sweetgram</string>
     <string name="MargeletBadgeChannelAbout">Единственный официальный канал Sweetgram.</string>
     <string name="MargeletBadgeForumTitle">Форум Sweetgram</string>
@@ -389,7 +389,7 @@
     <string name="MargeletMarkupAbout">Что показывать в чужих сообщениях. Отправлять можно в любом случае.</string>
     <string name="MargeletWatermarks">Показывать ватермарки</string>
     <string name="MargeletWatermarkSend">Ставить ватермарку</string>
-    <string name="MargeletWatermarkSendAbout">Ставится только на сообщения со своим оформлением форка — размером, затемнением, радугой, кнопкой. На обычные сообщения и на жирный с курсивом не ставится.\n\nВыглядит так:\n&lt;! Message looks better with @margeletter! &gt;</string>
+    <string name="MargeletWatermarkSendAbout">Sweetgram.</string>
     <string name="MargeletWatermarkAskTitle">Просьба</string>
     <string name="MargeletWatermarkAskText">Sweetgram — начинающий проект, и узнают о нём в основном по этой строке. Автор просит её оставить.\n\nНо это ваше сообщение и ваше решение.</string>
     <string name="MargeletWatermarkKeep">Оставлю</string>
@@ -401,7 +401,7 @@
     <string name="MargeletCopyFormatted">Копировать с оформлением</string>
     <string name="MargeletCopyFormattedAbout">Пункт в меню сообщения. Обычное копирование кладёт голый текст, этот — с жирным, курсивом, ссылками и нашим оформлением.</string>
     <string name="MargeletAboutTitle">Что это</string>
-    <string name="MargeletAboutText">Sweetgram — форк телеграма с кучей своего: оформление текста, теги у музыки, режим стримера, удалённые подарки и прочее.\n\nСделал @narezany.\n\nИ да: никогда не нажимай на название на главном экране и никогда не долби по кнопке «Чаты».</string>
+    <string name="MargeletAboutText">Sweetgram — форк телеграма с кучей своего: оформление текста, теги у музыки, режим стримера, удалённые подарки и прочее.\n\n\n\nИ да: никогда не нажимай на название на главном экране и никогда не долби по кнопке «Чаты».</string>
     <string name="MargeletMarkupWarnTitle">Своё оформление</string>
     <string name="MargeletMarkupWarnText">Это оформление понимает только Sweetgram. У остальных текст придёт обычным, без него, плюс строка со ссылкой на форк в начале сообщения.</string>
     <string name="MargeletDonate">Донат</string>
