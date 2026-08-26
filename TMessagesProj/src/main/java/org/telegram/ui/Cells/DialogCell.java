@@ -2372,6 +2372,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             if (LocaleController.isRTL) {
                 nameLeft += w;
             }
+        }
         if (drawBotVerified) {
             nameWidth -= dp(21);
         }
