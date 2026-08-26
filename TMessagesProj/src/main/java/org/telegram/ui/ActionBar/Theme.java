@@ -4323,9 +4323,7 @@ public class Theme {
         if (theme == null) {
             return;
         }
-        if (theme.isDark()) {
-            return;
-        }
+        final boolean dark = theme.isDark();
         final int pinkBar = 0xFFF8C8DC;
         final int pinkBarDark = 0xFFF3BBD0;
         final int pinkBgWhite = 0xFFFCEFF5;
@@ -4335,6 +4333,16 @@ public class Theme {
         final int pinkTitle = 0xFF7A2E4B;
         final int pinkAccent = 0xFFE59CB8;
         final int pinkTextLink = 0xFFD36A96;
+        // Акцентные цвета — в обеих темах: розовый вместо фирменного зелёного
+        // и синего, чтобы кнопки и переключатели не выбивались из стиля.
+        setColor(key_chats_actionBackground, pinkAccent, false);
+        setColor(key_windowBackgroundWhiteBlueButton, pinkTextLink, false);
+        setColor(key_switchTrackChecked, pinkAccent, false);
+        setColor(key_checkboxCheck, pinkAccent, false);
+        setColor(key_radioBackgroundChecked, pinkAccent, false);
+        if (dark) {
+            return;
+        }
         setColor(key_actionBarDefault, pinkBar, false);
         setColor(key_actionBarDefaultArchived, pinkBarDark, false);
         setColor(key_windowBackgroundWhite, pinkBgWhite, false);
@@ -4344,11 +4352,8 @@ public class Theme {
         setColor(key_actionBarDefaultTitle, pinkTitle, false);
         setColor(key_actionBarDefaultSearch, pinkTitle, false);
         setColor(key_actionBarDefaultSearchPlaceholder, pinkIcon, false);
-        setColor(key_switchTrackChecked, pinkAccent, false);
         setColor(key_chat_messageLinkIn, pinkTextLink, false);
         setColor(key_dialogTextLink, pinkTextLink, false);
-        setColor(key_checkboxCheck, pinkAccent, false);
-        setColor(key_radioBackgroundChecked, pinkAccent, false);
         setColor(key_avatar_backgroundActionBarBlue, pinkBar, false);
         setColor(key_avatar_actionBarSelectorBlue, 0x20E59CB8, false);
         setColor(key_windowBackgroundWhiteBlueText, pinkTextLink, false);
@@ -5889,8 +5894,9 @@ public class Theme {
                                 AndroidUtilities.runOnUIThread(Theme::checkAutoNightThemeConditions, 2100);
                             }
                         }
-                        currentTheme = themeInfo;
-                        refreshThemeColors();
+            currentTheme = themeInfo;
+            refreshThemeColors();
+            applySweetgramPinkIfDefault(themeInfo);
                     } catch (Exception e) {
                         FileLog.e(e);
                     }

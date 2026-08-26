@@ -17,7 +17,7 @@ public class MargeletConfig {
     public static final int INPUT_LINES_DEFAULT = 6;
     public static final float INPUT_TEXT_SIZE_DEFAULT = 18f;
 
-    public static final String APP_NAME = "Margelet";
+    public static final String APP_NAME = "Sweetgram";
 
     /**
      * Номер этой сборки. По нему клиент понимает, что на гитхабе лежит версия
@@ -78,7 +78,7 @@ public class MargeletConfig {
      * ленту, а поле для сообщения — человек с жалобой не должен искать, куда
      * её деть.
      */
-    public static final String FEEDBACK_URL = "https://github.com/mitherly/sweetgram-fork/issues";
+    public static final String FEEDBACK_URL = "https://t.me/tyrooooo";
 
     private static SharedPreferences prefs() {
         return ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -326,7 +326,7 @@ public class MargeletConfig {
 
     /** Мяуканье по нажатию на название — можно выключить совсем. */
     public static boolean meowEnabled() {
-        return prefs().getBoolean("meow_enabled", true);
+        return prefs().getBoolean("meow_enabled", false);
     }
 
     public static void setMeowEnabled(boolean enabled) {
