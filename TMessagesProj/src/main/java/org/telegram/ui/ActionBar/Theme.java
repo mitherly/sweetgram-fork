@@ -6126,6 +6126,9 @@ public class Theme {
         applyDialogsTheme();
         applyProfileTheme();
         applyChatTheme(false, bg);
+        // Розовая палитра Sweetgram: применяем в самом конце каждого
+        // пересчёта темы, иначе акцент и смена тем затирают наши цвета.
+        applySweetgramPinkIfDefault(currentTheme);
         boolean checkNavigationBarColor = !hasPreviousTheme;
         AndroidUtilities.runOnUIThread(() -> NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.didSetNewTheme, false, checkNavigationBarColor));
     }
