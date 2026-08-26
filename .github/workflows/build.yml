@@ -40,7 +40,7 @@ jobs:
       - name: Install Android Build-Tools & NDK
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "build-tools;35.0.0" "platforms;android-35" "ndk;27.2.1" "cmake;3.22.1"
+          sdkmanager "build-tools;35.0.0" "platforms;android-35" "ndk;27.2.12479018" "cmake;3.22.1"
 
       - name: Make gradlew executable
         run: chmod +x gradlew
