@@ -12253,9 +12253,6 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                     }
                     otherItem.addSubItem(set_banner, R.drawable.msg_addphoto, LocaleController.getString(R.string.sg_banner_set));
-                        otherItem.addSubItem(set_banner, R.drawable.msg_addphoto, LocaleController.getString(R.string.sg_banner_set));
-                    }
-                }
                 editColorItem = otherItem.addSubItem(edit_color, R.drawable.menu_profile_colors, LocaleController.getString(R.string.ProfileColorEdit));
                 updateEditColorIcon();
                 if (myProfile) {
