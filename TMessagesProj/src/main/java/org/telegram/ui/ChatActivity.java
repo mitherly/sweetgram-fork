@@ -1634,6 +1634,7 @@ public class ChatActivity extends BaseFragment implements
     private final static int chat_menu_search = -1;
     private final static int chat_menu_options = -2;
     private final static int chat_menu_edit_text_options = -3;
+    private final static int chat_menu_support = -4;
     private final static int clear_history = 15;
     private final static int delete_chat = 16;
     private final static int share_contact = 17;
@@ -3709,6 +3710,11 @@ public class ChatActivity extends BaseFragment implements
                             id - margelet_plugin_button, ChatActivity.this);
                     return;
                 }
+                if (id == chat_menu_support) {
+                    org.telegram.messenger.browser.Browser.openUrl(ChatActivity.this,
+                            "https://t.me/SweetGramOfficial");
+                    return;
+                }
                 if (id == -1) {
                     if (isInPollAddOptionMode()) {
                         pollAddOptionModeClose();
@@ -4273,6 +4279,11 @@ public class ChatActivity extends BaseFragment implements
                 searchItem.setVisibility(View.VISIBLE);
             }
             searchItemVisible = false;
+        }
+
+        if (currentEncryptedChat == null && chatMode == 0 && !isReport()) {
+            menu.addItem(chat_menu_support, R.drawable.outline_question_mark)
+                    .setContentDescription("Поддержка SweetGram");
         }
 
         if (chatMode == 0 && (threadMessageId == 0 || isTopic) && !UserObject.isReplyUser(currentUser) && !isReport()) {

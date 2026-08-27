@@ -942,6 +942,7 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
                 ScamDrawable drawable = new ScamDrawable(11, scam ? 0 : 1);
                 drawable.setColor(getThemedColor(Theme.key_actionBarDefaultSubtitle));
                 titleTextView.setRightDrawable2(drawable);
+                titleTextView.setRightDrawable2OnClick(null);
 //                titleTextView.setRightPadding(0);
                 rightDrawable2ContentDescription = getString(R.string.ScamMessage);
                 rightDrawableIsScamOrVerified = true;
@@ -953,6 +954,7 @@ public class ChatAvatarContainer extends FrameLayout implements FactorAnimator.T
             verifiedCheck.setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_profile_verifiedCheck), PorterDuff.Mode.MULTIPLY));
             Drawable verifiedDrawable = new CombinedDrawable(verifiedBackground, verifiedCheck);
             titleTextView.setRightDrawable2(verifiedDrawable);
+            titleTextView.setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), getString(R.string.AccDescrVerified), android.widget.Toast.LENGTH_LONG).show());
             rightDrawableIsScamOrVerified = true;
             rightDrawable2ContentDescription = getString(R.string.AccDescrVerified);
         } else if (titleTextView.getRightDrawable() instanceof ScamDrawable) {

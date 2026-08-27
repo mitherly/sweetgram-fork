@@ -11504,6 +11504,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 boolean rightIconIsPremium = false, rightIconIsStatus = false;
                 nameTextView[a].setRightDrawableOutside(a == 0);
                 if (a == 0 && !copyFromChatActivity) {
+                    nameTextView[a].setRightDrawable2OnClick(null);
                     if (user.scam || user.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(user.scam ? 0 : 1));
                         nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.ScamMessage);
@@ -11511,9 +11512,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
                             nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id)));
                             nameTextViewRightDrawable2ContentDescription = com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id);
+                            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id), android.widget.Toast.LENGTH_LONG).show());
                         } else {
                             nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
                             nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), LocaleController.getString(R.string.AccDescrVerified), android.widget.Toast.LENGTH_LONG).show());
                         }
                     } else if (getMessagesController().isDialogMuted(dialogId != 0 ? dialogId : userId, topicId)) {
                         nameTextView[a].setRightDrawable2(getThemedDrawable(Theme.key_drawable_muteIconDrawable));
@@ -11551,13 +11554,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextViewRightDrawableContentDescription = null;
                     }
                 } else if (a == 1) {
+                    nameTextView[a].setRightDrawable2OnClick(null);
                     if (user.scam || user.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(user.scam ? 0 : 1));
                     } else if (user.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
                         if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
                             nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id)));
+                            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id), android.widget.Toast.LENGTH_LONG).show());
                         } else {
                             nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), LocaleController.getString(R.string.AccDescrVerified), android.widget.Toast.LENGTH_LONG).show());
                         }
                     } else if (org.telegram.margelet.MargeletBadge.has(user.id)) {
                         // Второй заголовок — тот, что виден на развёрнутой шапке
@@ -11856,16 +11862,19 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 nameTextView[a].setRightDrawableOutside(a == 0);
                 nameTextView[a].setRightDrawableOnClick(null);
                 if (a != 0) {
+                    nameTextView[a].setRightDrawable2OnClick(null);
                     if (chat.scam || chat.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(chat.scam ? 0 : 1));
                         nameTextViewRightDrawableContentDescription = LocaleController.getString(R.string.ScamMessage);
                     } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
                         if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
                             nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id)));
-                            nameTextViewRightDrawableContentDescription = com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id);
+                            nameTextViewRightDrawable2ContentDescription = com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id);
+                            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id), android.widget.Toast.LENGTH_LONG).show());
                         } else {
                             nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
-                            nameTextViewRightDrawableContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                            nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.AccDescrVerified);
+                            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), LocaleController.getString(R.string.AccDescrVerified), android.widget.Toast.LENGTH_LONG).show());
                         }
                     } else if (org.telegram.margelet.MargeletBadge.has(org.telegram.margelet.MargeletBadge.chatPeer(chat.id))) {
                         // Свои площадки форка. Тот же слот и то же правило:
@@ -11898,13 +11907,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         }
                     }
                 } else if (!copyFromChatActivity) {
+                    nameTextView[a].setRightDrawable2OnClick(null);
                     if (chat.scam || chat.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(chat.scam ? 0 : 1));
                     } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
                         if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
                         nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id)));
+                        nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id), android.widget.Toast.LENGTH_LONG).show());
                         } else {
                             nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
+                            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), LocaleController.getString(R.string.AccDescrVerified), android.widget.Toast.LENGTH_LONG).show());
                         }
                     } else if (getMessagesController().isDialogMuted(-chatId, topicId)) {
                         nameTextView[a].setRightDrawable2(getThemedDrawable(Theme.key_drawable_muteIconDrawable));

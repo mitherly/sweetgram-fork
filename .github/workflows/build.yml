@@ -1,0 +1,54 @@
+name: Build Sweetgram APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [rewrite]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Shallow submodules (smaller clone)
+        run: git submodule update --init --recursive --depth 1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages (platform, build-tools, NDK)
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018"
+          yes | sdkmanager --licenses
+
+      - name: Ensure release keystore exists
+        run: |
+          if [ ! -f TMessagesProj/config/release.keystore ]; then
+            keytool -genkey -v \
+              -keystore TMessagesProj/config/release.keystore \
+              -alias androidkey -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass android -keypass android -dname "CN=Sweetgram"
+          fi
+
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew :TMessagesProj_App:assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sweetgram-debug-apk
+          path: TMessagesProj_App/build/outputs/apk/debug/*.apk

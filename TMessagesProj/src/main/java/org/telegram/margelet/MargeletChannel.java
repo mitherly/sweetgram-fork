@@ -1,7 +1,9 @@
 package org.telegram.margelet;
 
-import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.DialogObject;
+import org.telegram.messenger.MessagesController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.tgnet.TLRPC;
 
 import java.util.ArrayList;
@@ -19,19 +21,16 @@ import java.util.ArrayList;
  */
 public class MargeletChannel {
 
-    /**
-     * Номер канала в том виде, в каком его понимает список чатов.
-     *
-     * Здесь я ошибся ровно один раз и заметно: написал «минус триллион минус
-     * номер», как принято в ботовом интерфейсе телеграма. В самом приложении
-     * не так — номер переписки канала это просто минус номер канала
-     * (DialogObject.getPeerDialogId). Из-за этого моя строка не совпадала с
-     * настоящей перепиской, и у подписчиков канал оказывался в списке дважды.
-     */
-    public static final long CHANNEL_ID = 4426743212L;
-    public static final long DIALOG_ID = -CHANNEL_ID;
+    /** Юзернейм канала форка, который держим первой строкой списка чатов. */
+    public static final String CHANNEL_USERNAME = "SweetGramOfficial";
 
+    /**
+     * Номер переписки канала. Узнаём его сами через резолв юзернейма, а не
+     * хардкодим: так не ошибёшься с форматом id (для канала/чата это минус
+     * номер, DialogObject.getPeerDialogId) и не привяжешься к чужому каналу.
+     */
     private static TLRPC.TL_dialog own;
+    private static long resolvedId;
     private static long askedAt;
 
     /**
@@ -45,11 +44,14 @@ public class MargeletChannel {
         if (array == null || dialogsType != 0 || folderId != 0 || !MargeletConfig.channelOnTop()) {
             return array;
         }
+        final long dialogId = own != null ? own.id : 0;
         TLRPC.Dialog existing = null;
-        for (TLRPC.Dialog dialog : array) {
-            if (dialog != null && dialog.id == DIALOG_ID) {
-                existing = dialog;
-                break;
+        if (dialogId != 0) {
+            for (TLRPC.Dialog dialog : array) {
+                if (dialog != null && dialog.id == dialogId) {
+                    existing = dialog;
+                    break;
+                }
             }
         }
         if (existing == null && !load(account)) {
@@ -83,34 +85,54 @@ public class MargeletChannel {
      * начале списка выглядела бы поломкой.
      */
     private static boolean load(int account) {
-        final MessagesController controller = MessagesController.getInstance(account);
-        if (controller.getChat(CHANNEL_ID) == null) {
-            // Спрашиваем не один раз навсегда, а не чаще раза в десять секунд.
-            //
-            // Первая версия спрашивала однажды — и ломалась ровно там, ради
-            // чего всё затевалось: пока человек подписан, канал и так в
-            // памяти, а стоит выйти — он оттуда пропадает, и единственная
-            // попытка к тому моменту давно потрачена. Строка не появлялась
-            // именно у тех, кому она нужна.
-            final long now = android.os.SystemClock.elapsedRealtime();
-            if (now - askedAt > 10_000L) {
-                askedAt = now;
-                controller.getUserNameResolver().resolve("margeletter", id -> {
-                    // Ответ сам по себе не нужен: важно, что канал теперь в
-                    // памяти. Но список уже нарисован без него, и сам себя он
-                    // не пересоберёт — просим перерисовать.
-                    org.telegram.messenger.AndroidUtilities.runOnUIThread(() ->
-                            org.telegram.messenger.NotificationCenter.getInstance(account)
-                                    .postNotificationName(org.telegram.messenger.NotificationCenter.dialogsNeedReload));
-                });
+        if (resolvedId != 0) {
+            final MessagesController controller = MessagesController.getInstance(account);
+            final boolean inMemory = resolvedId > 0
+                    ? controller.getUser(resolvedId) != null
+                    : controller.getChat(-resolvedId) != null;
+            if (inMemory) {
+                if (own == null) {
+                    own = new TLRPC.TL_dialog();
+                    own.folder_id = 0;
+                    own.pinned = true;
+                    own.pinnedNum = Integer.MAX_VALUE;
+                    own.notify_settings = new TLRPC.TL_peerNotifySettings();
+                }
+                own.id = resolvedId;
+                if (resolvedId > 0) {
+                    own.peer = new TLRPC.TL_peerUser();
+                    own.peer.user_id = resolvedId;
+                } else {
+                    own.peer = new TLRPC.TL_peerChannel();
+                    own.peer.channel_id = -resolvedId;
+                }
+                return true;
             }
-            return false;
+            // Память очистилась (человек отписался) — забываем id и переспросим.
+            resolvedId = 0;
+            own = null;
         }
-        if (own == null) {
-            own = new TLRPC.TL_dialog();
-            own.id = DIALOG_ID;
-            own.folder_id = 0;
+        // Спрашиваем не один раз навсегда, а не чаще раза в десять секунд.
+        //
+        // Первая версия спрашивала однажды — и ломалась ровно там, ради
+        // чего всё затевалось: пока человек подписан, канал и так в
+        // памяти, а стоит выйти — он оттуда пропадает, и единственная
+        // попытка к тому моменту давно потрачена. Строка не появлялась
+        // именно у тех, кому она нужна.
+        final long now = android.os.SystemClock.elapsedRealtime();
+        if (now - askedAt > 10_000L) {
+            askedAt = now;
+            MessagesController.getInstance(account).getUserNameResolver().resolve(CHANNEL_USERNAME, id -> {
+                // Ответ сам по себе не нужен: важно, что канал теперь в
+                // памяти. Но список уже нарисован без него, и сам себя он
+                // не пересоберёт — просим перерисовать.
+                if (id != null && id != Long.MAX_VALUE) {
+                    resolvedId = id;
+                }
+                AndroidUtilities.runOnUIThread(() ->
+                        NotificationCenter.getInstance(account).postNotificationName(NotificationCenter.dialogsNeedReload));
+            });
         }
-        return true;
+        return false;
     }
 }

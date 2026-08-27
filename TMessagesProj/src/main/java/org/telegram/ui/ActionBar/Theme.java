@@ -9067,6 +9067,7 @@ public class Theme {
                 || key_chat_stickerReplyLine == key || key_chat_stickerReplyNameText == key || key_chat_stickerReplyMessageText == key)) {
             return 0xffffffff;
         }
+        int index = currentColors.indexOfKey(key);
         if (currentTheme == defaultTheme) {
             boolean useDefault;
             if (isMyMessagesBubbles(key)) {
@@ -9078,7 +9079,7 @@ public class Theme {
             } else {
                 useDefault = currentTheme.isDefaultMainAccent();
             }
-            if (useDefault) {
+            if (useDefault && index < 0) {
                 if (key == key_chat_serviceBackground) {
                     return serviceMessageColor;
                 } else if (key == key_chat_serviceBackgroundSelected) {
@@ -9087,7 +9088,6 @@ public class Theme {
                 return getDefaultColor(key);
             }
         }
-        int index = currentColors.indexOfKey(key);
         int color;
         if (index < 0) {
             int fallbackKey = fallbackKeys.get(key, -1);

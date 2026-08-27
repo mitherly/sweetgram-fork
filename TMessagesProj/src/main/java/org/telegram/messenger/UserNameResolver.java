@@ -2,6 +2,7 @@ package org.telegram.messenger;
 
 import android.text.TextUtils;
 import android.util.LruCache;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.util.Consumer;
 
@@ -26,6 +27,16 @@ public class UserNameResolver {
 
     LruCache<String, CachedPeer> resolvedCache = new LruCache<>(100);
     HashMap<String, ArrayList<Consumer<Long>>> resolvingConsumers = new HashMap<>();
+
+    private static boolean channelResolveLogged = false;
+
+    private static void showResolveToast(String msg) {
+        try {
+            Toast.makeText(ApplicationLoader.applicationContext, "[resolve] " + msg, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
 
     public Runnable resolve(String username, Consumer<Long> resolveConsumer) {
         return resolve(username, null, resolveConsumer);
@@ -79,6 +90,11 @@ public class UserNameResolver {
                 return;
             }
             if (error != null) {
+                FileLog.d("resolve username error " + username + " " + error.text);
+                if (!channelResolveLogged) {
+                    channelResolveLogged = true;
+                    showResolveToast("error " + username + " " + (error.text != null ? error.text : "null"));
+                }
                 if (error != null && error.text != null && "STARREF_EXPIRED".equals(error.text)) {
                     for (int i = 0; i < finalConsumers.size(); i++) {
                         finalConsumers.get(i).accept(Long.MAX_VALUE);
@@ -104,6 +120,11 @@ public class UserNameResolver {
             MessagesStorage.getInstance(currentAccount).putUsersAndChats(res.users, res.chats, false, true);
 
             long peerId = MessageObject.getPeerId(res.peer);
+            FileLog.d("resolve username " + username + " -> " + peerId);
+            if (!channelResolveLogged) {
+                channelResolveLogged = true;
+                showResolveToast(username + " -> " + peerId);
+            }
             resolvedCache.put(username, new CachedPeer(peerId));
             for (int i = 0; i < finalConsumers.size(); i++) {
                 finalConsumers.get(i).accept(peerId);

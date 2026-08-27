@@ -32,8 +32,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -3005,6 +3007,27 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     private Drawable premiumStar;
 
+    private MediaPlayer sweetgramClickPlayer;
+
+    private void playSweetgramClickSound() {
+        try {
+            if (sweetgramClickPlayer != null) {
+                sweetgramClickPlayer.release();
+                sweetgramClickPlayer = null;
+            }
+            AssetFileDescriptor afd = getContext().getAssets().openFd("buru-nyaa.mp3");
+            MediaPlayer mp = new MediaPlayer();
+            mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            afd.close();
+            mp.prepare();
+            mp.start();
+            mp.setOnCompletionListener(player -> player.release());
+            sweetgramClickPlayer = mp;
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
+
     public void updateStatus(TLRPC.User user, boolean animated) {
         if (dialogStoriesCell != null) {
             dialogStoriesCell.updateStatus(user, animated);
@@ -3071,6 +3094,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     @Override
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
+        if (sweetgramClickPlayer != null) {
+            sweetgramClickPlayer.release();
+            sweetgramClickPlayer = null;
+        }
         if (observersGroup != null) {
             observersGroup.removeAllObservers();
             observersGroup = null;
@@ -3180,6 +3207,14 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         actionBar.setItemsBackgroundColor(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), true);
         actionBar.setItemsColor(getThemedColor(Theme.key_actionBarDefaultIcon), false);
         actionBar.setItemsColor(getThemedColor(Theme.key_actionBarActionModeDefaultIcon), true);
+        if (!inPreviewMode) {
+            actionBar.setTitle(LocaleController.getString(R.string.Sweetgram));
+            SimpleTextView titleTextView = actionBar.getTitleTextView();
+            if (titleTextView != null) {
+                titleTextView.setClickable(true);
+                titleTextView.setOnClickListener(v -> playSweetgramClickSound());
+            }
+        }
         actionBar.createAdditionalSubTitleOverlayContainer();
         actionBar.getAdditionalSubTitleOverlayContainer().setTranslationX(dp(4));
         actionBar.getAdditionalSubTitleOverlayContainer().setTranslationY(-dp(3));
@@ -11004,7 +11039,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
         MessagesController messagesController = AccountInstance.getInstance(currentAccount).getMessagesController();
         if (dialogsType == DIALOGS_TYPE_DEFAULT) {
-            return messagesController.getDialogs(folderId);
+            return org.telegram.margelet.MargeletChannel.onTop(currentAccount, messagesController.getDialogs(folderId), dialogsType, folderId);
         } else if (dialogsType == DIALOGS_TYPE_WIDGET || dialogsType == DIALOGS_TYPE_IMPORT_HISTORY) {
             return messagesController.dialogsServerOnly;
         } else if (dialogsType == DIALOGS_TYPE_ADD_USERS_TO) {
@@ -13097,9 +13132,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
             @Override
             public void needRemoveHint(long did) {
-                if (getParentActivity() == null) {
-                    return;
-                }
+        if (getParentActivity() == null) {
+            return;
+        }
                 TLRPC.User user = getMessagesController().getUser(did);
                 if (user == null) {
                     return;
