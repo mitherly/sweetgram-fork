@@ -40,7 +40,6 @@ public class MargeletSettingsActivity extends UniversalFragment {
     private static final int ID_GIFTS = 7;
     private static final int ID_SOURCE = 8;
     private static final int ID_PROFILES = 9;
-    private static final int ID_DONATE = 11;
     private static final int ID_MARKUP = 12;
     private static final int ID_HELP = 13;
     private static final int ID_STICKERS = 14;
@@ -114,10 +113,6 @@ public class MargeletSettingsActivity extends UniversalFragment {
         items.add(UItem.asButton(ID_STICKERS, LocaleController.getString(R.string.MargeletStickers),
                 LocaleController.getString(R.string.MargeletStickersAdd)));
         items.add(UItem.asShadow(LocaleController.getString(R.string.MargeletStickersAbout)));
-        items.add(SettingsActivity.SettingCell.Factory.of(ID_DONATE,
-                IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom,
-                R.drawable.settings_wallet, LocaleController.getString(R.string.MargeletDonate),
-                LocaleController.getString(R.string.MargeletDonateInfo)));
         items.add(SettingsActivity.SettingCell.Factory.of(ID_CHANNEL,
                 IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom,
                 R.drawable.settings_channel, LocaleController.getString(R.string.MargeletChannel), "t.me/SweetGramOfficial"));
@@ -173,8 +168,6 @@ public class MargeletSettingsActivity extends UniversalFragment {
             presentFragment(new MargeletPluginsActivity());
         } else if (item.id == ID_MARKUP) {
             presentFragment(new MargeletMarkupActivity());
-        } else if (item.id == ID_DONATE) {
-            presentFragment(new MargeletDonateActivity());
         } else if (item.id == ID_INPUT) {
             presentFragment(new MargeletInputActivity());
         } else if (item.id == ID_SOUND) {

@@ -5592,7 +5592,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
             nameTextView[a].setFocusable(a == 0);
             nameTextView[a].setEllipsizeByGradient(true);
-            nameTextView[a].setRightDrawableOutside(a == 0);
+            nameTextView[a].setRightDrawableOutside(true);
             avatarContainer2.addView(nameTextView[a], LayoutHelper.createFrame(a == 0 ? initialTitleWidth : LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP, 109, -6, (a == 0 ? rightMargin - (hasTitleExpanded ? 10 : 0) : 0), 0));
         }
         for (int a = 0; a < onlineTextView.length; a++) {
@@ -11502,7 +11502,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 } : null);
                 Drawable leftIcon = currentEncryptedChat != null ? getLockIconDrawable() : null;
                 boolean rightIconIsPremium = false, rightIconIsStatus = false;
-                nameTextView[a].setRightDrawableOutside(a == 0);
+                nameTextView[a].setRightDrawableOutside(true);
                 if (a == 0 && !copyFromChatActivity) {
                     nameTextView[a].setRightDrawable2OnClick(null);
                     if (user.scam || user.fake) {
@@ -11859,7 +11859,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 }
                 nameTextView[a].setLeftDrawableOutside(false);
                 nameTextView[a].setLeftDrawable(null);
-                nameTextView[a].setRightDrawableOutside(a == 0);
+                nameTextView[a].setRightDrawableOutside(true);
                 nameTextView[a].setRightDrawableOnClick(null);
                 if (a != 0) {
                     nameTextView[a].setRightDrawable2OnClick(null);
