@@ -16,3 +16,4 @@
 
 - Канал: [@SweetGramOfficial](https://t.me/SweetGramOfficial)
 - Исходный код: [github.com/mitherly/sweetgram-fork](https://github.com/mitherly/sweetgram-fork)
+- Форк, на котором основан Sweetgram - Margy (ранее Margalet https://t.me/margeletter )
