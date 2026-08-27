@@ -12246,12 +12246,13 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         editItemVisible = true;
                     }
                 }
-                if (!hasMainTabs) {
-                    otherItem.addSubItem(edit_info, R.drawable.msg_edit, LocaleController.getString(R.string.EditInfo));
-                    if (imageUpdater != null) {
-                        if (!hasMainTabs) {
+                    if (!hasMainTabs) {
+                        otherItem.addSubItem(edit_info, R.drawable.msg_edit, LocaleController.getString(R.string.EditInfo));
+                        if (imageUpdater != null) {
                             otherItem.addSubItem(add_photo, R.drawable.msg_addphoto, LocaleController.getString(R.string.AddPhoto));
                         }
+                    }
+                    otherItem.addSubItem(set_banner, R.drawable.msg_addphoto, LocaleController.getString(R.string.sg_banner_set));
                         otherItem.addSubItem(set_banner, R.drawable.msg_addphoto, LocaleController.getString(R.string.sg_banner_set));
                     }
                 }
