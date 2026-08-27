@@ -377,7 +377,7 @@ public class Switch extends View {
             return;
         }
 
-        boolean isM3 = org.telegram.margelet.MargeletConfig.m3SwitchStyle();
+        boolean isM3 = org.telegram.sweetgram.SweetgramConfig.m3SwitchStyle();
         int width = AndroidUtilities.dp(31);
         int thumb = AndroidUtilities.dp(20);
         int x = (getMeasuredWidth() - width) / 2;

@@ -1,6 +1,6 @@
 package de.robv.android.xposed;
 
-import org.telegram.margelet.hook.MargeletHook;
+import org.telegram.sweetgram.hook.SweetgramHook;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -13,12 +13,12 @@ import java.lang.reflect.Modifier;
 public class XposedHelpers {
 
     public static Class<?> findClass(String className, ClassLoader classLoader) {
-        return MargeletHook.findClass(className, classLoader);
+        return SweetgramHook.findClass(className, classLoader);
     }
 
     public static Method findMethodExact(Class<?> clazz, String methodName, Object... parameterTypes) {
         Class<?>[] paramClasses = getParameterClasses(clazz.getClassLoader(), parameterTypes);
-        return MargeletHook.findMethod(clazz, methodName, paramClasses);
+        return SweetgramHook.findMethod(clazz, methodName, paramClasses);
     }
 
     public static Method findMethodExact(String className, ClassLoader classLoader, String methodName, Object... parameterTypes) {
@@ -43,15 +43,15 @@ public class XposedHelpers {
     }
 
     public static Object getObjectField(Object obj, String fieldName) {
-        return MargeletHook.getObjectField(obj, fieldName);
+        return SweetgramHook.getObjectField(obj, fieldName);
     }
 
     public static void setObjectField(Object obj, String fieldName, Object value) {
-        MargeletHook.setObjectField(obj, fieldName, value);
+        SweetgramHook.setObjectField(obj, fieldName, value);
     }
 
     public static Object callMethod(Object obj, String methodName, Object... args) {
-        return MargeletHook.callMethod(obj, methodName, args);
+        return SweetgramHook.callMethod(obj, methodName, args);
     }
 
     private static Object[] getParameters(Object[] parameterTypesAndCallback) {

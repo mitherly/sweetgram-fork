@@ -8064,13 +8064,13 @@ public class MessageObject {
         // жирного слова разметки нет вовсе. Тогда заводим свой: иначе кнопка
         // в таком сообщении осталась бы без ссылки, а это как раз самый частый
         // случай — «просто текст и кнопка».
-        if (org.telegram.margelet.MargeletMarkup.has(text)) {
+        if (org.telegram.sweetgram.SweetgramMarkup.has(text)) {
             if (entities == null) {
                 entities = new ArrayList<>();
             }
-            org.telegram.margelet.MargeletMarkup.injectEntities(text, entities);
+            org.telegram.sweetgram.SweetgramMarkup.injectEntities(text, entities);
         }
-        org.telegram.margelet.MargeletMarkup.apply(spannable);
+        org.telegram.sweetgram.SweetgramMarkup.apply(spannable);
         URLSpan[] spans = spannable.getSpans(0, text.length(), URLSpan.class);
         boolean hasUrls = spans != null && spans.length > 0;
         if (entities == null || entities.isEmpty()) {

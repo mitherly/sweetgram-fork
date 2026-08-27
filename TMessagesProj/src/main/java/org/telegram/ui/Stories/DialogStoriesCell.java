@@ -339,7 +339,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
         // Свёрнутый заголовок главного экрана рисуется именно этой вьюшкой,
         // и пока тут стояла картинка, имя форка было видно только когда
         // истории развёрнуты.
-        telegramLogoView.setImageDrawable(new org.telegram.margelet.MargeletWordmark());
+        telegramLogoView.setImageDrawable(new org.telegram.sweetgram.SweetgramWordmark());
         telegramLogoView.setColorFilter(getTextLogoColor(), PorterDuff.Mode.MULTIPLY);
         telegramLogoView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         telegramLogoView.setFocusableInTouchMode(true);

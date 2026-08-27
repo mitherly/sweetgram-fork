@@ -263,9 +263,9 @@ public class AndroidUtilities {
     public static Typeface bold() {
         // Свой шрифт: иначе жирный остался бы системным, потому что при
         // включённом системном жирном сюда getTypeface не заходит вовсе.
-        final Typeface margelet = org.telegram.margelet.MargeletFonts.replace(TYPEFACE_ROBOTO_MEDIUM);
-        if (margelet != null) {
-            return margelet;
+        final Typeface sweetgram = org.telegram.sweetgram.SweetgramFonts.replace(TYPEFACE_ROBOTO_MEDIUM);
+        if (sweetgram != null) {
+            return sweetgram;
         }
         if (mediumTypeface == null) {
             if (SharedConfig.useSystemBoldFont && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -2400,9 +2400,9 @@ public class AndroidUtilities {
         // Свой шрифт форка. Подменяем здесь, потому что это единственное
         // место, где телеграм берёт шрифты: перехватишь его — сменится всё
         // приложение разом, а не те экраны, до которых дошли руки.
-        final Typeface margelet = org.telegram.margelet.MargeletFonts.replace(assetPath);
-        if (margelet != null) {
-            return margelet;
+        final Typeface sweetgram = org.telegram.sweetgram.SweetgramFonts.replace(assetPath);
+        if (sweetgram != null) {
+            return sweetgram;
         }
         synchronized (typefaceCache) {
             if (!typefaceCache.containsKey(assetPath)) {
@@ -3630,7 +3630,7 @@ public class AndroidUtilities {
         // Служебные знаки своего оформления и строку со ссылкой на форк в
         // буфер не кладём: человек копирует текст, а не нашу разметку.
         // Оформление уносит отдельный пункт «Копировать с оформлением».
-        str = org.telegram.margelet.MargeletMarkup.strip(str);
+        str = org.telegram.sweetgram.SweetgramMarkup.strip(str);
         try {
             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
 
@@ -4293,7 +4293,7 @@ public class AndroidUtilities {
             // проходит открытие любого файла: и из переписки, и из кэша.
             if (!restrict && activity != null && fileName != null
                     && fileName.toLowerCase().endsWith(".marp")
-                    && org.telegram.margelet.MargeletPlugins.offerInstall(activity, f)) {
+                    && org.telegram.sweetgram.SweetgramPlugins.offerInstall(activity, f)) {
                 return true;
             }
             String realMimeType = null;

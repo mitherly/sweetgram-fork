@@ -1,16 +1,16 @@
 package de.robv.android.xposed;
 
-import org.telegram.margelet.hook.HookCallback;
-import org.telegram.margelet.hook.MethodHookParam;
+import org.telegram.sweetgram.hook.HookCallback;
+import org.telegram.sweetgram.hook.MethodHookParam;
 
 import java.lang.reflect.Member;
 
 /**
- * Xposed API Compatibility Layer for Margelet.
+ * Xposed API Compatibility Layer for Sweetgram.
  */
 public abstract class XC_MethodHook extends HookCallback {
 
-    public static class MethodHookParam extends org.telegram.margelet.hook.MethodHookParam {
+    public static class MethodHookParam extends org.telegram.sweetgram.hook.MethodHookParam {
     }
 
     public void beforeHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
@@ -20,7 +20,7 @@ public abstract class XC_MethodHook extends HookCallback {
     }
 
     @Override
-    public void beforeHookedMethod(org.telegram.margelet.hook.MethodHookParam param) throws Throwable {
+    public void beforeHookedMethod(org.telegram.sweetgram.hook.MethodHookParam param) throws Throwable {
         if (param instanceof XC_MethodHook.MethodHookParam) {
             beforeHookedMethod((XC_MethodHook.MethodHookParam) param);
         } else {
@@ -40,7 +40,7 @@ public abstract class XC_MethodHook extends HookCallback {
     }
 
     @Override
-    public void afterHookedMethod(org.telegram.margelet.hook.MethodHookParam param) throws Throwable {
+    public void afterHookedMethod(org.telegram.sweetgram.hook.MethodHookParam param) throws Throwable {
         if (param instanceof XC_MethodHook.MethodHookParam) {
             afterHookedMethod((XC_MethodHook.MethodHookParam) param);
         } else {

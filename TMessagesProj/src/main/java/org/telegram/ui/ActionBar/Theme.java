@@ -9048,7 +9048,7 @@ public class Theme {
             // Приступ перехватывает и здесь: у ячеек с собственным набором
             // цветов путь до темы свой, и без этой строки половина экранов
             // осталась бы обычной.
-            final int seizure = org.telegram.margelet.MargeletSeizure.colorFor(key);
+            final int seizure = org.telegram.sweetgram.SweetgramSeizure.colorFor(key);
             if (seizure != 0) {
                 return seizure;
             }
@@ -9073,7 +9073,7 @@ public class Theme {
         // Настройка «Приступ»: текстовые ключи отдают цвет радуги вместо цвета
         // темы. Сама тема не трогается, поэтому выключение возвращает всё как
         // было, без починки.
-        final int seizure = org.telegram.margelet.MargeletSeizure.colorFor(key);
+        final int seizure = org.telegram.sweetgram.SweetgramSeizure.colorFor(key);
         if (seizure != 0) {
             return seizure;
         }

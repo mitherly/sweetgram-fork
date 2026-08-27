@@ -17,7 +17,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
-import org.telegram.margelet.MargeletConfig;
+import org.telegram.sweetgram.SweetgramConfig;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.Components.LayoutHelper;
@@ -39,7 +39,7 @@ public class ChatInputViewsContainer extends FrameLayout {
      * сторону у живого чата нельзя — половина размеров уже посчитана от той,
      * что была. Настройка применяется к следующему открытому чату.
      */
-    private final boolean inputOnTop = MargeletConfig.inputOnTop();
+    private final boolean inputOnTop = SweetgramConfig.inputOnTop();
 
     /**
      * Сколько занято сверху. Правильное значение знает только сам чат: кроме

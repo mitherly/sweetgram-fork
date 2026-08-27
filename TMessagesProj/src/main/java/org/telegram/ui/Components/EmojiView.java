@@ -1392,12 +1392,12 @@ public class EmojiView extends FrameLayout implements
                 // при этом происходит на самом деле: телеграмовская пометка на
                 // сервер не уедет (у не-премиума её не примут), вместо неё в
                 // текст встанет запасной символ и наша невидимая метка с
-                // номером значка. Значит анимацию увидят только в Margelet, а
+                // номером значка. Значит анимацию увидят только в Sweetgram, а
                 // премиума ни у кого не появится — так и написано в
                 // предупреждении, которое показывается один раз.
-                if (org.telegram.margelet.MargeletConfig.freeEmoji()
+                if (org.telegram.sweetgram.SweetgramConfig.freeEmoji()
                         && !UserConfig.getInstance(currentAccount).isPremium()) {
-                    org.telegram.ui.MargeletMarkupAlert.warnEmojiOnce(getContext());
+                    org.telegram.ui.SweetgramMarkupAlert.warnEmojiOnce(getContext());
                 } else if (!MessageObject.isFreeEmoji(document) && !UserConfig.getInstance(currentAccount).isPremium() && !(delegate != null && delegate.isUserSelf()) && !allowEmojisForNonPremium && !isGroupEmojis) {
                     showBottomTab(false, true);
                     BulletinFactory factory = fragment != null ? BulletinFactory.of(fragment) : BulletinFactory.of(bulletinContainer, resourcesProvider);

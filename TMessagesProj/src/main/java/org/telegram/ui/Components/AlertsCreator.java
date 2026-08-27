@@ -677,7 +677,7 @@ public class AlertsCreator {
         builder.setMessage(text);
         builder.setPositiveButton(LocaleController.getString(R.string.OK), null);
         if (updateApp) {
-            builder.setNegativeButton(LocaleController.getString(R.string.UpdateApp), (dialog, which) -> Browser.openUrl(context, org.telegram.margelet.MargeletConfig.CHANNEL_URL));
+            builder.setNegativeButton(LocaleController.getString(R.string.UpdateApp), (dialog, which) -> Browser.openUrl(context, org.telegram.sweetgram.SweetgramConfig.CHANNEL_URL));
         }
         return builder.show();
     }

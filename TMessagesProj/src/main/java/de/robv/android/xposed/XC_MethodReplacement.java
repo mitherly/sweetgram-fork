@@ -1,6 +1,6 @@
 package de.robv.android.xposed;
 
-import org.telegram.margelet.hook.MethodHookParam;
+import org.telegram.sweetgram.hook.MethodHookParam;
 
 /**
  * Xposed Method Replacement Compatibility Layer.

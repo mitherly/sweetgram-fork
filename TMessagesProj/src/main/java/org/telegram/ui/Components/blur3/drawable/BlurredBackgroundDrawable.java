@@ -203,9 +203,9 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
     public void updateColors() {
         if (colorProvider == null) return;
 
-        int style = org.telegram.margelet.MargeletGlassOutline.getStyle();
-        boolean isGlare = style == org.telegram.margelet.MargeletGlassOutline.GLARE;
-        boolean isSolid = style == org.telegram.margelet.MargeletGlassOutline.SOLID;
+        int style = org.telegram.sweetgram.SweetgramGlassOutline.getStyle();
+        boolean isGlare = style == org.telegram.sweetgram.SweetgramGlassOutline.GLARE;
+        boolean isSolid = style == org.telegram.sweetgram.SweetgramGlassOutline.SOLID;
 
         backgroundColor = colorProvider.getBackgroundColor();
         shadowColor = isGlare ? colorProvider.getShadowColor() : 0;

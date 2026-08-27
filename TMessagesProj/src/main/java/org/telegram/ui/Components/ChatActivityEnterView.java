@@ -5775,8 +5775,8 @@ public class ChatActivityEnterView extends FrameLayout implements
         messageEditText.setInputType(commonInputType = (messageEditText.getInputType() | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE));
         updateFieldHint(false);
         messageEditText.setSingleLine(false);
-        messageEditText.setMaxLines(org.telegram.margelet.MargeletConfig.inputMaxLines());
-        messageEditText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, org.telegram.margelet.MargeletConfig.inputTextSize());
+        messageEditText.setMaxLines(org.telegram.sweetgram.SweetgramConfig.inputMaxLines());
+        messageEditText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, org.telegram.sweetgram.SweetgramConfig.inputTextSize());
         messageEditText.setGravity(Gravity.BOTTOM);
         messageEditText.setPadding(0, dp(9), 0, dp(10));
         messageEditText.setBackgroundDrawable(null);
@@ -7429,9 +7429,9 @@ public class ChatActivityEnterView extends FrameLayout implements
         // Вторая застава на премиум-значки, уже при отправке. Первая стоит в
         // выборе значков, и её мало: владелец вставил значок, а отправить не
         // дало. Когда форк разрешает такие значки, проверять нечего — сама
-        // телеграмовская пометка до сервера не доедет, её снимает MargeletMarkup
+        // телеграмовская пометка до сервера не доедет, её снимает SweetgramMarkup
         // и заменяет своей невидимой.
-        if (org.telegram.margelet.MargeletConfig.freeEmoji()) {
+        if (org.telegram.sweetgram.SweetgramConfig.freeEmoji()) {
             return false;
         }
         if (!isPremium && UserConfig.getInstance(currentAccount).getClientUserId() != dialogId && message instanceof Spanned) {
@@ -7744,7 +7744,7 @@ public class ChatActivityEnterView extends FrameLayout implements
         // Своё оформление превращаем в невидимые метки здесь, до всего
         // остального: ниже текст режется на части и по нему считаются отсчёты
         // жирного и ссылок. Вставишь знаки позже — все отсчёты уедут.
-        text = org.telegram.margelet.MargeletMarkup.encode(text);
+        text = org.telegram.sweetgram.SweetgramMarkup.encode(text);
         if (replyingQuote != null && parentFragment != null && replyingQuote.outdated) {
             parentFragment.showQuoteMessageUpdate();
             return false;
@@ -11108,7 +11108,7 @@ public class ChatActivityEnterView extends FrameLayout implements
         if (defPeer == null && delegate.getSendAsPeers() != null && !delegate.getSendAsPeers().peers.isEmpty()) {
             defPeer = delegate.getSendAsPeers().peers.get(0).peer;
         }
-        final boolean isVisible = !forceHide && !org.telegram.margelet.MargeletConfig.hideSendAsPeer() && defPeer != null
+        final boolean isVisible = !forceHide && !org.telegram.sweetgram.SweetgramConfig.hideSendAsPeer() && defPeer != null
             && (delegate.getSendAsPeers() == null || delegate.getSendAsPeers().peers.size() > 1)
             && !isEditingMessage() && !isRecordingAudioVideo()
             && (recordedAudioPanel == null || recordedAudioPanel.getVisibility() != View.VISIBLE)
@@ -11264,9 +11264,9 @@ public class ChatActivityEnterView extends FrameLayout implements
             animated = false;
         }
         boolean hasBotWebView = hasBotWebView();
-        boolean canShowBotsMenu = botMenuButtonType != BotMenuButtonType.NO_BUTTON && dialog_id > 0 && !org.telegram.margelet.MargeletConfig.hideBotButton();
+        boolean canShowBotsMenu = botMenuButtonType != BotMenuButtonType.NO_BUTTON && dialog_id > 0 && !org.telegram.sweetgram.SweetgramConfig.hideBotButton();
         boolean wasVisible = botButton != null && botButton.getVisibility() == VISIBLE;
-        if (!org.telegram.margelet.MargeletConfig.hideBotButton() && (hasBotWebView || hasBotCommands || hasQuickReplies || botReplyMarkup != null)) {
+        if (!org.telegram.sweetgram.SweetgramConfig.hideBotButton() && (hasBotWebView || hasBotCommands || hasQuickReplies || botReplyMarkup != null)) {
             if (botReplyMarkup != null) {
                 if (isPopupShowing() && currentPopupContentType == POPUP_CONTENT_BOT_KEYBOARD && botReplyMarkup.is_persistent) {
                     if (botButton != null && botButton.getVisibility() != GONE) {

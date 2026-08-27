@@ -588,7 +588,7 @@ public class AvatarDrawable extends Drawable {
                 canvas.save();
                 canvas.rotate(-45, size / 2.0f, size / 2.0f);
             }
-            float customRadius = org.telegram.margelet.MargeletAvatars.getAvatarCorners(size, false);
+            float customRadius = org.telegram.sweetgram.SweetgramAvatars.getAvatarCorners(size, false);
             AndroidUtilities.rectTmp.set(0, 0, size, size);
             if (customRadius == 0) {
                 canvas.drawRect(AndroidUtilities.rectTmp, backgroundPaint);
@@ -603,7 +603,7 @@ public class AvatarDrawable extends Drawable {
         }
 
         if (avatarType == AVATAR_TYPE_ARCHIVED) {
-            float customRadius = org.telegram.margelet.MargeletAvatars.getAvatarCorners(size, false);
+            float customRadius = org.telegram.sweetgram.SweetgramAvatars.getAvatarCorners(size, false);
             if (archivedAvatarProgress != 0) {
                 backgroundPaint.setColor(ColorUtils.setAlphaComponent(getThemedColor(Theme.key_avatar_backgroundArchived), alpha));
                 AndroidUtilities.rectTmp.set(0, 0, size * archivedAvatarProgress, size * archivedAvatarProgress);

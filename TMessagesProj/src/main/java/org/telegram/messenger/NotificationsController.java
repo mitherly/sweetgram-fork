@@ -4222,7 +4222,7 @@ public class NotificationsController extends BaseController implements Notificat
             int vibrate = 0;
             String soundPath = null;
             boolean isInternalSoundFile = false;
-            int ledColor = 0xff0000ff;
+            int ledColor = 0xFFE59CB8;
             int importance = 0;
 
             int notifyOverride = getNotifyOverride(preferences, override_dialog_id, topicId);
@@ -4434,7 +4434,7 @@ public class NotificationsController extends BaseController implements Notificat
                 }
                 vibrate = preferences.getInt("vibrate_react", 0);
                 importance = preferences.getInt("priority_react", 1);
-                ledColor = preferences.getInt("ReactionsLed", 0xff0000ff);
+                ledColor = preferences.getInt("ReactionsLed", 0xFFE59CB8);
                 chatType = lastMessageObject.isStoryReactionPush ? TYPE_REACTIONS_STORIES : TYPE_REACTIONS_MESSAGES;
             } else if (chatId != 0) {
                 if (isChannel) {
@@ -4447,7 +4447,7 @@ public class NotificationsController extends BaseController implements Notificat
                     }
                     vibrate = preferences.getInt("vibrate_channel", 0);
                     importance = preferences.getInt("priority_channel", 1);
-                    ledColor = preferences.getInt("ChannelLed", 0xff0000ff);
+                    ledColor = preferences.getInt("ChannelLed", 0xFFE59CB8);
                     chatType = TYPE_CHANNEL;
                 } else {
                     long soundDocumentId = preferences.getLong("GroupSoundDocId", 0);
@@ -4459,7 +4459,7 @@ public class NotificationsController extends BaseController implements Notificat
                     }
                     vibrate = preferences.getInt("vibrate_group", 0);
                     importance = preferences.getInt("priority_group", 1);
-                    ledColor = preferences.getInt("GroupLed", 0xff0000ff);
+                    ledColor = preferences.getInt("GroupLed", 0xFFE59CB8);
                     chatType = TYPE_GROUP;
                 }
             } else if (userId != 0) {
@@ -4472,7 +4472,7 @@ public class NotificationsController extends BaseController implements Notificat
                 }
                 vibrate = preferences.getInt("vibrate_messages", 0);
                 importance = preferences.getInt("priority_messages", 1);
-                ledColor = preferences.getInt("MessagesLed", 0xff0000ff);
+                ledColor = preferences.getInt("MessagesLed", 0xFFE59CB8);
                 chatType = story ? TYPE_STORIES : TYPE_PRIVATE;
             }
             if (vibrate == 4) {
@@ -4703,6 +4703,7 @@ public class NotificationsController extends BaseController implements Notificat
                         }
                     }
                 }
+                mBuilder.setColor(0xFFE59CB8);
                 if (ledColor != 0) {
                     mBuilder.setLights(ledColor, 1000, 1000);
                 }
@@ -6421,3 +6422,4 @@ public class NotificationsController extends BaseController implements Notificat
         }
     }
 }
+

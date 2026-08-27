@@ -1200,8 +1200,8 @@ public class ChatActivity extends BaseFragment implements
     public final static int OPTION_FORWARD = 2;
     public final static int OPTION_COPY = 3;
     /** Свой пункт меню. Номер с запасом от чужих: они нумеруются подряд. */
-    public final static int OPTION_MARGELET_TAGS = 1001;
-    public final static int OPTION_MARGELET_COPY = 1002;
+    public final static int OPTION_sweetgram_TAGS = 1001;
+    public final static int OPTION_sweetgram_COPY = 1002;
     public final static int OPTION_SAVE_TO_GALLERY = 4;
     public final static int OPTION_APPLY_LOCALIZATION_OR_THEME = 5;
     public final static int OPTION_SHARE = 6;
@@ -1698,7 +1698,7 @@ public class ChatActivity extends BaseFragment implements
      * Кнопки плагинов в меню чата. Номер один на всех, порядковый номер
      * кнопки прибавляется сверху: сколько их будет, заранее не знает никто.
      */
-    private final static int margelet_plugin_button = 3000;
+    private final static int sweetgram_plugin_button = 3000;
 
     RecyclerListView.OnItemLongClickListenerExtended onItemLongClickListener = new RecyclerListView.OnItemLongClickListenerExtended() {
         @Override
@@ -3705,9 +3705,9 @@ public class ChatActivity extends BaseFragment implements
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick() {
             @Override
             public void onItemClick(final int id) {
-                if (id >= margelet_plugin_button) {
-                    org.telegram.margelet.MargeletHooks.buttonClicked(
-                            id - margelet_plugin_button, ChatActivity.this);
+                if (id >= sweetgram_plugin_button) {
+                    org.telegram.sweetgram.SweetgramHooks.buttonClicked(
+                            id - sweetgram_plugin_button, ChatActivity.this);
                     return;
                 }
                 if (id == chat_menu_support) {
@@ -4542,10 +4542,10 @@ public class ChatActivity extends BaseFragment implements
         // Строчки плагинов идут последними, после всего своего: чужой код не
         // должен раздвигать привычные пункты меню.
         if (headerItem != null && chatMode == MODE_DEFAULT) {
-            final java.util.List<org.telegram.margelet.MargeletHooks.Button> pluginButtons =
-                    org.telegram.margelet.MargeletHooks.buttons();
+            final java.util.List<org.telegram.sweetgram.SweetgramHooks.Button> pluginButtons =
+                    org.telegram.sweetgram.SweetgramHooks.buttons();
             for (int i = 0; i < pluginButtons.size(); i++) {
-                headerItem.lazilyAddSubItem(margelet_plugin_button + i,
+                headerItem.lazilyAddSubItem(sweetgram_plugin_button + i,
                         R.drawable.msg_settings_old, pluginButtons.get(i).title);
             }
         }
@@ -19580,7 +19580,7 @@ public class ChatActivity extends BaseFragment implements
                 avatarContainer.setTitle(LocaleController.getString(R.string.SavedMessages));
             } else if (!MessagesController.isSupportUser(currentUser) && getContactsController().contactsDict.get(currentUser.id) == null && (getContactsController().contactsDict.size() != 0 || !getContactsController().isLoadingContacts())) {
                 if (!TextUtils.isEmpty(currentUser.phone)) {
-                    avatarContainer.setTitle(org.telegram.margelet.MargeletPrivacy.phone(PhoneFormat.getInstance().format("+" + currentUser.phone), currentUser.id), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
+                    avatarContainer.setTitle(org.telegram.sweetgram.SweetgramPrivacy.phone(PhoneFormat.getInstance().format("+" + currentUser.phone), currentUser.id), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
                 } else {
                     avatarContainer.setTitle(AndroidUtilities.removeRTL(AndroidUtilities.removeDiacritics(UserObject.getUserName(currentUser))), currentUser.scam, currentUser.fake, currentUser.verified, getMessagesController().isPremiumUser(currentUser), currentUser.emoji_status, animated);
                 }
@@ -26380,7 +26380,7 @@ public class ChatActivity extends BaseFragment implements
                     }
                 }
                 obj.deleted = true;
-                if (org.telegram.margelet.MargeletConfig.antiDelete() && !obj.isOutOwner()) {
+                if (org.telegram.sweetgram.SweetgramConfig.antiDelete() && !obj.isOutOwner()) {
                     // Оставляем сообщение в списке и обновляем ячейку со значком корзины 🗑
                     int idx = chatAdapter != null && chatAdapter.isFiltered && filteredMessagesDict != null ? chatAdapter.filteredMessages.indexOf(filteredMessagesDict.get(mid)) : (messages != null ? messages.indexOf(obj) : -1);
                     if (idx != -1 && chatAdapter != null && !chatAdapter.isFrozen) {
@@ -27659,12 +27659,12 @@ public class ChatActivity extends BaseFragment implements
         if (includeSpoilers) {
             menu.add(R.id.menu_groupbolditalic, R.id.menu_spoiler, order++, LocaleController.getString(R.string.Spoiler));
         final String wand = "\uD83E\uDE84 ";
-        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_size, order++, wand + LocaleController.getString(R.string.MargeletMarkupSize));
-        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_dim, order++, wand + LocaleController.getString(R.string.MargeletMarkupDim));
-        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_rainbow, order++, wand + LocaleController.getString(R.string.MargeletMarkupRainbow));
-        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_outline, order++, wand + LocaleController.getString(R.string.MargeletMarkupOutline));
-        menu.add(R.id.menu_groupbolditalic, R.id.menu_margelet_button, order++,
-                wand + LocaleController.getString(R.string.MargeletMarkupButton));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_sweetgram_size, order++, wand + LocaleController.getString(R.string.SweetgramMarkupSize));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_sweetgram_dim, order++, wand + LocaleController.getString(R.string.SweetgramMarkupDim));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_sweetgram_rainbow, order++, wand + LocaleController.getString(R.string.SweetgramMarkupRainbow));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_sweetgram_outline, order++, wand + LocaleController.getString(R.string.SweetgramMarkupOutline));
+        menu.add(R.id.menu_groupbolditalic, R.id.menu_sweetgram_button, order++,
+                wand + LocaleController.getString(R.string.SweetgramMarkupButton));
         }
 
         SpannableStringBuilder stringBuilder = new SpannableStringBuilder(LocaleController.getString(R.string.Bold));
@@ -29808,7 +29808,7 @@ public class ChatActivity extends BaseFragment implements
         // Плагинам сообщаем, что переписка открыта: раньше события не было, и
         // тем, кому нужен открытый чат, приходилось спрашивать самим по
         // несколько раз в секунду.
-        org.telegram.margelet.MargeletPluginHost.chatOpened(this);
+        org.telegram.sweetgram.SweetgramPluginHost.chatOpened(this);
         checkShowBlur(false);
         activityResumeTime = System.currentTimeMillis();
         if (openImport && getSendMessagesHelper().getImportingHistory(dialog_id) != null) {
@@ -33461,12 +33461,12 @@ public class ChatActivity extends BaseFragment implements
                 undoView.showWithAction(0, UndoView.ACTION_MESSAGE_COPIED, null);
                 break;
             }
-            case OPTION_MARGELET_TAGS: {
-                MargeletTagsAlert.show(this, selectedObject);
+            case OPTION_sweetgram_TAGS: {
+                SweetgramTagsAlert.show(this, selectedObject);
                 break;
             }
-            case OPTION_MARGELET_COPY: {
-                org.telegram.margelet.MargeletCopy.copy(selectedObject);
+            case OPTION_sweetgram_COPY: {
+                org.telegram.sweetgram.SweetgramCopy.copy(selectedObject);
                 createUndoView();
                 if (undoView == null) {
                     return;

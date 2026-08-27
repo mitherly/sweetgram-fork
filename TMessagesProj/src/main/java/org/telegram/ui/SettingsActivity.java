@@ -536,11 +536,11 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         titleView.setText(UserObject.getUserName(user));
         final StringBuilder sb = new StringBuilder();
         if (user != null) {
-            sb.append(org.telegram.margelet.MargeletPrivacy.phone(PhoneFormat.getInstance().format("+" + user.phone), user.id));
+            sb.append(org.telegram.sweetgram.SweetgramPrivacy.phone(PhoneFormat.getInstance().format("+" + user.phone), user.id));
         }
         final String username = UserObject.getPublicUsername(user);
         if (username != null) {
-            sb.append(" • @").append(org.telegram.margelet.MargeletPrivacy.username(username, user == null ? 0 : user.id));
+            sb.append(" • @").append(org.telegram.sweetgram.SweetgramPrivacy.username(username, user == null ? 0 : user.id));
         }
         subtitleView.setText(sb);
 
@@ -841,7 +841,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 presentSettingFragment(new LanguageSelectActivity());
                 break;
             case 1001:
-                presentSettingFragment(new MargeletSettingsActivity());
+                presentSettingFragment(new SweetgramSettingsActivity());
                 break;
 
             case 11:

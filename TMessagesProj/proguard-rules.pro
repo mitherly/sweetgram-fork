@@ -111,20 +111,20 @@
 -keep class ru.noties.jlatexmath.** { *; }
 -dontwarn org.scilab.forge.jlatexmath.**
 
-# Плагины. Эти два класса зовут по имени: MargeletPython — из библиотеки,
-# где движка питона нет, а MargeletPluginHost — из самого питона. Для
+# Плагины. Эти два класса зовут по имени: SweetgramPython — из библиотеки,
+# где движка питона нет, а SweetgramPluginHost — из самого питона. Для
 # сжимателя оба выглядят никому не нужными, и без этого он их выкинет.
--keep class org.telegram.margelet.MargeletPython { *; }
--keep class org.telegram.margelet.MargeletPluginHost { *; }
+-keep class org.telegram.sweetgram.SweetgramPython { *; }
+-keep class org.telegram.sweetgram.SweetgramPluginHost { *; }
 # Питон зовёт эти методы по имени: сокращатель о таких вызовах не знает и
 # переименовал бы их, а узнали бы мы об этом только в собранной сборке.
--keep class org.telegram.margelet.MargeletHooks { *; }
--keep class org.telegram.margelet.MargeletHooks$Button { *; }
+-keep class org.telegram.sweetgram.SweetgramHooks { *; }
+-keep class org.telegram.sweetgram.SweetgramHooks$Button { *; }
 # Плагин реализует этот интерфейс из питона, то есть по имени. В этой сборке
 # он уцелел и без правила — проверено в собранном APK, — но держаться на
 # везении такие вещи не должны.
--keep class org.telegram.margelet.hook.** { *; }
--keep interface org.telegram.margelet.hook.** { *; }
+-keep class org.telegram.sweetgram.hook.** { *; }
+-keep interface org.telegram.sweetgram.hook.** { *; }
 -keep class de.robv.android.xposed.** { *; }
 -keep interface de.robv.android.xposed.** { *; }
 -keep class com.chaquo.python.** { *; }

@@ -447,7 +447,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         // Первый запуск: включаем тёмно-зелёную тему до того, как из темы
         // начнут строиться кисти и картинки, иначе первый экран нарисуется
         // старыми цветами и перекрасится уже на глазах.
-        org.telegram.margelet.MargeletTheme.applyOnFirstLaunch();
+        org.telegram.sweetgram.SweetgramTheme.applyOnFirstLaunch();
         Theme.createCommonChatResources();
         Theme.createDialogsResources(this);
         if (SharedConfig.passcodeHash.length() != 0 && SharedConfig.appLocked) {
@@ -462,23 +462,23 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         setContentView(frameLayout);
         // «Приступ»: пока режим включён, дерево окна перерисовывается по кадрам,
         // иначе переливаться будет только то, что и так шевелится.
-        org.telegram.margelet.MargeletSeizure.attach(frameLayout);
+        org.telegram.sweetgram.SweetgramSeizure.attach(frameLayout);
         // Пример плагина кладём один раз и выключенным; питон поднимется
         // только если человек сам что-то включил.
-        org.telegram.margelet.MargeletPlugins.preinstallExample();
-        org.telegram.margelet.MargeletPluginHost.start();
+        org.telegram.sweetgram.SweetgramPlugins.preinstallExample();
+        org.telegram.sweetgram.SweetgramPluginHost.start();
         // Список значков перечитывается с гитхаба при каждом запуске: правка в
         // репозитории должна доезжать до людей без новой сборки. Ответа никто
         // не ждёт — пока он едет, показывается прошлый список.
 
         // Проверка обновления форка: узнав про новую версию, показываем
         // полоску внизу списка чатов. Молча ничего не качается и не ставится.
-        if (org.telegram.margelet.MargeletConfig.updatesChecked()) {
-            org.telegram.margelet.MargeletUpdate.check(() ->
+        if (org.telegram.sweetgram.SweetgramConfig.updatesChecked()) {
+            org.telegram.sweetgram.SweetgramUpdate.check(() ->
                     org.telegram.messenger.NotificationCenter.getGlobalInstance()
                             .postNotificationName(org.telegram.messenger.NotificationCenter.appUpdateAvailable));
         }
-        org.telegram.margelet.MargeletUpdate.schedule();
+        org.telegram.sweetgram.SweetgramUpdate.schedule();
         rootAnimatedInsetsListener = new WindowAnimatedInsetsProvider(frameLayout);
         pipActivityController.addPipListener(new IPipActivityListener() {
             final ActivityVisibilityController activityVisibilityController = createActivityVisibilityController(false);
@@ -1443,10 +1443,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         if (drawerLayoutContainer == null) {
             return;
         }
-        boolean classicDrawer = org.telegram.margelet.MargeletConfig.classicDrawer();
+        boolean classicDrawer = org.telegram.sweetgram.SweetgramConfig.classicDrawer();
         if (classicDrawer) {
             if (drawerLayoutContainer.getDrawerContainer() == null) {
-                drawerLayoutContainer.setDrawerContainer(new org.telegram.margelet.drawer.DrawerContainer(this));
+                drawerLayoutContainer.setDrawerContainer(new org.telegram.sweetgram.drawer.DrawerContainer(this));
             }
         } else if (drawerLayoutContainer.getDrawerContainer() != null) {
             drawerLayoutContainer.setDrawerContainer(null);

@@ -3571,8 +3571,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         actionBar.setTitleActionRunnable(() -> {
             // Нажатие по названию: мяу и прогиб надписи. Штатное действие —
             // прокрутка к началу — остаётся, привычный жест ломать незачем.
-            org.telegram.margelet.MargeletMeow.squish(actionBar.getTitleTextView());
-            org.telegram.margelet.MargeletMeow.play(getContext());
+            org.telegram.sweetgram.SweetgramMeow.squish(actionBar.getTitleTextView());
+            org.telegram.sweetgram.SweetgramMeow.play(getContext());
             if (initialDialogsType != DIALOGS_TYPE_WIDGET) {
                 hideFloatingButton(false);
             }
@@ -6916,7 +6916,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     selectWithStableId = true;
                 }
                 filterTabsView.removeTabs();
-                boolean hideAll = org.telegram.margelet.MargeletConfig.hideAllChats();
+                boolean hideAll = org.telegram.sweetgram.SweetgramConfig.hideAllChats();
                 for (int a = 0, N = filters.size(); a < N; a++) {
                     if (filters.get(a).isDefault()) {
                         if (!hideAll) {
@@ -11039,7 +11039,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
         MessagesController messagesController = AccountInstance.getInstance(currentAccount).getMessagesController();
         if (dialogsType == DIALOGS_TYPE_DEFAULT) {
-            return org.telegram.margelet.MargeletChannel.onTop(currentAccount, messagesController.getDialogs(folderId), dialogsType, folderId);
+            return org.telegram.sweetgram.SweetgramChannel.onTop(currentAccount, messagesController.getDialogs(folderId), dialogsType, folderId);
         } else if (dialogsType == DIALOGS_TYPE_WIDGET || dialogsType == DIALOGS_TYPE_IMPORT_HISTORY) {
             return messagesController.dialogsServerOnly;
         } else if (dialogsType == DIALOGS_TYPE_ADD_USERS_TO) {

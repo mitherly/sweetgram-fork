@@ -165,16 +165,16 @@ public class EditTextCaption extends EditTextBoldCursor implements FloatingToolb
      * только в тексте, поэтому вешается на выделение напрямую. Прежнее
      * оформление того же вида снимается — иначе они копятся друг на друге.
      */
-    public int margeletSelectionStart() {
+    public int sweetgramSelectionStart() {
         return selectionStart >= 0 ? selectionStart : getSelectionStart();
     }
 
-    public int margeletSelectionEnd() {
+    public int sweetgramSelectionEnd() {
         return selectionEnd >= 0 ? selectionEnd : getSelectionEnd();
     }
 
-    public void makeSelectedMargelet(int kind, int value) {
-        makeSelectedMargelet(kind, value, margeletSelectionStart(), margeletSelectionEnd());
+    public void makeSelectedSweetgram(int kind, int value) {
+        makeSelectedSweetgram(kind, value, sweetgramSelectionStart(), sweetgramSelectionEnd());
         selectionStart = selectionEnd = -1;
     }
 
@@ -184,53 +184,53 @@ public class EditTextCaption extends EditTextBoldCursor implements FloatingToolb
         if (editable == null || start < 0 || end <= start) {
             return;
         }
-        for (Object span : editable.getSpans(start, end, org.telegram.margelet.MargeletSpans.Button.class)) {
+        for (Object span : editable.getSpans(start, end, org.telegram.sweetgram.SweetgramSpans.Button.class)) {
             editable.removeSpan(span);
         }
-        for (org.telegram.margelet.MargeletSpans.Base span :
-                editable.getSpans(start, end, org.telegram.margelet.MargeletSpans.Base.class)) {
-            if (span.kind() == org.telegram.margelet.MargeletMarkup.KIND_BUTTON) {
+        for (org.telegram.sweetgram.SweetgramSpans.Base span :
+                editable.getSpans(start, end, org.telegram.sweetgram.SweetgramSpans.Base.class)) {
+            if (span.kind() == org.telegram.sweetgram.SweetgramMarkup.KIND_BUTTON) {
                 editable.removeSpan(span);
             }
         }
-        editable.setSpan(new org.telegram.margelet.MargeletSpans.ButtonMark(value, url),
+        editable.setSpan(new org.telegram.sweetgram.SweetgramSpans.ButtonMark(value, url),
                 start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        editable.setSpan(new org.telegram.margelet.MargeletSpans.Button(value, url),
+        editable.setSpan(new org.telegram.sweetgram.SweetgramSpans.Button(value, url),
                 start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        org.telegram.ui.MargeletMarkupAlert.warnOnce(getContext());
+        org.telegram.ui.SweetgramMarkupAlert.warnOnce(getContext());
         invalidate();
     }
 
-    public void makeSelectedMargelet(int kind, int value, int start, int end) {
+    public void makeSelectedSweetgram(int kind, int value, int start, int end) {
         final android.text.Editable editable = getText();
         if (editable == null || start < 0 || end <= start) {
             return;
         }
-        for (org.telegram.margelet.MargeletSpans.Base span :
-                editable.getSpans(start, end, org.telegram.margelet.MargeletSpans.Base.class)) {
+        for (org.telegram.sweetgram.SweetgramSpans.Base span :
+                editable.getSpans(start, end, org.telegram.sweetgram.SweetgramSpans.Base.class)) {
             if (span.kind() == kind) {
                 editable.removeSpan(span);
             }
         }
-        if (kind == org.telegram.margelet.MargeletMarkup.KIND_OUTLINE) {
+        if (kind == org.telegram.sweetgram.SweetgramMarkup.KIND_OUTLINE) {
             // Обводка, как и кнопка, рисуется разметкой, занимающей место
             // собой: такая не попадает в список меток, поэтому рядом кладём
             // невидимую пометку — она и уедет с сообщением.
             for (Object drawn : editable.getSpans(start, end,
-                    org.telegram.margelet.MargeletSpans.Outline.class)) {
+                    org.telegram.sweetgram.SweetgramSpans.Outline.class)) {
                 editable.removeSpan(drawn);
             }
-            editable.setSpan(new org.telegram.margelet.MargeletSpans.OutlineMark(value),
+            editable.setSpan(new org.telegram.sweetgram.SweetgramSpans.OutlineMark(value),
                     start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            editable.setSpan(new org.telegram.margelet.MargeletSpans.Outline(value),
+            editable.setSpan(new org.telegram.sweetgram.SweetgramSpans.Outline(value),
                     start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
-            final Object span = org.telegram.margelet.MargeletSpans.create(kind, value);
+            final Object span = org.telegram.sweetgram.SweetgramSpans.create(kind, value);
             if (span != null) {
                 editable.setSpan(span, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
-        org.telegram.ui.MargeletMarkupAlert.warnOnce(getContext());
+        org.telegram.ui.SweetgramMarkupAlert.warnOnce(getContext());
         invalidate();
     }
 
@@ -886,27 +886,27 @@ public class EditTextCaption extends EditTextBoldCursor implements FloatingToolb
         } else if (itemId == R.id.menu_spoiler) {
             makeSelectedSpoiler();
             return true;
-        } else if (itemId == R.id.menu_margelet_size) {
+        } else if (itemId == R.id.menu_sweetgram_size) {
             // Отрезок запоминаем прямо сейчас. Пока открыт диалог, выделение
             // снимается вместе с меню, и к нажатию «Готово» его уже нет —
             // именно поэтому размер не применялся вовсе.
-            org.telegram.ui.MargeletMarkupAlert.showSize(getContext(), this,
-                    margeletSelectionStart(), margeletSelectionEnd());
+            org.telegram.ui.SweetgramMarkupAlert.showSize(getContext(), this,
+                    sweetgramSelectionStart(), sweetgramSelectionEnd());
             return true;
-        } else if (itemId == R.id.menu_margelet_dim) {
-            makeSelectedMargelet(org.telegram.margelet.MargeletMarkup.KIND_DIM, 7);
+        } else if (itemId == R.id.menu_sweetgram_dim) {
+            makeSelectedSweetgram(org.telegram.sweetgram.SweetgramMarkup.KIND_DIM, 7);
             return true;
-        } else if (itemId == R.id.menu_margelet_rainbow) {
-            makeSelectedMargelet(org.telegram.margelet.MargeletMarkup.KIND_RAINBOW, 0);
+        } else if (itemId == R.id.menu_sweetgram_rainbow) {
+            makeSelectedSweetgram(org.telegram.sweetgram.SweetgramMarkup.KIND_RAINBOW, 0);
             return true;
-        } else if (itemId == R.id.menu_margelet_outline) {
-            makeSelectedMargelet(org.telegram.margelet.MargeletMarkup.KIND_OUTLINE, 0);
+        } else if (itemId == R.id.menu_sweetgram_outline) {
+            makeSelectedSweetgram(org.telegram.sweetgram.SweetgramMarkup.KIND_OUTLINE, 0);
             return true;
-        } else if (itemId == R.id.menu_margelet_button) {
+        } else if (itemId == R.id.menu_sweetgram_button) {
             // Отрезок, как и у размера, запоминаем до открытия окна: пока оно
             // открыто, выделения уже нет.
-            org.telegram.ui.MargeletMarkupAlert.showButton(getContext(), this,
-                    margeletSelectionStart(), margeletSelectionEnd());
+            org.telegram.ui.SweetgramMarkupAlert.showButton(getContext(), this,
+                    sweetgramSelectionStart(), sweetgramSelectionEnd());
             return true;
         } else if (itemId == R.id.menu_quote) {
             makeSelectedQuote();

@@ -530,7 +530,7 @@ public class ProfileSearchCell extends BaseCell implements NotificationCenter.No
         nameString = AndroidUtilities.replaceNewLines(nameString);
         if (TextUtils.isEmpty(nameString)) {
             if (user != null && !TextUtils.isEmpty(user.phone)) {
-                nameString = org.telegram.margelet.MargeletPrivacy.phone(PhoneFormat.getInstance().format("+" + user.phone), user.id);
+                nameString = org.telegram.sweetgram.SweetgramPrivacy.phone(PhoneFormat.getInstance().format("+" + user.phone), user.id);
             } else {
                 nameString = getString(R.string.HiddenName);
             }

@@ -82,7 +82,7 @@ android {
             debuggable false
             jniDebuggable false
             signingConfig signingConfigs.release
-            // Суффикс убран: имя пакета теперь наше целиком, cat.narezany.margelet,
+            // Суффикс убран: имя пакета теперь наше целиком, cat.narezany.sweetgram,
             // и приписка про веб-версию телеграма к нему не относится.
             minifyEnabled true
             multiDexEnabled true

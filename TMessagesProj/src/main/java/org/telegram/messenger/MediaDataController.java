@@ -7220,7 +7220,7 @@ public class MediaDataController extends BaseController {
         // превращает размеченный текст в текст плюс список разметки, он зовёт
         // getEntities. Значит, и метки ставить надо здесь, а не в каждом
         // экране по отдельности.
-        message[0] = org.telegram.margelet.MargeletMarkup.encode(message[0]);
+        message[0] = org.telegram.sweetgram.SweetgramMarkup.encode(message[0]);
         ArrayList<TLRPC.MessageEntity> entities = null;
         int index;
         int start = -1;
@@ -7508,16 +7508,16 @@ public class MediaDataController extends BaseController {
             // Каждый вид разметки значками можно выключить у себя: тогда
             // звёздочки останутся звёздочками. Настройка форка, по умолчанию
             // всё включено.
-            if (org.telegram.margelet.MargeletConfig.markdownEnabled("bold")) {
+            if (org.telegram.sweetgram.SweetgramConfig.markdownEnabled("bold")) {
                 cs = parsePattern(cs, BOLD_PATTERN, entities, obj -> new TLRPC.TL_messageEntityBold());
             }
-            if (org.telegram.margelet.MargeletConfig.markdownEnabled("italic")) {
+            if (org.telegram.sweetgram.SweetgramConfig.markdownEnabled("italic")) {
                 cs = parsePattern(cs, ITALIC_PATTERN, entities, obj -> new TLRPC.TL_messageEntityItalic());
             }
-            if (org.telegram.margelet.MargeletConfig.markdownEnabled("spoiler")) {
+            if (org.telegram.sweetgram.SweetgramConfig.markdownEnabled("spoiler")) {
                 cs = parsePattern(cs, SPOILER_PATTERN, entities, obj -> new TLRPC.TL_messageEntitySpoiler());
             }
-            if (allowStrike && org.telegram.margelet.MargeletConfig.markdownEnabled("strike")) {
+            if (allowStrike && org.telegram.sweetgram.SweetgramConfig.markdownEnabled("strike")) {
                 cs = parsePattern(cs, STRIKE_PATTERN, entities, obj -> new TLRPC.TL_messageEntityStrike());
             }
             // Своё: подчёркивание и цитаты. В телеграме значков для них нет,
@@ -7529,10 +7529,10 @@ public class MediaDataController extends BaseController {
             // плохо: при копировании многострочная цитата рассыпалась на
             // строки с повторяющимся знаком, а конца у неё не было вовсе.
             // Владелец сразу предложил правильное: пусть будет начало и конец.
-            if (org.telegram.margelet.MargeletConfig.markdownEnabled("underline")) {
+            if (org.telegram.sweetgram.SweetgramConfig.markdownEnabled("underline")) {
                 cs = parsePattern(cs, UNDERLINE_PATTERN, entities, obj -> new TLRPC.TL_messageEntityUnderline());
             }
-            if (org.telegram.margelet.MargeletConfig.markdownEnabled("quote_collapsed")) {
+            if (org.telegram.sweetgram.SweetgramConfig.markdownEnabled("quote_collapsed")) {
                 cs = parsePattern(cs, QUOTE_COLLAPSED_PATTERN, entities, obj -> {
                     final TLRPC.TL_messageEntityBlockquote quote = new TLRPC.TL_messageEntityBlockquote();
                     quote.collapsed = true;
@@ -7540,7 +7540,7 @@ public class MediaDataController extends BaseController {
                     return quote;
                 });
             }
-            if (org.telegram.margelet.MargeletConfig.markdownEnabled("quote")) {
+            if (org.telegram.sweetgram.SweetgramConfig.markdownEnabled("quote")) {
                 cs = parsePattern(cs, QUOTE_PATTERN, entities, obj -> new TLRPC.TL_messageEntityBlockquote());
             }
         }

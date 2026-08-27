@@ -312,11 +312,11 @@ public final class FloatingToolbar {
         R.id.menu_link,
         R.id.menu_quote,
         R.id.menu_date,
-        R.id.menu_margelet_size,
-        R.id.menu_margelet_dim,
-        R.id.menu_margelet_rainbow,
-        R.id.menu_margelet_outline,
-        R.id.menu_margelet_button
+        R.id.menu_sweetgram_size,
+        R.id.menu_sweetgram_dim,
+        R.id.menu_sweetgram_rainbow,
+        R.id.menu_sweetgram_outline,
+        R.id.menu_sweetgram_button
     );
     public static final List<Integer> premiumOptions = Arrays.asList(
         R.id.menu_bold,

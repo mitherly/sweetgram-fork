@@ -2405,9 +2405,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             // У кнопки форка плашка шире и выше строки, а рамка проверки
             // считается по тексту. Без запаса край плашки оказывается «вне
             // сообщения», и нажатие туда просто не доходит до разбора.
-            final int margeletSlack = org.telegram.margelet.MargeletSpans
+            final int sweetgramSlack = org.telegram.sweetgram.SweetgramSpans
                     .hasButton(currentMessageObject.messageText) ? dp(12) : 0;
-            if (x >= textX - margeletSlack && y >= textY && x <= textX + currentMessageObject.textWidth + margeletSlack && y <= textY + currentMessageObject.textHeight(transitionParams) + margeletSlack) {
+            if (x >= textX - sweetgramSlack && y >= textY && x <= textX + currentMessageObject.textWidth + sweetgramSlack && y <= textY + currentMessageObject.textHeight(transitionParams) + sweetgramSlack) {
                 y -= textY;
                 int blockNum = 0;
                 for (int a = 0; a < currentMessageObject.textLayoutBlocks.size(); a++) {
@@ -2451,13 +2451,13 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     // распознали как ссылку. Кнопка перестала и подсвечиваться,
                     // и открываться. Теперь всю работу делает телеграмовский
                     // код, а от нас — только верный отсчёт.
-                    final org.telegram.margelet.MargeletSpans.Button margeletButton =
-                            org.telegram.margelet.MargeletSpans.buttonAt(
+                    final org.telegram.sweetgram.SweetgramSpans.Button sweetgramButton =
+                            org.telegram.sweetgram.SweetgramSpans.buttonAt(
                                     currentMessageObject.messageText, x, y - block.padTop);
-                    if (margeletButton != null && currentMessageObject.messageText instanceof Spannable) {
+                    if (sweetgramButton != null && currentMessageObject.messageText instanceof Spannable) {
                         final Spannable text = (Spannable) currentMessageObject.messageText;
-                        final int from = text.getSpanStart(margeletButton);
-                        final int to = text.getSpanEnd(margeletButton);
+                        final int from = text.getSpanStart(sweetgramButton);
+                        final int to = text.getSpanEnd(sweetgramButton);
                         if (from >= 0 && to > from) {
                             off = (from + to) / 2;
                         }
@@ -2469,7 +2469,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     // прямоугольнику, а ширина строки считается по знакам и
                     // правый край плашки в неё не всегда попадает. Из-за этого
                     // левая половина кнопки нажималась, а правая нет.
-                    if (margeletButton != null
+                    if (sweetgramButton != null
                             || left <= x && left + block.textLayout.getLineWidth(line) >= x) {
                         Spannable buffer = (Spannable) currentMessageObject.messageText;
                         CharacterStyle[] link = buffer.getSpans(off, off, ClickableSpan.class);
@@ -2705,12 +2705,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     // попадало никуда. Справа отсчёт приходился уже на саму
                     // подпись, и там ссылка находилась — оттого и работала
                     // только правая половина.
-                    final org.telegram.margelet.MargeletSpans.Button margeletButton =
-                            org.telegram.margelet.MargeletSpans.buttonAt(currentCaption, x, y - block.padTop);
-                    if (margeletButton != null && currentCaption instanceof Spannable) {
+                    final org.telegram.sweetgram.SweetgramSpans.Button sweetgramButton =
+                            org.telegram.sweetgram.SweetgramSpans.buttonAt(currentCaption, x, y - block.padTop);
+                    if (sweetgramButton != null && currentCaption instanceof Spannable) {
                         final Spannable text = (Spannable) currentCaption;
-                        final int from = text.getSpanStart(margeletButton);
-                        final int to = text.getSpanEnd(margeletButton);
+                        final int from = text.getSpanStart(sweetgramButton);
+                        final int to = text.getSpanEnd(sweetgramButton);
                         if (from >= 0 && to > from) {
                             off = (from + to) / 2;
                         }
@@ -2720,7 +2720,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     // Ширину строки для кнопки не проверяем: её нашли по
                     // нарисованному прямоугольнику, а ширина считается по
                     // знакам, и правый край плашки в неё не попадает.
-                    if (margeletButton != null
+                    if (sweetgramButton != null
                             || left <= x && left + block.textLayout.getLineWidth(line) >= x) {
                         Spannable buffer = (Spannable) currentCaption;
                         CharacterStyle[] link = buffer.getSpans(off, off, ClickableSpan.class);
@@ -18540,7 +18540,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (currentMessageObject.messageOwner.video_processing_pending) {
             timeString = formatString(R.string.ScheduledTimeApprox, timeString);
         }
-        if (currentMessageObject.deleted && org.telegram.margelet.MargeletConfig.antiDelete()) {
+        if (currentMessageObject.deleted && org.telegram.sweetgram.SweetgramConfig.antiDelete()) {
             timeString = "🗑 " + timeString;
         }
         if (signString != null) {
@@ -20201,11 +20201,18 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
         if (sweetgramVerified && currentBackgroundDrawable != null) {
             android.graphics.Rect b = currentBackgroundDrawable.getBounds();
-            android.graphics.Paint hp = new android.graphics.Paint();
-            hp.setColor(0xFFFF4FA9);
-            hp.setStyle(android.graphics.Paint.Style.FILL);
-            float w = dp(3);
-            canvas.drawRoundRect(b.left - dp(6) - w, b.top, b.left - dp(6), b.bottom, w / 2f, w / 2f, hp);
+            float pad = dp(4);
+            float rad = dp(14);
+            android.graphics.RectF rf = new android.graphics.RectF(b.left - pad, b.top - pad, b.right + pad, b.bottom + pad);
+            android.graphics.Paint softFill = new android.graphics.Paint();
+            softFill.setColor(0x1FE59CB8);
+            softFill.setStyle(android.graphics.Paint.Style.FILL);
+            canvas.drawRoundRect(rf, rad, rad, softFill);
+            android.graphics.Paint softStroke = new android.graphics.Paint();
+            softStroke.setColor(0xFFE59CB8);
+            softStroke.setStyle(android.graphics.Paint.Style.STROKE);
+            softStroke.setStrokeWidth(dp(2));
+            canvas.drawRoundRect(rf, rad, rad, softStroke);
         }
         if (!wasLayout) {
             onLayout(false, getLeft(), getTop(), getRight(), getBottom());

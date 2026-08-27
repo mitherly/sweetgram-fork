@@ -180,8 +180,9 @@ public class VoIpSwitchLayout extends FrameLayout {
             case MICRO:
                 if (this.type != Type.MICRO) {
                     voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, size, size, true, null);
+                    voIpButtonView.unSelectedIcon.setColorFilter(new PorterDuffColorFilter(0xFFE59CB8, PorterDuff.Mode.MULTIPLY));
                     voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.call_mute, "" + R.raw.call_mute, size, size, true, null);
-                    voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
+                    voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(0xFFB0306A, PorterDuff.Mode.MULTIPLY));
                     voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
                 }
                 break;
@@ -189,8 +190,9 @@ public class VoIpSwitchLayout extends FrameLayout {
                 //R.drawable.calls_sharescreen screencast is not used in the design
                 if (this.type != Type.VIDEO) {
                     voIpButtonView.unSelectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, size, size, true, null);
+                    voIpButtonView.unSelectedIcon.setColorFilter(new PorterDuffColorFilter(0xFFE59CB8, PorterDuff.Mode.MULTIPLY));
                     voIpButtonView.selectedIcon = new RLottieDrawable(R.raw.video_stop, "" + R.raw.video_stop, size, size, true, null);
-                    voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY));
+                    voIpButtonView.selectedIcon.setColorFilter(new PorterDuffColorFilter(0xFFB0306A, PorterDuff.Mode.MULTIPLY));
                     voIpButtonView.selectedIcon.setMasterParent(voIpButtonView);
                 }
                 break;

@@ -2272,7 +2272,7 @@ public class StarsController {
                     gifts.clear();
                     gifts.addAll(res.gifts);
                     // Дописываем сюда, до сортировок: они строятся из gifts.
-                    org.telegram.margelet.MargeletGifts.inject(currentAccount, gifts);
+                    org.telegram.sweetgram.SweetgramGifts.inject(currentAccount, gifts);
                     birthdaySortedGifts.clear();
                     birthdaySortedGifts.addAll(gifts);
                     Collections.sort(birthdaySortedGifts, Comparator.comparingInt((TL_stars.StarGift a) -> (a.sold_out ? 1 : 0)).thenComparingInt((TL_stars.StarGift a) -> (a.birthday ? -1 : 0)));
@@ -2395,7 +2395,7 @@ public class StarsController {
         // С ненулевым хешем сервер отвечает «ничего не изменилось» и списка не
         // присылает — а дописывать удалённые подарки нам некуда. Поэтому при
         // включённой настройке всегда просим полный каталог.
-        req.hash = org.telegram.margelet.MargeletGifts.enabled() ? 0 : hash;
+        req.hash = org.telegram.sweetgram.SweetgramGifts.enabled() ? 0 : hash;
         ConnectionsManager.getInstance(currentAccount).sendRequest(req, (res, err) -> AndroidUtilities.runOnUIThread(() -> {
            if (res instanceof TL_stars.StarGifts) {
                whenDone.run((TL_stars.StarGifts) res);

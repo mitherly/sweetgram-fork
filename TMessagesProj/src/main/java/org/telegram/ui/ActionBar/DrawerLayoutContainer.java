@@ -31,7 +31,7 @@ public class DrawerLayoutContainer extends FrameLayout {
     private INavigationLayout parentActionBarLayout;
     private ActionBarLayout actionBarLayout;
     private boolean inLayout;
-    private org.telegram.margelet.drawer.DrawerContainer drawerContainer;
+    private org.telegram.sweetgram.drawer.DrawerContainer drawerContainer;
 
     public DrawerLayoutContainer(Context context) {
         super(context);
@@ -48,7 +48,7 @@ public class DrawerLayoutContainer extends FrameLayout {
         this.actionBarLayout = actionBarLayout;
     }
 
-    public void setDrawerContainer(org.telegram.margelet.drawer.DrawerContainer container) {
+    public void setDrawerContainer(org.telegram.sweetgram.drawer.DrawerContainer container) {
         if (drawerContainer == container) {
             return;
         }
@@ -61,7 +61,7 @@ public class DrawerLayoutContainer extends FrameLayout {
         }
     }
 
-    public org.telegram.margelet.drawer.DrawerContainer getDrawerContainer() {
+    public org.telegram.sweetgram.drawer.DrawerContainer getDrawerContainer() {
         return drawerContainer;
     }
 

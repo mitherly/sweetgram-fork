@@ -39,12 +39,12 @@ public class LauncherIconController {
         // что у всех, кто уже выбрал иконку, она пропала. Меняется содержимое:
         // свой самолётик на своём цвете, названия по цвету, и ни одной за
         // премиум — это наши иконки, продавать их некому.
-        DEFAULT("DefaultIcon", R.drawable.icon_background_sa, R.drawable.logo, R.string.MargeletIconGreen),
-        VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.drawable.logo, R.string.MargeletIconRose),
-        AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.drawable.logo, R.string.MargeletIconSand),
-        PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.drawable.logo, R.string.MargeletIconLavender),
-        TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.drawable.logo, R.string.MargeletIconSea),
-        NOX("NoxIcon", R.drawable.icon_2_background_sa, R.drawable.logo, R.string.MargeletIconNight);
+        DEFAULT("DefaultIcon", R.drawable.icon_background_sa, R.drawable.logo, R.string.SweetgramIconGreen),
+        VINTAGE("VintageIcon", R.drawable.icon_6_background_sa, R.drawable.logo, R.string.SweetgramIconRose),
+        AQUA("AquaIcon", R.drawable.icon_4_background_sa, R.drawable.logo, R.string.SweetgramIconSand),
+        PREMIUM("PremiumIcon", R.drawable.icon_3_background_sa, R.drawable.logo, R.string.SweetgramIconLavender),
+        TURBO("TurboIcon", R.drawable.icon_5_background_sa, R.drawable.logo, R.string.SweetgramIconSea),
+        NOX("NoxIcon", R.drawable.icon_2_background_sa, R.drawable.logo, R.string.SweetgramIconNight);
 
         public final String key;
         public final int background;

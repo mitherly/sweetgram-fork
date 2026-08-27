@@ -335,7 +335,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
                     // Пасхалка: если долбить по «Чатам», покажется кошка.
                     // Считается здесь, до всех проверок ниже, — иначе повторные
                     // нажатия по уже выбранной вкладке до счётчика не доходят.
-                    org.telegram.margelet.MargeletCats.tap(getParentActivity());
+                    org.telegram.sweetgram.SweetgramCats.tap(getParentActivity());
                 }
                 if (viewPager.isManualScrolling() || viewPager.isTouch()) {
                     return;
@@ -387,7 +387,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         tabsViewWrapper.setOnClickListener(v -> {});
         tabsViewWrapper.addView(tabsView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL));
         tabsViewWrapper.setClipToPadding(false);
-        if (org.telegram.margelet.MargeletConfig.hideBottomTabs()) {
+        if (org.telegram.sweetgram.SweetgramConfig.hideBottomTabs()) {
             tabsViewWrapper.setVisibility(View.GONE);
             if (fadeView != null) {
                 fadeView.setVisibility(View.GONE);

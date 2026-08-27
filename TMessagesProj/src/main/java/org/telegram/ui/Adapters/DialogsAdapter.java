@@ -1210,7 +1210,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
         // Тот же список, что видит экран: со строкой канала форка наверху.
         // Иначе отсчёты строк и отсчёты списка разъедутся на единицу, и
         // перетаскивание закреплённого чата переставит соседний.
-        ArrayList<TLRPC.Dialog> dialogs = org.telegram.margelet.MargeletChannel.onTop(currentAccount,
+        ArrayList<TLRPC.Dialog> dialogs = org.telegram.sweetgram.SweetgramChannel.onTop(currentAccount,
                 parentFragment.getDialogsArray(currentAccount, dialogsType, folderId, false),
                 dialogsType, folderId);
         int fromIndex = fixPosition(fromPosition);
@@ -1630,7 +1630,7 @@ public class DialogsAdapter extends RecyclerListView.SelectionAdapter implements
             }
             // Канал форка первой строкой. Список берётся копией: настоящий
             // принадлежит телеграму, и дописывать в него своё нельзя.
-            array = org.telegram.margelet.MargeletChannel.onTop(currentAccount, array, dialogsType, folderId);
+            array = org.telegram.sweetgram.SweetgramChannel.onTop(currentAccount, array, dialogsType, folderId);
         }
 
         dialogsCount = array.size();

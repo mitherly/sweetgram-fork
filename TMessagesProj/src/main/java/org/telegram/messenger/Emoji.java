@@ -665,7 +665,7 @@ public class Emoji {
         }
         ArrayList<EmojiSpanRange> emojis = parseEmojis(s, emojiOnly);
         if (emojis.isEmpty()) {
-            return org.telegram.margelet.MargeletZalgo.filterSpannable(cs);
+            return org.telegram.sweetgram.SweetgramZalgo.filterSpannable(cs);
         }
 
         AnimatedEmojiSpan[] animatedEmojiSpans = s.getSpans(0, s.length(), AnimatedEmojiSpan.class);
@@ -716,7 +716,7 @@ public class Emoji {
                 break;
             }
         }
-        return org.telegram.margelet.MargeletZalgo.filterSpannable(s);
+        return org.telegram.sweetgram.SweetgramZalgo.filterSpannable(s);
     }
 
     public static CharSequence replaceWithRestrictedEmoji(CharSequence cs, TextView textView, Runnable update) {
