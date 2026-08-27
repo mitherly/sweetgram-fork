@@ -42,13 +42,16 @@ jobs:
               -storepass android -keypass android -dname "CN=Sweetgram"
           fi
 
-      - name: Build debug APK
+      - name: Build release APK
         run: |
           chmod +x gradlew
-          ./gradlew :TMessagesProj_App:assembleAfatDebug --no-daemon
+          ./gradlew :TMessagesProj_App:assembleAfatRelease --no-daemon
+
+      - name: Rename APK
+        run: cp TMessagesProj_App/build/outputs/apk/afat/release/app.apk Sweetgram-v12.10.0.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: sweetgram-debug-apk
-          path: TMessagesProj_App/build/outputs/apk/afat/debug/*.apk
+          name: sweetgram-release-apk
+          path: Sweetgram-v12.10.0.apk
