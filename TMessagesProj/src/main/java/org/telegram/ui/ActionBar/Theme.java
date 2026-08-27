@@ -4333,6 +4333,7 @@ public class Theme {
         final int pinkTitle = 0xFF7A2E4B;
         final int pinkAccent = 0xFFE59CB8;
         final int pinkTextLink = 0xFFD36A96;
+        final int pinkName = dark ? 0xFFF48FB1 : 0xFFB0306A;
         // Акцентные цвета — в обеих темах: розовый вместо фирменного зелёного
         // и синего, чтобы кнопки и переключатели не выбивались из стиля.
         setColor(key_chats_actionBackground, pinkAccent, false);
@@ -4340,6 +4341,18 @@ public class Theme {
         setColor(key_switchTrackChecked, pinkAccent, false);
         setColor(key_checkboxCheck, pinkAccent, false);
         setColor(key_radioBackgroundChecked, pinkAccent, false);
+        setColor(key_chats_unreadCounter, pinkAccent, false);
+        // Названия и имена — розовые в обеих темах (список, профиль, заголовок,
+        // имя отправителя/пересланного в чате).
+        setColor(key_chats_name, pinkName, false);
+        setColor(key_chats_secretName, pinkName, false);
+        setColor(key_profile_title, pinkName, false);
+        setColor(key_chat_inForwardedNameText, pinkName, false);
+        setColor(key_chat_outForwardedNameText, pinkName, false);
+        setColor(key_chat_inReplyNameText, pinkName, false);
+        setColor(key_chat_outReplyNameText, pinkName, false);
+        setColor(key_actionBarDefaultTitle, dark ? pinkBarDark : pinkTitle, false);
+        setColor(key_actionBarDefaultSearch, dark ? pinkBarDark : pinkTitle, false);
         if (dark) {
             return;
         }
@@ -4349,8 +4362,6 @@ public class Theme {
         setColor(key_windowBackgroundGray, pinkBgGray, false);
         setColor(key_chat_wallpaper, pinkWall, false);
         setColor(key_actionBarDefaultIcon, pinkIcon, false);
-        setColor(key_actionBarDefaultTitle, pinkTitle, false);
-        setColor(key_actionBarDefaultSearch, pinkTitle, false);
         setColor(key_actionBarDefaultSearchPlaceholder, pinkIcon, false);
         setColor(key_chat_messageLinkIn, pinkTextLink, false);
         setColor(key_dialogTextLink, pinkTextLink, false);
