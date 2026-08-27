@@ -9,6 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    permissions:
+      contents: write
     steps:
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
@@ -62,3 +64,21 @@ jobs:
         with:
           name: sweetgram-release-apk
           path: Sweetgram-v12.10.0.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v12.10.0
+          name: Sweetgram v12.10.0
+          files: Sweetgram-v12.10.0.apk
+          overwrite: true
+          make_latest: true
+          body: |
+            Первый релизный билд Sweetgram.
+
+            Что внутри:
+            - розовый ребренд (тема, фон чата, уведомления, иконки микрофона/камеры в звонках);
+            - система верификации (галочки в списке диалогов, в чате и в профиле);
+            - кастомный фон чата по умолчанию и фирменный сплеш/звук.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
