@@ -4415,7 +4415,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 if ((!(useForceThreeLines || SharedConfig.useThreeLinesLayout) || isForumCell()) && hasTags()) {
                     sy -= dp(9);
                 }
-                sv.setBounds(nameMuteLeft - dp(1), sy, nameMuteLeft - dp(1) + dp(17), sy + dp(17));
+                sv.setBounds((int)(nameMuteLeft - dp(1)), (int) sy, (int)(nameMuteLeft - dp(1) + dp(17)), (int)(sy + dp(17)));
                 sv.draw(canvas);
             }
             boolean drawMuted = drawUnmute || dialogMuted || isHiddenInCommunity;
