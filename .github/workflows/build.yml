@@ -45,10 +45,10 @@ jobs:
       - name: Build debug APK
         run: |
           chmod +x gradlew
-          ./gradlew :TMessagesProj_App:assembleDebug --no-daemon
+          ./gradlew :TMessagesProj_App:assembleAfatDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: sweetgram-debug-apk
-          path: TMessagesProj_App/build/outputs/apk/debug/*.apk
+          path: TMessagesProj_App/build/outputs/apk/afat/debug/*.apk
