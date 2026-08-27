@@ -925,8 +925,9 @@ public class MessagesController extends BaseController implements NotificationCe
     public boolean isPremiumUser(TLRPC.User currentUser) {
         // Локальный премиум: считаем премиумом самого себя, чтобы были
         // доступны клиентские фичи (эмодзи-статус и т.п.) без подписки.
+        // Если в настройках форка премиум отключён — сами себе мы не премиум.
         if (currentUser != null && currentUser.id == UserConfig.getInstance(currentAccount).clientUserId) {
-            return true;
+            return !org.telegram.sweetgram.SweetgramConfig.isPremiumDisabled();
         }
         return currentUser != null && currentUser.premium && !isSupportUser(currentUser);
     }

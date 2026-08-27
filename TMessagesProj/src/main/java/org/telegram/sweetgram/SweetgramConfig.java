@@ -78,7 +78,7 @@ public class SweetgramConfig {
      * ленту, а поле для сообщения — человек с жалобой не должен искать, куда
      * её деть.
      */
-    public static final String FEEDBACK_URL = "https://t.me/tyrooooo";
+    public static final String FEEDBACK_URL = "https://t.me/SweetgramHelper";
 
     private static SharedPreferences prefs() {
         return ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -209,6 +209,19 @@ public class SweetgramConfig {
 
     public static void setWatermarkOnSend(boolean on) {
         prefs().edit().putBoolean("watermark_send", on).apply();
+    }
+
+    /**
+     * Выключить поддельный премиум-статус локального пользователя. По умолчанию
+     * выключено: форк сам делает аккаунт премиумом, чтобы были доступны клиентские
+     * фичи. Этот переключатель отменяет это — аккаунт снова выглядит обычным.
+     */
+    public static boolean isPremiumDisabled() {
+        return prefs().getBoolean("sweetgram_disable_premium", false);
+    }
+
+    public static void setPremiumDisabled(boolean on) {
+        prefs().edit().putBoolean("sweetgram_disable_premium", on).apply();
     }
 
     /** Премиум-значки без премиума: видны только в форке. */

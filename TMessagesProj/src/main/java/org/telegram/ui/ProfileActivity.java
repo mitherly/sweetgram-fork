@@ -243,6 +243,7 @@ import org.telegram.ui.Components.Forum.ForumUtilities;
 import org.telegram.ui.Components.HintView;
 import org.telegram.ui.Components.HintsController;
 import org.telegram.ui.Components.IdenticonDrawable;
+import org.telegram.sweetgram.SweetgramBanner;
 import org.telegram.ui.Components.ImageUpdater;
 import org.telegram.ui.Components.InstantCameraView;
 import org.telegram.ui.Components.ItemOptions;
@@ -406,6 +407,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private AvatarDrawable avatarDrawable;
     private ImageUpdater imageUpdater;
     private int avatarColor;
+
+    private ImageView bannerImageView;
+    private boolean bannerLoaded;
     TimerDrawable autoDeleteItemDrawable;
     private ProfileGooeyView avatarGooey;
     private ProfileStoriesView storyView;
@@ -590,6 +594,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private final static int edit_avatar = 34;
     private final static int delete_avatar = 35;
     private final static int add_photo = 36;
+    private final static int set_banner = 37;
+    private final static int SG_PICK_BANNER = 937;
     private final static int gift_premium = 38;
     private final static int channel_stories = 39;
     private final static int edit_color = 40;
@@ -2904,6 +2910,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         thumb = null;
                     }
                     imageUpdater.openPhotoForEdit(f.getAbsolutePath(), thumb, 0, isVideo);
+                } else if (id == set_banner) {
+                    openBannerPicker();
                 } else if (id == delete_avatar) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), resourcesProvider);
                     ImageLocation location = avatarsViewPager.getImageLocation(avatarsViewPager.getRealPosition());
@@ -5348,6 +5356,19 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         fallbackImage.setRoundRadius(AndroidUtilities.dp(11));
         AndroidUtilities.updateViewVisibilityAnimated(avatarContainer2, true, 1f, false);
         frameLayout.addView(avatarContainer2, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.START, 0, 0, 0, 0));
+
+        bannerImageView = new ImageView(context);
+        bannerImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        bannerImageView.setBackgroundColor(0xff2b2b2b);
+        bannerImageView.setVisibility(View.GONE);
+        bannerImageView.setContentDescription(LocaleController.getString(R.string.sg_banner_set));
+        bannerImageView.setOnClickListener(v -> {
+            if (myProfile) {
+                openBannerPicker();
+            }
+        });
+        avatarContainer2.addView(bannerImageView, 0, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 150, Gravity.TOP, 0, 104, 0, 0));
+        loadBanner();
         avatarContainer.setPivotX(0);
         avatarContainer.setPivotY(0);
         avatarGooey = new ProfileGooeyView(context);
@@ -12229,6 +12250,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     otherItem.addSubItem(edit_info, R.drawable.msg_edit, LocaleController.getString(R.string.EditInfo));
                     if (imageUpdater != null) {
                         otherItem.addSubItem(add_photo, R.drawable.msg_addphoto, LocaleController.getString(R.string.AddPhoto));
+                        otherItem.addSubItem(set_banner, R.drawable.msg_addphoto, LocaleController.getString(R.string.sg_banner_set));
                     }
                 }
                 editColorItem = otherItem.addSubItem(edit_color, R.drawable.menu_profile_colors, LocaleController.getString(R.string.ProfileColorEdit));
@@ -13069,6 +13091,93 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         if (imageUpdater != null) {
             imageUpdater.onActivityResult(requestCode, resultCode, data);
         }
+        if (requestCode == SG_PICK_BANNER && resultCode == Activity.RESULT_OK && data != null) {
+            Uri uri = data.getData();
+            if (uri == null) {
+                return;
+            }
+            String path = AndroidUtilities.getPath(uri);
+            if (path == null) {
+                if (getParentActivity() != null) {
+                    Toast.makeText(getParentActivity(), LocaleController.getString(R.string.sg_banner_failed_path), Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            showBannerChooser(new File(path));
+        }
+    }
+
+    private void openBannerPicker() {
+        if (getParentActivity() == null) {
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, SG_PICK_BANNER);
+    }
+
+    private void showBannerChooser(File file) {
+        if (getParentActivity() == null) {
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), resourcesProvider);
+        builder.setTitle(LocaleController.getString(R.string.sg_banner_choose_title));
+        builder.setItems(new CharSequence[]{
+                LocaleController.getString(R.string.sg_banner_for_avatar),
+                LocaleController.getString(R.string.sg_banner_for_banner)
+        }, (dialog, which) -> {
+            if (which == 0) {
+                if (imageUpdater != null) {
+                    imageUpdater.openPhotoForEdit(file.getAbsolutePath(), null, 0, false);
+                }
+            } else {
+                if (file.length() > SweetgramBanner.MAX_BYTES) {
+                    if (getParentActivity() != null) {
+                        Toast.makeText(getParentActivity(), LocaleController.getString(R.string.sg_banner_too_large), Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+                SweetgramBanner.uploadBanner(file, (ok, url, error) -> AndroidUtilities.runOnUIThread(() -> {
+                    if (getParentActivity() == null) {
+                        return;
+                    }
+                    if (ok) {
+                        SweetgramBanner.loadBitmap(url, bannerImageView);
+                        Toast.makeText(getParentActivity(), LocaleController.getString(R.string.sg_banner_updated), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getParentActivity(), LocaleController.getString(R.string.sg_banner_error) + ": " + error, Toast.LENGTH_SHORT).show();
+                    }
+                }));
+            }
+        });
+        builder.show();
+    }
+
+    private void loadBanner() {
+        if (bannerImageView == null || bannerLoaded) {
+            return;
+        }
+        bannerLoaded = true;
+        if (user == null || !UserObject.isUserSelf(user)) {
+            if (user != null) {
+                SweetgramBanner.fetchBannerUrl(userId, url -> {
+                    if (url != null) {
+                        SweetgramBanner.loadBitmap(url, bannerImageView);
+                    }
+                });
+            }
+            return;
+        }
+        String cached = SweetgramBanner.getLocalBannerUrl();
+        if (cached != null) {
+            SweetgramBanner.loadBitmap(cached, bannerImageView);
+        }
+        SweetgramBanner.fetchBannerUrl(SweetgramBanner.selfId(), url -> {
+            if (url != null) {
+                SweetgramBanner.saveLocalBannerUrl(url);
+                SweetgramBanner.loadBitmap(url, bannerImageView);
+            }
+        });
     }
 
     @Override

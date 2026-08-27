@@ -596,7 +596,9 @@ public class UserConfig extends BaseController {
     }
 
     public boolean isPremium() {
-        return true;
+        // Форк делает локального пользователя премиумом ради клиентских фич.
+        // Если в настройках форка премиум отключён — ведём себя как обычный аккаунт.
+        return !org.telegram.sweetgram.SweetgramConfig.isPremiumDisabled();
     }
 
     public Long getEmojiStatus() {

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sg_updates_title">Обновления</string>
+    <string name="sg_updates_available">Доступно обновление</string>
+    <string name="sg_updates_loading">Загрузка обновлений…</string>
+    <string name="sg_updates_error">Не удалось загрузить обновления</string>
+    <string name="sg_updates_download">Скачать</string>
+    <string name="sg_updates_check">Проверить</string>
+    <string name="sg_updates_current">Установлено: %1$s</string>
+    <string name="sg_updates_open">Открыть</string>
+</resources>

@@ -2247,6 +2247,10 @@ public class StarsController {
                 giftsCacheLoaded = true;
                 gifts.clear();
                 gifts.addAll(giftsCached);
+                // Дописываем удалённые подарки и в кэш-путь, иначе они видны
+                // только сразу после сетевого обновления, а после перезапуска —
+                // или когда сервер вернул «ничего не изменилось» — пропадают.
+                org.telegram.sweetgram.SweetgramGifts.inject(currentAccount, gifts);
                 birthdaySortedGifts.clear();
                 birthdaySortedGifts.addAll(gifts);
                 Collections.sort(birthdaySortedGifts, Comparator.comparingInt((TL_stars.StarGift a) -> (a.sold_out ? 1 : 0)).thenComparingInt((TL_stars.StarGift a) -> (a.birthday ? -1 : 0)));
@@ -2282,8 +2286,11 @@ public class StarsController {
                     giftsHash = res.hash;
                     giftsRemoteTime = System.currentTimeMillis();
                     NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.starGiftsLoaded);
-                    saveStarGiftsCached(res.gifts, giftsHash, giftsRemoteTime);
+                    // Сохраняем уже дополненный список, чтобы удалённые подарки
+                    // не терялись между перезапусками.
+                    saveStarGiftsCached(gifts, giftsHash, giftsRemoteTime);
                 } else if (giftsRemote instanceof TL_stars.TL_starGiftsNotModified) {
+                    org.telegram.sweetgram.SweetgramGifts.inject(currentAccount, gifts);
                     saveStarGiftsCached(gifts, giftsHash, giftsRemoteTime = System.currentTimeMillis());
                 }
             });

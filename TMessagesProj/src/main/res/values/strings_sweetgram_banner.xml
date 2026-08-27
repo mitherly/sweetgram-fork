@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sg_banner_set">Установить баннер</string>
+    <string name="sg_banner_choose_title">Аватар или баннер?</string>
+    <string name="sg_banner_for_avatar">Для аватарки</string>
+    <string name="sg_banner_for_banner">Для баннера</string>
+    <string name="sg_banner_too_large">Файл больше 2 МБ</string>
+    <string name="sg_banner_updated">Баннер обновлён</string>
+    <string name="sg_banner_error">Ошибка загрузки баннера</string>
+    <string name="sg_banner_failed_path">Не удалось получить файл изображения</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sg_analytics_tab_title">Аналитика</string>
+    <string name="sg_analytics_manage_tab_title">Управление</string>
+    <string name="sg_analytics_launches">Запуски (всего)</string>
+    <string name="sg_analytics_users">Уникальные пользователи</string>
+    <string name="sg_analytics_installs">Установки (≈ скачивания)</string>
+    <string name="sg_analytics_verified">Верифицированные</string>
+    <string name="sg_analytics_loading">Загрузка…</string>
+</resources>

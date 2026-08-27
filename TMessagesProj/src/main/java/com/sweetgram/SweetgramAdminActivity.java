@@ -5,13 +5,24 @@ import android.graphics.Color;
 import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
@@ -19,14 +30,23 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 
 /**
- * Панель выдачи верификации. Открывается только после пароля из настроек
- * форка: галочка — ручная операция, интерфейс для неё нужен простой,
- * без лишних экранов.
+ * Панель форка: две вкладки — управление верификацией и аналитика.
+ * Открывается только после пароля из настроек форка.
  */
 public class SweetgramAdminActivity extends BaseFragment {
 
     private EditText userIdEditText;
     private EditText verificationTextEditText;
+
+    private TextView manageTab;
+    private TextView analyticsTab;
+    private View manageView;
+    private View analyticsView;
+
+    private TextView launchesValue;
+    private TextView usersValue;
+    private TextView installsValue;
+    private TextView verifiedValue;
 
     @Override
     public android.view.View createView(Context context) {
@@ -42,13 +62,62 @@ public class SweetgramAdminActivity extends BaseFragment {
             }
         });
 
-        ScrollView scrollView = new ScrollView(context);
-        fragmentView = scrollView;
+        FrameLayout root = new FrameLayout(context);
+        fragmentView = root;
 
+        ScrollView manageScroll = new ScrollView(context);
+        manageView = buildManageView(context);
+        manageScroll.addView(manageView, LayoutHelper.createScroll(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT));
+        root.addView(manageScroll, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT, 0, 56, 0, 0));
+
+        ScrollView analyticsScroll = new ScrollView(context);
+        analyticsView = buildAnalyticsView(context);
+        analyticsScroll.addView(analyticsView, LayoutHelper.createScroll(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT));
+        analyticsScroll.setVisibility(View.GONE);
+        root.addView(analyticsScroll, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT, 0, 56, 0, 0));
+
+        LinearLayout tabBar = new LinearLayout(context);
+        tabBar.setOrientation(LinearLayout.HORIZONTAL);
+        tabBar.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
+        tabBar.setPadding(AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8));
+
+        manageTab = makeTab(context, LocaleController.getString(R.string.sg_analytics_manage_tab_title), true);
+        manageTab.setOnClickListener(v -> selectTab(true));
+        analyticsTab = makeTab(context, LocaleController.getString(R.string.sg_analytics_tab_title), false);
+        analyticsTab.setOnClickListener(v -> {
+            selectTab(false);
+            loadAnalytics();
+        });
+
+        tabBar.addView(manageTab, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
+        tabBar.addView(analyticsTab, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1f));
+        root.addView(tabBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 56, Gravity.TOP | Gravity.LEFT));
+
+        return fragmentView;
+    }
+
+    private TextView makeTab(Context context, String text, boolean selected) {
+        TextView tab = new TextView(context);
+        tab.setText(text);
+        tab.setGravity(Gravity.CENTER);
+        tab.setTextColor(Theme.getColor(selected ? Theme.key_windowBackgroundWhiteBlackText : Theme.key_windowBackgroundWhiteGrayText));
+        tab.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+        tab.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        tab.setPadding(0, AndroidUtilities.dp(8), 0, AndroidUtilities.dp(8));
+        return tab;
+    }
+
+    private void selectTab(boolean manage) {
+        manageView.setVisibility(manage ? View.VISIBLE : View.GONE);
+        analyticsView.setVisibility(manage ? View.GONE : View.VISIBLE);
+        manageTab.setTextColor(Theme.getColor(manage ? Theme.key_windowBackgroundWhiteBlackText : Theme.key_windowBackgroundWhiteGrayText));
+        analyticsTab.setTextColor(Theme.getColor(manage ? Theme.key_windowBackgroundWhiteGrayText : Theme.key_windowBackgroundWhiteBlackText));
+    }
+
+    private View buildManageView(Context context) {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16));
-        scrollView.addView(linearLayout, LayoutHelper.createScroll(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP | Gravity.LEFT));
 
         TextView title = new TextView(context);
         title.setText("Verification management");
@@ -96,7 +165,103 @@ public class SweetgramAdminActivity extends BaseFragment {
         hint.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         linearLayout.addView(hint, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
-        return fragmentView;
+        return linearLayout;
+    }
+
+    private View buildAnalyticsView(Context context) {
+        LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16), AndroidUtilities.dp(16));
+
+        launchesValue = addMetric(context, linearLayout, R.string.sg_analytics_launches);
+        usersValue = addMetric(context, linearLayout, R.string.sg_analytics_users);
+        installsValue = addMetric(context, linearLayout, R.string.sg_analytics_installs);
+        verifiedValue = addMetric(context, linearLayout, R.string.sg_analytics_verified);
+
+        return linearLayout;
+    }
+
+    private TextView addMetric(Context context, LinearLayout parent, int labelRes) {
+        TextView label = new TextView(context);
+        label.setText(LocaleController.getString(labelRes));
+        label.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
+        label.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        parent.addView(label, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 4));
+
+        TextView value = new TextView(context);
+        value.setText(LocaleController.getString(R.string.sg_analytics_loading));
+        value.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
+        value.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
+        value.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        parent.addView(value, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 16));
+
+        return value;
+    }
+
+    private void loadAnalytics() {
+        try {
+            DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+
+            root.child("stats").child("launches").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    Long v = snapshot.getValue(Long.class);
+                    setText(launchesValue, v == null ? "0" : String.valueOf(v));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    setText(launchesValue, "-");
+                }
+            });
+
+            root.child("stats").child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    setText(usersValue, String.valueOf(snapshot.getChildrenCount()));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    setText(usersValue, "-");
+                }
+            });
+
+            root.child("stats").child("installs").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    Long v = snapshot.getValue(Long.class);
+                    setText(installsValue, v == null ? "0" : String.valueOf(v));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    setText(installsValue, "-");
+                }
+            });
+
+            root.child("verified_users").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    setText(verifiedValue, String.valueOf(snapshot.getChildrenCount()));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    setText(verifiedValue, "-");
+                }
+            });
+        } catch (Throwable e) {
+            android.util.Log.e("SweetgramAdmin", "loadAnalytics failed", e);
+        }
+    }
+
+    private void setText(TextView view, String text) {
+        if (view == null) return;
+        AndroidUtilities.runOnUIThread(() -> {
+            if (getParentActivity() == null) return;
+            view.setText(text);
+        });
     }
 
     private void grant() {

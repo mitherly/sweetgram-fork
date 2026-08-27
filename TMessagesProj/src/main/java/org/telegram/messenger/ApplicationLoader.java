@@ -300,6 +300,12 @@ public class ApplicationLoader extends Application {
             }
         }).start();
 
+        // Аналитика форка: считаем запуск/установку один раз за жизнь процесса.
+        try {
+            org.telegram.sweetgram.SweetgramAnalytics.trackLaunch();
+        } catch (Throwable ignore) {
+        }
+
         try {
             final Thread.UncaughtExceptionHandler previousHandler = Thread.getDefaultUncaughtExceptionHandler();
             Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {

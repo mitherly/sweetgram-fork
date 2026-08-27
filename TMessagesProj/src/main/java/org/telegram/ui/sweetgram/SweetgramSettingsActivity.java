@@ -7,6 +7,7 @@ import android.widget.FrameLayout;
 import org.telegram.sweetgram.SweetgramConfig;
 import org.telegram.sweetgram.SweetgramPlane3D;
 import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -32,6 +33,7 @@ public class SweetgramSettingsActivity extends UniversalFragment {
 
     private static final int ID_INPUT = 1;
     private static final int ID_SOUND = 2;
+    private static final int ID_PREMIUM_DISABLE = 16;
     private static final int ID_CHANNEL = 3;
     private static final int ID_FORUM = 4;
     private static final int ID_CONVENIENCES = 5;
@@ -75,6 +77,9 @@ public class SweetgramSettingsActivity extends UniversalFragment {
         items.add(SettingsActivity.SettingCell.Factory.of(ID_INPUT,
                 IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom,
                 R.drawable.settings_chat, LocaleController.getString(R.string.SweetgramInput), LocaleController.getString(R.string.SweetgramInputInfo)));
+        // Выключить поддельный премиум: локальный аккаунт перестаёт казаться премиумом.
+        items.add(UItem.asCheck(ID_PREMIUM_DISABLE, LocaleController.getString(R.string.sg_uifix_disable_premium))
+                .setChecked(SweetgramConfig.isPremiumDisabled()));
         // Раздел «Звук» появляется, только когда мяуканье уже услышали.
         if (SweetgramConfig.meowHeard()) {
             items.add(SettingsActivity.SettingCell.Factory.of(ID_SOUND,
@@ -162,7 +167,12 @@ public class SweetgramSettingsActivity extends UniversalFragment {
 
     @Override
     protected void onClick(UItem item, View view, int position, float x, float y) {
-        if (item.id == ID_STICKERS) {
+        if (item.id == ID_PREMIUM_DISABLE) {
+            SweetgramConfig.setPremiumDisabled(!SweetgramConfig.isPremiumDisabled());
+            listView.adapter.update(true);
+            // Обновить виджеты, где показан премиум-статус (шапка чата и т.п.).
+            NotificationCenter.getInstance(getCurrentAccount()).postNotificationName(NotificationCenter.currentUserPremiumStatusChanged);
+        } else if (item.id == ID_STICKERS) {
             Browser.openUrl(getContext(), SweetgramConfig.STICKERS_URL);
         } else if (item.id == ID_PLUGINS) {
             presentFragment(new SweetgramPluginsActivity());

@@ -1,4 +1,4 @@
-name: Build Sweetgram APK
+name: Build Sweetgram Debug APK
 
 on:
   workflow_dispatch:
@@ -9,8 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    permissions:
-      contents: write
     steps:
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
@@ -35,15 +33,6 @@ jobs:
           sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018"
           yes | sdkmanager --licenses
 
-      - name: Ensure release keystore exists
-        run: |
-          if [ ! -f TMessagesProj/config/release.keystore ]; then
-            keytool -genkey -v \
-              -keystore TMessagesProj/config/release.keystore \
-              -alias androidkey -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass android -keypass android -dname "CN=Sweetgram"
-          fi
-
       - name: Inject real google-services.json from secret
         run: |
           echo "$GOOGLE_SERVICES_JSON" | base64 -d > TMessagesProj_App/google-services.json
@@ -51,34 +40,16 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
-      - name: Build release APK
+      - name: Build debug APK
         run: |
           chmod +x gradlew
-          ./gradlew :TMessagesProj_App:assembleAfatRelease --no-daemon
+          ./gradlew :TMessagesProj_App:assembleAfatDebug --no-daemon
 
       - name: Rename APK
-        run: cp TMessagesProj_App/build/outputs/apk/afat/release/app.apk Sweetgram-v12.10.0.apk
+        run: cp TMessagesProj_App/build/outputs/apk/afat/debug/*.apk Sweetgram-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: sweetgram-release-apk
-          path: Sweetgram-v12.10.0.apk
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v12.10.0
-          name: Sweetgram v12.10.0
-          files: Sweetgram-v12.10.0.apk
-          overwrite: true
-          make_latest: true
-          body: |
-            Первый релизный билд Sweetgram.
-
-            Что внутри:
-            - розовый ребренд (тема, фон чата, уведомления, иконки микрофона/камеры в звонках);
-            - система верификации (галочки в списке диалогов, в чате и в профиле);
-            - кастомный фон чата по умолчанию и фирменный сплеш/звук.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: sweetgram-debug-apk
+          path: Sweetgram-debug.apk

@@ -12,6 +12,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
@@ -51,6 +52,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.BuildConfig;
 import org.telegram.messenger.DialogObject;
@@ -343,6 +345,8 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
         telegramLogoView.setColorFilter(getTextLogoColor(), PorterDuff.Mode.MULTIPLY);
         telegramLogoView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         telegramLogoView.setFocusableInTouchMode(true);
+        // По тапу по слову форка проигрываем звук из ассетов («ня»).
+        telegramLogoView.setOnClickListener(v -> playWordmarkSound());
         addView(telegramLogoView, LayoutHelper.createFrame(90, 22));
 
         statusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(null, dp(26));
@@ -2231,6 +2235,27 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
         if (subtitleOverlayContainer != null) {
             subtitleOverlayContainer.setAlpha(progress);
             subtitleOverlayContainer.setVisibility(progress > 0 ? VISIBLE : GONE);
+        }
+    }
+
+    /**
+     * Проигрывает «buru-nyaa.mp3» из ассетов по тапу по слову форка.
+     * Звук короткий; плеер освобождается сразу по окончании.
+     */
+    private void playWordmarkSound() {
+        try {
+            final AssetFileDescriptor afd = ApplicationLoader.applicationContext.getAssets().openFd("buru-nyaa.mp3");
+            final MediaPlayer mp = new MediaPlayer();
+            mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            mp.setOnCompletionListener(MediaPlayer::release);
+            mp.setOnErrorListener((m, what, extra) -> {
+                m.release();
+                return true;
+            });
+            mp.prepare();
+            mp.start();
+        } catch (Exception e) {
+            FileLog.e(e);
         }
     }
 }
