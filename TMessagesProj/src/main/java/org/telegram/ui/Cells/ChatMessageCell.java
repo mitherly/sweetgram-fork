@@ -1779,6 +1779,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private TLRPC.FileLocation currentPhoto;
     private String currentNameString;
     private Object currentNameStatus;
+    private boolean sweetgramVerified;
     private long currentNameBotVerificationId;
     private String nameStatusSlug;
     public AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable currentNameStatusDrawable;
@@ -18952,6 +18953,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             }
 
             currentNameStatus = null;
+            sweetgramVerified = false;
             nameStatusSlug = null;
             currentNameBotVerificationId = 0;
             if (messageObject.customName != null) {
@@ -18959,6 +18961,13 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             } else if (needAuthorName) {
                 currentNameString = getAuthorName();
                 currentNameStatus = getAuthorStatus();
+            if (messageObject != null && messageObject.messageOwner != null && messageObject.messageOwner.from_id != null) {
+                long sgPeer = org.telegram.messenger.DialogObject.getPeerDialogId(messageObject.messageOwner.from_id);
+                if (sgPeer != 0 && com.sweetgram.SweetgramAuth.getInstance().isUserVerified(Math.abs(sgPeer))) {
+                    currentNameStatus = new com.sweetgram.SweetgramVerifiedDrawable(null);
+                    sweetgramVerified = true;
+                }
+            }
                 currentNameBotVerificationId = getAuthorBotVerificationId();
             } else {
                 currentNameString = "";
@@ -20189,6 +20198,14 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     public void drawInternal(Canvas canvas) {
         if (currentMessageObject == null) {
             return;
+        }
+        if (sweetgramVerified && currentBackgroundDrawable != null) {
+            android.graphics.Rect b = currentBackgroundDrawable.getBounds();
+            android.graphics.Paint hp = new android.graphics.Paint();
+            hp.setColor(0xFFFF4FA9);
+            hp.setStyle(android.graphics.Paint.Style.FILL);
+            float w = dp(3);
+            canvas.drawRoundRect(b.left - dp(6) - w, b.top, b.left - dp(6), b.bottom, w / 2f, w / 2f, hp);
         }
         if (!wasLayout) {
             onLayout(false, getLeft(), getTop(), getRight(), getBottom());
