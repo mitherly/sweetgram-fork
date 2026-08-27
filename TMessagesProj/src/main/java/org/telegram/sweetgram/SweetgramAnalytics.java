@@ -70,7 +70,7 @@ public class SweetgramAnalytics {
             }
 
             @Override
-            public void onComplete(DatabaseError error, boolean committed, DatabaseReference ref) {
+            public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
                 if (error != null) {
                     Log.e(TAG, "increment failed: " + error.getMessage());
                 }

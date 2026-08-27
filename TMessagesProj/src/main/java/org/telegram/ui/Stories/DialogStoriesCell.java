@@ -1,5 +1,7 @@
 package org.telegram.ui.Stories;
 
+import android.media.MediaPlayer;
+
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.dpf2;
 import static org.telegram.messenger.AndroidUtilities.lerp;

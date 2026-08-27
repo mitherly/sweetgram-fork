@@ -13158,8 +13158,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             return;
         }
         bannerLoaded = true;
-        if (user == null || !UserObject.isUserSelf(user)) {
-            if (user != null) {
+        final long selfId = UserConfig.getInstance(currentAccount).getClientUserId();
+        if (userId == 0 || userId != selfId) {
+            if (userId != 0) {
                 SweetgramBanner.fetchBannerUrl(userId, url -> {
                     if (url != null) {
                         SweetgramBanner.loadBitmap(url, bannerImageView);
