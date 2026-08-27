@@ -1,6 +1,6 @@
 # 💖 Sweetgram
 
-![Sweetgram](logo.png)
+![Sweetgram](hero.jpg)
 
 **Sweetgram** — форк Telegram с фирменным розовым стилем и набором авторских возможностей.
 
