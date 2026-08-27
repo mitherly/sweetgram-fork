@@ -20199,21 +20199,6 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (currentMessageObject == null) {
             return;
         }
-        if (sweetgramVerified && currentBackgroundDrawable != null) {
-            android.graphics.Rect b = currentBackgroundDrawable.getBounds();
-            float pad = dp(4);
-            float rad = dp(14);
-            android.graphics.RectF rf = new android.graphics.RectF(b.left - pad, b.top - pad, b.right + pad, b.bottom + pad);
-            android.graphics.Paint softFill = new android.graphics.Paint();
-            softFill.setColor(0x1FE59CB8);
-            softFill.setStyle(android.graphics.Paint.Style.FILL);
-            canvas.drawRoundRect(rf, rad, rad, softFill);
-            android.graphics.Paint softStroke = new android.graphics.Paint();
-            softStroke.setColor(0xFFE59CB8);
-            softStroke.setStyle(android.graphics.Paint.Style.STROKE);
-            softStroke.setStrokeWidth(dp(2));
-            canvas.drawRoundRect(rf, rad, rad, softStroke);
-        }
         if (!wasLayout) {
             onLayout(false, getLeft(), getTop(), getRight(), getBottom());
         }

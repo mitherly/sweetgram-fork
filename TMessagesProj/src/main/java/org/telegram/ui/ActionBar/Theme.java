@@ -4337,6 +4337,10 @@ public class Theme {
         // Акцентные цвета — в обеих темах: розовый вместо фирменного зелёного
         // и синего, чтобы кнопки и переключатели не выбивались из стиля.
         setColor(key_chats_actionBackground, pinkAccent, false);
+        setColor(key_chats_actionPressedBackground, 0xFFD36A96, false);
+        setColor(key_chat_messagePanelSend, pinkAccent, false);
+        setColor(key_featuredStickers_addButton, pinkAccent, false);
+        setColor(key_featuredStickers_addButtonPressed, 0xFFD36A96, false);
         setColor(key_windowBackgroundWhiteBlueButton, pinkTextLink, false);
         setColor(key_switchTrackChecked, pinkAccent, false);
         setColor(key_checkboxCheck, pinkAccent, false);
