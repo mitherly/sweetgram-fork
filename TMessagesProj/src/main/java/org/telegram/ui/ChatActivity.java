@@ -3711,7 +3711,7 @@ public class ChatActivity extends BaseFragment implements
                     return;
                 }
                 if (id == chat_menu_support) {
-                    org.telegram.messenger.browser.Browser.openUrl(ChatActivity.this,
+                    org.telegram.messenger.browser.Browser.openUrl(getParentActivity(),
                             "https://t.me/SweetGramOfficial");
                     return;
                 }

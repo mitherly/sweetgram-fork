@@ -32,7 +32,7 @@ public class SweetgramVerifiedDrawable extends Drawable {
         this.text = text;
 
         try {
-            logo = ApplicationLoader.applicationContext.getDrawable(R.drawable.sweetgram_verified).mutate();
+            logo = ApplicationLoader.applicationContext.getDrawable(org.telegram.messenger.R.drawable.sweetgram_verified).mutate();
         } catch (Throwable e) {
             logo = null;
         }

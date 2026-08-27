@@ -3208,7 +3208,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         actionBar.setItemsColor(getThemedColor(Theme.key_actionBarDefaultIcon), false);
         actionBar.setItemsColor(getThemedColor(Theme.key_actionBarActionModeDefaultIcon), true);
         if (!inPreviewMode) {
-            actionBar.setTitle(LocaleController.getString(R.string.Sweetgram));
+            actionBar.setTitle(LocaleController.getString(R.string.AppName));
             SimpleTextView titleTextView = actionBar.getTitleTextView();
             if (titleTextView != null) {
                 titleTextView.setClickable(true);
