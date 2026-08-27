@@ -11870,7 +11870,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
                             nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id)));
                             nameTextViewRightDrawable2ContentDescription = com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id);
-                            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id), android.widget.Toast.LENGTH_LONG).show());
+                            final long chatVid = -chat.id;
+            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(chatVid), android.widget.Toast.LENGTH_LONG).show());
                         } else {
                             nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
                             nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.AccDescrVerified);
@@ -11913,7 +11914,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
                         if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
                         nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id)));
-                        nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id), android.widget.Toast.LENGTH_LONG).show());
+                        final long chatVid = -chat.id;
+            nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(chatVid), android.widget.Toast.LENGTH_LONG).show());
                         } else {
                             nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
                             nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), LocaleController.getString(R.string.AccDescrVerified), android.widget.Toast.LENGTH_LONG).show());
