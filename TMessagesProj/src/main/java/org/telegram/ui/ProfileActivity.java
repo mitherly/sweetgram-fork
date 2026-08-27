@@ -11510,7 +11510,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextViewRightDrawable2ContentDescription = LocaleController.getString(R.string.ScamMessage);
                     } else if (user.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
                         if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
-                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id)));
+                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(null));
                             nameTextViewRightDrawable2ContentDescription = com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id);
                             nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id), android.widget.Toast.LENGTH_LONG).show());
                         } else {
@@ -11559,7 +11559,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         nameTextView[a].setRightDrawable2(getScamDrawable(user.scam ? 0 : 1));
                     } else if (user.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
                         if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(user.id)) {
-                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id)));
+                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(null));
                             nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(user.id), android.widget.Toast.LENGTH_LONG).show());
                         } else {
                             nameTextView[a].setRightDrawable2(getVerifiedCrossfadeDrawable(a));
@@ -11866,9 +11866,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     if (chat.scam || chat.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(chat.scam ? 0 : 1));
                         nameTextViewRightDrawableContentDescription = LocaleController.getString(R.string.ScamMessage);
-                    } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
-                        if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
-                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id)));
+                    } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(Math.abs(chat.id))) {
+                        if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(Math.abs(chat.id))) {
+                            nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(null));
                             nameTextViewRightDrawable2ContentDescription = com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id);
                             final long chatVid = -chat.id;
             nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(chatVid), android.widget.Toast.LENGTH_LONG).show());
@@ -11911,8 +11911,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     nameTextView[a].setRightDrawable2OnClick(null);
                     if (chat.scam || chat.fake) {
                         nameTextView[a].setRightDrawable2(getScamDrawable(chat.scam ? 0 : 1));
-                    } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
-                        if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(-chat.id)) {
+                    } else if (chat.verified || com.sweetgram.SweetgramAuth.getInstance().isUserVerified(Math.abs(chat.id))) {
+                        if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(Math.abs(chat.id))) {
                         nameTextView[a].setRightDrawable2(new com.sweetgram.SweetgramVerifiedDrawable(com.sweetgram.SweetgramAuth.getInstance().getVerificationText(-chat.id)));
                         final long chatVid = -chat.id;
             nameTextView[a].setRightDrawable2OnClick(v -> android.widget.Toast.makeText(getContext(), com.sweetgram.SweetgramAuth.getInstance().getVerificationText(chatVid), android.widget.Toast.LENGTH_LONG).show());
@@ -17136,3 +17136,4 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         }
     }
 }
+

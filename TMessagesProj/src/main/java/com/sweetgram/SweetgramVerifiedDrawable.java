@@ -92,8 +92,8 @@ public class SweetgramVerifiedDrawable extends Drawable {
 
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
-        if (logo != null) logo.setColorFilter(colorFilter);
-        textPaint.setColorFilter(colorFilter);
+        // Бейдж всегда рисуется своими розово-белыми цветами и не должен
+        // перекрашиваться внешним тинтом (например, цветом ника в чате).
     }
 
     @Override

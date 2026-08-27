@@ -4411,11 +4411,11 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             }
             if (com.sweetgram.SweetgramAuth.getInstance().isUserVerified(Math.abs(currentDialogId))) {
                 Drawable sv = new com.sweetgram.SweetgramVerifiedDrawable(null);
-                int sy = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 12.5f : 15.5f);
+                float sy = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 13.5f : 16.5f);
                 if ((!(useForceThreeLines || SharedConfig.useThreeLinesLayout) || isForumCell()) && hasTags()) {
                     sy -= dp(9);
                 }
-                sv.setBounds(nameLeft - dp(17 + 2), sy + dp(-1), nameLeft - dp(2), sy + dp(17 - 1));
+                sv.setBounds(nameMuteLeft - dp(1), sy, nameMuteLeft - dp(1) + dp(17), sy + dp(17));
                 sv.draw(canvas);
             }
             boolean drawMuted = drawUnmute || dialogMuted || isHiddenInCommunity;
