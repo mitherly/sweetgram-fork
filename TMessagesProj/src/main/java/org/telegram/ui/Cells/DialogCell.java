@@ -2415,6 +2415,10 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 nameLayout = new StaticLayout(nameStringFinal, Theme.dialogs_namePaint[paintIndex], Math.max(ellipsizeWidth, nameWidth), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             }
             nameLayoutTranslateX = nameLayoutEllipsizeByGradient && nameLayout.isRtlCharAt(0) ? -dp(36) : 0;
+            int avatarRight = dp(avatarStart) + dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 56 : 52);
+            if (!LocaleController.isRTL && nameLeft + nameLayoutTranslateX < avatarRight + dp(8)) {
+                nameLayoutTranslateX = avatarRight + dp(8) - nameLeft;
+            }
             nameLayoutEllipsizeLeft = nameLayout.isRtlCharAt(0);
         } catch (Exception e) {
             FileLog.e(e);
@@ -4097,7 +4101,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                         fadePaintBack.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
                     }
                     canvas.saveLayerAlpha(0, 0, getMeasuredWidth(), getMeasuredHeight(), 255, Canvas.ALL_SAVE_FLAG);
-                    canvas.clipRect(nameLeft, 0, nameLeft + nameWidth, getMeasuredHeight());
+                    canvas.clipRect(nameLeft + Math.min(0, nameLayoutTranslateX), 0, nameLeft + nameWidth, getMeasuredHeight());
                 }
                 if (currentDialogFolderId != 0) {
                     Theme.dialogs_namePaint[paintIndex].setColor(Theme.dialogs_namePaint[paintIndex].linkColor = Theme.getColor(Theme.key_chats_nameArchived, resourcesProvider));

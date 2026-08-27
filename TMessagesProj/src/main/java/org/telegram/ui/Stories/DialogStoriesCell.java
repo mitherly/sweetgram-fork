@@ -2246,16 +2246,23 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
      */
     private void playWordmarkSound() {
         try {
-            final AssetFileDescriptor afd = ApplicationLoader.applicationContext.getAssets().openFd("buru-nyaa.mp3");
+            final android.content.Context ctx = ApplicationLoader.applicationContext;
+            final AssetFileDescriptor afd = ctx.getAssets().openFd("buru-nyaa.mp3");
             final MediaPlayer mp = new MediaPlayer();
+            mp.setVolume(1.0f, 1.0f);
             mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            try {
+                afd.close();
+            } catch (Exception ignore) {
+            }
             mp.setOnCompletionListener(MediaPlayer::release);
             mp.setOnErrorListener((m, what, extra) -> {
+                FileLog.e("playWordmarkSound error " + what + "/" + extra);
                 m.release();
                 return true;
             });
-            mp.prepare();
-            mp.start();
+            mp.setOnPreparedListener(MediaPlayer::start);
+            mp.prepareAsync();
         } catch (Exception e) {
             FileLog.e(e);
         }

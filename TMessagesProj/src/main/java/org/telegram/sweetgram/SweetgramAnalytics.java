@@ -7,12 +7,12 @@ import android.util.Log;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
 
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.FileLog;
 import org.telegram.messenger.UserConfig;
 
 /**
@@ -39,14 +39,18 @@ public class SweetgramAnalytics {
         }
         called = true;
         try {
-            FirebaseDatabase db = FirebaseDatabase.getInstance();
-            DatabaseReference root = db.getReference();
+            DatabaseReference root = SweetgramDb.ref("");
 
             increment(root.child("stats").child("launches"));
 
             long userId = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
             root.child("stats").child("users").child(String.valueOf(Math.abs(userId)))
-                    .setValue(ServerValue.TIMESTAMP);
+                    .setValue(ServerValue.TIMESTAMP, (DatabaseError error, DatabaseReference ref) -> {
+                        if (error != null) {
+                            Log.e(TAG, "users setValue failed: " + error.getMessage());
+                            FileLog.e("SweetgramAnalytics users write error: " + error.getMessage(), error.toException());
+                        }
+                    });
 
             SharedPreferences prefs = ApplicationLoader.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
             if (!prefs.getBoolean(PREF_INSTALLED, false)) {
@@ -55,7 +59,9 @@ public class SweetgramAnalytics {
             }
         } catch (Throwable e) {
             Log.e(TAG, "trackLaunch failed", e);
+            FileLog.e("trackLaunch failed", e);
         }
+        Log.i(TAG, "trackLaunch ran, userId=" + UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId());
     }
 
     private static void increment(DatabaseReference ref) {
@@ -74,6 +80,7 @@ public class SweetgramAnalytics {
             public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
                 if (error != null) {
                     Log.e(TAG, "increment failed: " + error.getMessage());
+                    FileLog.e("SweetgramAnalytics increment error: " + error.getMessage(), error.toException());
                 }
             }
         });

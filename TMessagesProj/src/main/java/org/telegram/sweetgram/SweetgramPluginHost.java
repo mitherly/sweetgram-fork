@@ -89,27 +89,37 @@ public class SweetgramPluginHost {
             return;
         }
         started = true;
-        worker = new Thread(() -> {
-            Looper.prepare();
-            handler = new Handler(Looper.myLooper());
-            try {
-                python("start", new Class<?>[]{android.content.Context.class},
-                        ApplicationLoader.applicationContext);
-            } catch (Throwable t) {
-                FileLog.e(t);
-                log("sweetgram", "питон не поднялся: " + t, true);
-                return;
-            }
-            log("sweetgram", "питон готов", false);
-            for (SweetgramPlugins.Plugin plugin : SweetgramPlugins.installed()) {
-                if (plugin.enabled() && SweetgramConfig.pluginsEnabled()) {
-                    run(plugin);
+        try {
+            worker = new Thread(() -> {
+                Looper.prepare();
+                handler = new Handler(Looper.myLooper());
+                try {
+                    python("start", new Class<?>[]{android.content.Context.class},
+                            ApplicationLoader.applicationContext);
+                } catch (Throwable t) {
+                    FileLog.e(t);
+                    log("sweetgram", "питон не поднялся: " + t, true);
+                    // Не держим флаг «поднято»: при следующем включении
+                    // плагина попытка повторится, а не молча пропадёт.
+                    started = false;
+                    return;
                 }
-            }
-            Looper.loop();
-        }, "sweetgram-plugins");
-        worker.setDaemon(true);
-        worker.start();
+                log("sweetgram", "питон готов", false);
+                for (SweetgramPlugins.Plugin plugin : SweetgramPlugins.installed()) {
+                    if (plugin.enabled() && SweetgramConfig.pluginsEnabled()) {
+                        run(plugin);
+                    }
+                }
+                Looper.loop();
+            }, "sweetgram-plugins");
+            worker.setDaemon(true);
+            worker.start();
+        } catch (Throwable t) {
+            // Поднять поток не вышло — плагины просто не заработают, но
+            // приложение не должно из-за этого падать.
+            FileLog.e(t);
+            started = false;
+        }
     }
 
     /**
@@ -121,13 +131,22 @@ public class SweetgramPluginHost {
      * написано на экране, врать тут нечем.
      */
     public static void launch(SweetgramPlugins.Plugin plugin) {
-        start();
+        try {
+            start();
+        } catch (Throwable t) {
+            FileLog.e(t);
+            return;
+        }
         final Handler h = handler;
         if (h == null) {
             // Питон ещё поднимается — плагин заберут при старте.
             return;
         }
-        h.post(() -> run(plugin));
+        try {
+            h.post(() -> run(plugin));
+        } catch (Throwable t) {
+            FileLog.e(t);
+        }
     }
 
     private static void run(SweetgramPlugins.Plugin plugin) {

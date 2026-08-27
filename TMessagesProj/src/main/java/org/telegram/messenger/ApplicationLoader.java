@@ -293,18 +293,19 @@ public class ApplicationLoader extends Application {
             com.sweetgram.SweetgramConfig.load();
         } catch (Throwable ignore) {
         }
+        // Обе инициализации форка — в фоне: Firebase cold-init и обращение к
+        // UserConfig.selectedAccount могут синхронно блокировать поток, а на
+        // главном потоке это замораживает сплэш (приложение не уходит в чат-лист).
         new Thread(() -> {
             try {
                 com.sweetgram.SweetgramAuth.getInstance();
             } catch (Throwable ignore) {
             }
+            try {
+                org.telegram.sweetgram.SweetgramAnalytics.trackLaunch();
+            } catch (Throwable ignore) {
+            }
         }).start();
-
-        // Аналитика форка: считаем запуск/установку один раз за жизнь процесса.
-        try {
-            org.telegram.sweetgram.SweetgramAnalytics.trackLaunch();
-        } catch (Throwable ignore) {
-        }
 
         try {
             final Thread.UncaughtExceptionHandler previousHandler = Thread.getDefaultUncaughtExceptionHandler();

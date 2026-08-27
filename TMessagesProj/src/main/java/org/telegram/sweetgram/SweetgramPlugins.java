@@ -92,9 +92,11 @@ public class SweetgramPlugins {
         public Bitmap icon() {
             if (!iconRead) {
                 iconRead = true;
-                final File file = new File(folder, "icon.png");
-                if (file.exists()) {
-                    icon = BitmapFactory.decodeFile(file.getAbsolutePath());
+                if (folder != null) {
+                    final File file = new File(folder, "icon.png");
+                    if (file.exists()) {
+                        icon = BitmapFactory.decodeFile(file.getAbsolutePath());
+                    }
                 }
             }
             return icon;
@@ -119,31 +121,54 @@ public class SweetgramPlugins {
 
     public static List<Plugin> installed() {
         final List<Plugin> found = new ArrayList<>();
-        final File[] folders = root().listFiles();
-        if (folders == null) {
-            return found;
-        }
-        for (File folder : folders) {
-            // Папка распаковки — не установленный плагин. Лежит она здесь же,
-            // и без этой проверки только что распакованный плагин находил сам
-            // себя: окно установки говорило «у тебя уже такой стоит, установка
-            // его заменит» вообще всем и всегда, даже на первом в жизни
-            // плагине. Заодно недораспакованное больше не мелькнёт в списке.
-            if (folder.getName().startsWith(STAGING)) {
-                continue;
+        try {
+            final File dir = root();
+            if (dir == null || !dir.isDirectory()) {
+                return found;
             }
-            final Plugin plugin = read(folder);
-            if (plugin != null) {
-                found.add(plugin);
+            final File[] folders = dir.listFiles();
+            if (folders == null) {
+                return found;
             }
+            for (File folder : folders) {
+                if (folder == null) {
+                    continue;
+                }
+                // Папка распаковки — не установленный плагин. Лежит она здесь
+                // же, и без этой проверки только что распакованный плагин
+                // находил сам себя: окно установки говорило «у тебя уже такой
+                // стоит, установка его заменит» вообще всем и всегда, даже на
+                // первом в жизни плагине. Заодно недораспакованное больше не
+                // мелькнёт в списке.
+                if (folder.getName().startsWith(STAGING)) {
+                    continue;
+                }
+                try {
+                    final Plugin plugin = read(folder);
+                    if (plugin != null) {
+                        found.add(plugin);
+                    }
+                } catch (Throwable ignored) {
+                    // Один битый плагин не должен ронять весь список.
+                }
+            }
+            Collections.sort(found, (a, b) -> {
+                final String an = a != null && a.name != null ? a.name : "";
+                final String bn = b != null && b.name != null ? b.name : "";
+                return an.compareToIgnoreCase(bn);
+            });
+        } catch (Throwable ignored) {
+            // Нет прав на каталог, нет каталога — возвращаем пустой список.
         }
-        Collections.sort(found, (a, b) -> a.name.compareToIgnoreCase(b.name));
         return found;
     }
 
     private static Plugin read(File folder) {
+        if (folder == null) {
+            return null;
+        }
         final File manifest = new File(folder, "manifest.json");
-        if (!folder.isDirectory() || !manifest.exists()) {
+        if (!folder.isDirectory() || !manifest.exists() || !manifest.isFile()) {
             return null;
         }
         try {

@@ -113,13 +113,25 @@ public class SweetgramPluginCell extends FrameLayout implements Theme.Colorable 
     }
 
     public void set(SweetgramPlugins.Plugin plugin, boolean checked, boolean animated) {
-        titleView.setText(plugin.name);
-        subtitleView.setText(plugin.version + " · " + plugin.author);
+        if (plugin == null) {
+            titleView.setText("");
+            subtitleView.setText("");
+            iconView.setImageDrawable(null);
+            gearView.setVisibility(GONE);
+            switchView.setChecked(false, animated);
+            return;
+        }
+        final String name = plugin.name != null ? plugin.name : "";
+        final String version = plugin.version != null ? plugin.version : "";
+        final String author = plugin.author != null ? plugin.author : "";
+        final String id = plugin.id != null ? plugin.id : "";
+        titleView.setText(name);
+        subtitleView.setText(version + " · " + author);
         final Bitmap icon = plugin.icon();
         iconView.setImageDrawable(icon != null
                 ? new Rounded(icon)
-                : new Letter(plugin.name, COLORS[Math.abs(plugin.id.hashCode()) % COLORS.length]));
-        gearView.setVisibility(SweetgramHooks.hasSettings(plugin.id) ? VISIBLE : GONE);
+                : new Letter(name, COLORS[Math.abs(id.hashCode()) % COLORS.length]));
+        gearView.setVisibility(SweetgramHooks.hasSettings(id) ? VISIBLE : GONE);
         switchView.setChecked(checked, animated);
     }
 

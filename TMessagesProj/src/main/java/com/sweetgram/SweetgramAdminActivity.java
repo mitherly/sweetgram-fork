@@ -18,10 +18,10 @@ import androidx.annotation.NonNull;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.ActionBar;
@@ -200,7 +200,7 @@ public class SweetgramAdminActivity extends BaseFragment {
 
     private void loadAnalytics() {
         try {
-            DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference root = SweetgramDb.ref("");
 
             root.child("stats").child("launches").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -211,6 +211,7 @@ public class SweetgramAdminActivity extends BaseFragment {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+                    FileLog.e("SweetgramAdmin launches read cancelled: " + error.getMessage(), error.toException());
                     setText(launchesValue, "-");
                 }
             });
@@ -223,6 +224,7 @@ public class SweetgramAdminActivity extends BaseFragment {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+                    FileLog.e("SweetgramAdmin users read cancelled: " + error.getMessage(), error.toException());
                     setText(usersValue, "-");
                 }
             });
@@ -236,6 +238,7 @@ public class SweetgramAdminActivity extends BaseFragment {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+                    FileLog.e("SweetgramAdmin installs read cancelled: " + error.getMessage(), error.toException());
                     setText(installsValue, "-");
                 }
             });
@@ -248,10 +251,12 @@ public class SweetgramAdminActivity extends BaseFragment {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+                    FileLog.e("SweetgramAdmin verified_users read cancelled: " + error.getMessage(), error.toException());
                     setText(verifiedValue, "-");
                 }
             });
         } catch (Throwable e) {
+            FileLog.e("SweetgramAdmin loadAnalytics failed", e);
             android.util.Log.e("SweetgramAdmin", "loadAnalytics failed", e);
         }
     }
