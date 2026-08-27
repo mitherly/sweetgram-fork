@@ -66,7 +66,7 @@
     <string name="MargeletIconSand">沙色</string>
     <string name="MargeletIconSea">海色</string>
     <string name="MargeletIconRose">玫瑰色</string>
-    <string name="MargeletCatAddYours">想让自己的猫进 Sweetgram？写给 @narezany</string>
+    <string name="MargeletCatAddYours">Want your cat in Sweetgram?</string>
     <string name="MargeletCatAskText">你好！我想把我的猫加进 Sweetgram。描述： </string>
     <string name="MargeletCatAskTail"> —— 照片附上。</string>
     <string name="MargeletCatOne">核桃</string>
@@ -83,15 +83,15 @@
     <string name="MargeletGiftsAbout">被撤下的礼物会加在列表末尾。购买仍然由服务器确认。</string>
     <string name="MargeletGiftsAuthor">这个办法的作者：@binbash_0</string>
     <string name="MargeletSource">源代码</string>
-    <string name="MargeletSourceInfo">github.com/narezany/Sweetgram</string>
+    <string name="MargeletSourceInfo">github.com/mitherly/sweetgram-fork</string>
     <string name="MargeletProfiles">个人资料</string>
     <string name="MargeletProfilesInfo">资料页上还显示些什么</string>
     <string name="MargeletShowIds">显示 ID</string>
     <string name="MargeletShowIdsAbout">在人、机器人、群组和频道的资料里加一行数字 id。点一下复制。</string>
     <string name="MargeletBadgeTitle">Sweetgram 作者</string>
-    <string name="MargeletBadgeAbout">Sweetgram 是 narezany 做的，所以徽章归他。</string>
-    <string name="MargeletBadgeFriendTitle">narezany 最好的朋友</string>
-    <string name="MargeletBadgeFriendAbout">narezany 最好的朋友。徽章由此而来。</string>
+    <string name="MargeletBadgeAbout">Sweetgram badge.</string>
+    <string name="MargeletBadgeFriendTitle">Sweetgram team</string>
+    <string name="MargeletBadgeFriendAbout">Sweetgram team member.</string>
     <string name="MargeletBadgeChannelTitle">Sweetgram 频道</string>
     <string name="MargeletBadgeChannelAbout">唯一的官方 Sweetgram 频道。</string>
     <string name="MargeletBadgeForumTitle">Sweetgram 论坛</string>
@@ -126,7 +126,7 @@
     <string name="MargeletMarkupAbout">别人的消息里显示哪些。发送始终允许。</string>
     <string name="MargeletWatermarks">显示水印</string>
     <string name="MargeletWatermarkSend">加上水印</string>
-    <string name="MargeletWatermarkSendAbout">只加在用了本分支自有格式的消息上——字号、变暗、彩虹、按钮。普通消息，以及 Telegram 自己的粗体斜体，不会加。\n\n它长这样：\n&lt;! Message looks better with @margeletter! &gt;</string>
+    <string name="MargeletWatermarkSendAbout">Sweetgram.</string>
     <string name="MargeletWatermarkAskTitle">一个请求</string>
     <string name="MargeletWatermarkAskText">Sweetgram 是个年轻的项目，大家多半是通过那行字才知道它的。作者请你留着。\n\n但这是你的消息，你说了算。</string>
     <string name="MargeletWatermarkKeep">我留着</string>
@@ -138,7 +138,7 @@
     <string name="MargeletCopyFormatted">带格式复制</string>
     <string name="MargeletCopyFormattedAbout">消息菜单里的一项。普通复制给的是纯文本，这个会保留粗体、斜体、链接和我们自己的格式。</string>
     <string name="MargeletAboutTitle">这是什么</string>
-    <string name="MargeletAboutText">Sweetgram 是一个 Telegram 分支，塞了一堆自己的东西：文本格式、音乐标签、主播模式、下架的礼物等等。\n\n作者 @narezany。\n\n还有：千万别点主界面上的标题，也别猛戳“聊天”按钮。</string>
+    <string name="MargeletAboutText">Sweetgram 是一个 Telegram 分支，塞了一堆自己的东西：文本格式、音乐标签、主播模式、下架的礼物等等。\n\n\n\n还有：千万别点主界面上的标题，也别猛戳“聊天”按钮。</string>
     <string name="MargeletMarkupWarnTitle">自有格式</string>
     <string name="MargeletMarkupWarnText">这种格式只有 Sweetgram 认得。其他人收到的是没有格式的纯文本，外加消息开头一行指向本分支的字。</string>
     <string name="MargeletDonate">捐赠</string>

@@ -470,7 +470,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         // Список значков перечитывается с гитхаба при каждом запуске: правка в
         // репозитории должна доезжать до людей без новой сборки. Ответа никто
         // не ждёт — пока он едет, показывается прошлый список.
-        org.telegram.margelet.MargeletBadge.refresh();
+
         // Проверка обновления форка: узнав про новую версию, показываем
         // полоску внизу списка чатов. Молча ничего не качается и не ставится.
         if (org.telegram.margelet.MargeletConfig.updatesChecked()) {
@@ -6996,7 +6996,6 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     View feedbackView;
 
-    @Override
     private void showLastSweetgramCrash() {
         try {
             java.io.File crashFile = new java.io.File(org.telegram.messenger.ApplicationLoader.applicationContext.getFilesDir(), "sweetgram_crash.log");

@@ -80,7 +80,7 @@ public class MargeletUpdate {
      * «посмотри, не появилось ли нового».
      */
     public static void checkAll(Runnable done) {
-        MargeletBadge.refresh();
+
         check(done);
     }
 
@@ -134,7 +134,7 @@ public class MargeletUpdate {
                 // запуске приложения, и у того, кто держит телеграм открытым
                 // сутками, новый значок не появлялся вовсе — ровно та же
                 // беда, из-за которой здесь и завелось расписание.
-                MargeletBadge.refresh();
+        
                 AndroidUtilities.runOnUIThread(this, delay);
             }
         };

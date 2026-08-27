@@ -635,8 +635,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
      * «проверено», и занимает его, только если слот свободен: ни галочку, ни
      * «скам», ни значок премиума затирать нельзя.
      */
-    private android.graphics.drawable.Drawable margeletBadge;
-    private boolean drawMargelet;
     private boolean drawBotVerified;
     private boolean drawPremium;
     private final View emojiStatusView;
@@ -1293,8 +1291,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
 
         drawNameLock = false;
         drawVerified = false;
-        margeletBadge = null;
-        drawMargelet = false;
         drawBotVerified = false;
         drawPremium = false;
         drawForwardIcon = false;
@@ -1499,7 +1495,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                             drawVerified = !forbidVerified && chat.verified;
                             drawBotVerified = !forbidVerified && chat.bot_verification_icon != 0;
                         }
-                        margeletBadge = margeletBadgeFor(org.telegram.margelet.MargeletBadge.chatPeer(chat.id));
                     } else if (user != null) {
                         dialogBotVerificationIcon = DialogObject.getBotVerificationIcon(user);
                         if (user.scam) {
@@ -1512,7 +1507,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                             drawVerified = !forbidVerified && user.verified;
                             drawBotVerified = !forbidVerified && !UserObject.isUserSelf(user) && user.bot_verification_icon != 0;
                         }
-                        margeletBadge = margeletBadgeFor(user.id);
                         drawPremium = MessagesController.getInstance(currentAccount).isPremiumUser(user) && UserConfig.getInstance(currentAccount).clientUserId != user.id && user.id != 0;
                         if (drawPremium) {
                             Long emojiStatusId = UserObject.getEmojiStatusDocumentId(user);
@@ -2337,8 +2331,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
 
         nameAdditionalsForChannelSubscriber = 0;
         final boolean reserveMuteSlot = (dialogMuted || isHiddenInCommunity || drawUnmute || dialogMutedProgress > 0) && !drawVerified && drawScam == 0;
-        // Слот один. Значок форка достаётся только тому, у кого он свободен.
-        drawMargelet = margeletBadge != null && !reserveMuteSlot && !drawVerified && !drawPremium && drawScam == 0;
         if (drawPremium && emojiStatus.getDrawable() != null) {
             int w = dp(6 + 24 + 6);
             if (reserveMuteSlot) {
@@ -2375,13 +2367,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             }
         } else if (drawScam != 0) {
             int w = dp(6) + (drawScam == 1 ? Theme.dialogs_scamDrawable : Theme.dialogs_fakeDrawable).getIntrinsicWidth();
-            nameWidth -= w;
-            nameAdditionalsForChannelSubscriber += w;
-            if (LocaleController.isRTL) {
-                nameLeft += w;
-            }
-        } else if (drawMargelet) {
-            int w = dp(6) + Theme.dialogs_verifiedDrawable.getIntrinsicWidth();
             nameWidth -= w;
             nameAdditionalsForChannelSubscriber += w;
             if (LocaleController.isRTL) {
@@ -2818,8 +2803,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                     nameMutedIconLeft = nameMuteLeft - dp(6) - Theme.dialogs_muteDrawable.getIntrinsicWidth();
                 } else if (drawScam != 0) {
                     nameMuteLeft = (int) (nameLeft + (nameWidth - widthpx) - dp(6) - (drawScam == 1 ? Theme.dialogs_scamDrawable : Theme.dialogs_fakeDrawable).getIntrinsicWidth());
-                } else if (drawMargelet) {
-                    nameMuteLeft = (int) (nameLeft + (nameWidth - widthpx) - dp(6) - Theme.dialogs_verifiedDrawable.getIntrinsicWidth());
                 } else {
                     nameMuteLeft = (int) (nameLeft + (nameWidth - widthpx) - dp(6) - Theme.dialogs_muteDrawable.getIntrinsicWidth());
                 }
@@ -2906,7 +2889,7 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 if (drawBotVerified) {
                     nameLeft += dp(21);
                 }
-                if ((dialogMuted || true) || drawUnmute || drawVerified || drawPremium || drawScam != 0 || drawMargelet) {
+                if ((dialogMuted || true) || drawUnmute || drawVerified || drawPremium || drawScam != 0) {
                     nameMuteLeft = (int) (nameLeft + left + dp(6));
                     if (drawPremium) {
                         nameMutedIconLeft = nameMuteLeft + dp(24 + 6);
@@ -3058,10 +3041,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         return forumFormattedNames.formattedNames;
     }
 
-    /** Значок форка для номера или null, если такого в таблице нет. */
-    private android.graphics.drawable.Drawable margeletBadgeFor(long peerId) {
-        return org.telegram.margelet.MargeletBadge.iconDrawable(getContext(), peerId);
-    }
 
     public boolean isForumCell() {
         return !isDialogFolder() && !insideCommunityListNoDialog && chat != null && (chat.forum || ChatObject.isMonoForum(chat) && ChatObject.canManageMonoForum(currentAccount, chat)) && !isTopic;
@@ -4496,17 +4475,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
                 setDrawableBounds(Theme.dialogs_verifiedCheckDrawable, nameMuteLeft - dp(1), y);
                 Theme.dialogs_verifiedDrawable.draw(canvas);
                 Theme.dialogs_verifiedCheckDrawable.draw(canvas);
-            } else if (drawMargelet && margeletBadge != null && !drawMuted) {
-                float y = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 13.5f : 16.5f);
-                if ((!(useForceThreeLines || SharedConfig.useThreeLinesLayout) || isForumCell()) && hasTags()) {
-                    y -= dp(9);
-                }
-                // Размер берём у галочки «проверено»: место под значок
-                // посчитано по ней, и свой размер тут сдвинул бы имя.
-                final int size = Theme.dialogs_verifiedDrawable.getIntrinsicWidth();
-                final int x = nameMuteLeft - dp(1);
-                margeletBadge.setBounds(x, (int) y, x + size, (int) y + size);
-                margeletBadge.draw(canvas);
             } else if (drawPremium) {
                 int y = dp(useForceThreeLines || SharedConfig.useThreeLinesLayout ? 12.5f : 15.5f);
                 if ((!(useForceThreeLines || SharedConfig.useThreeLinesLayout) || isForumCell()) && hasTags()) {
@@ -5573,10 +5541,6 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
         }
         if (drawVerified) {
             sb.append(getString(R.string.AccDescrVerified));
-            sb.append(". ");
-        }
-        if (drawMargelet) {
-            sb.append(getString(R.string.MargeletBadgeRow));
             sb.append(". ");
         }
         if (dialogMuted) {

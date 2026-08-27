@@ -11287,7 +11287,7 @@
     <string name="MargeletIconSand">Sand</string>
     <string name="MargeletIconSea">Sea</string>
     <string name="MargeletIconRose">Rose</string>
-    <string name="MargeletCatAddYours">Want your cat in Sweetgram? Write to @narezany</string>
+    <string name="MargeletCatAddYours">Want your cat in Sweetgram?</string>
     <string name="MargeletCatAskText">Hi! I want to add my cat to Sweetgram. Description: </string>
     <string name="MargeletCatAskTail"> — photo attached.</string>
     <string name="MargeletCatOne">walnut</string>
@@ -11304,15 +11304,15 @@
     <string name="MargeletGiftsAbout">Gifts taken out of the catalog are added to the end of the list. The purchase is still confirmed by the server.</string>
     <string name="MargeletGiftsAuthor">Author of the trick: @binbash_0</string>
     <string name="MargeletSource">Source code</string>
-    <string name="MargeletSourceInfo">github.com/narezany/Sweetgram</string>
+    <string name="MargeletSourceInfo">github.com/mitherly/sweetgram-fork</string>
     <string name="MargeletProfiles">Profiles</string>
     <string name="MargeletProfilesInfo">What else to show on a profile page</string>
     <string name="MargeletShowIds">Show ID</string>
     <string name="MargeletShowIdsAbout">A line with the numeric id in profiles of people, bots, groups and channels. Tap to copy.</string>
     <string name="MargeletBadgeTitle">Sweetgram creator</string>
-    <string name="MargeletBadgeAbout">Narezany made Sweetgram, that is why the badge is his.</string>
-    <string name="MargeletBadgeFriendTitle">Narezany\'s best friend</string>
-    <string name="MargeletBadgeFriendAbout">Narezany\'s best friend. Hence the badge.</string>
+    <string name="MargeletBadgeAbout">Sweetgram badge.</string>
+    <string name="MargeletBadgeFriendTitle">Sweetgram team</string>
+    <string name="MargeletBadgeFriendAbout">Sweetgram team member.</string>
     <string name="MargeletBadgeChannelTitle">Sweetgram channel</string>
     <string name="MargeletBadgeChannelAbout">The one official Sweetgram channel.</string>
     <string name="MargeletBadgeForumTitle">Sweetgram forum</string>
@@ -11347,7 +11347,7 @@
     <string name="MargeletMarkupAbout">What to show in other people\u0027s messages. Sending is always allowed.</string>
     <string name="MargeletWatermarks">Show watermarks</string>
     <string name="MargeletWatermarkSend">Add the watermark</string>
-    <string name="MargeletWatermarkSendAbout">Added only to messages that use the fork\u0027s own formatting — size, dim, rainbow, a button. Plain messages and Telegram\u0027s own bold or italics do not get it.\n\nIt looks like this:\n&lt;! Message looks better with @margeletter! &gt;</string>
+    <string name="MargeletWatermarkSendAbout">Sweetgram.</string>
     <string name="MargeletWatermarkAskTitle">A request</string>
     <string name="MargeletWatermarkAskText">Sweetgram is a young project, and that line is mostly how people hear about it. The author asks you to keep it.\n\nBut it is your message and your call.</string>
     <string name="MargeletWatermarkKeep">I will keep it</string>
@@ -11359,7 +11359,7 @@
     <string name="MargeletCopyFormatted">Copy with formatting</string>
     <string name="MargeletCopyFormattedAbout">An item in the message menu. A plain copy gives bare text, this one keeps bold, italics, links and our own formatting.</string>
     <string name="MargeletAboutTitle">What this is</string>
-    <string name="MargeletAboutText">Sweetgram is a Telegram fork with a pile of its own: text formatting, music tags, streamer mode, delisted gifts and more.\n\nMade by @narezany.\n\nAlso: never tap the title on the main screen, and never spam the Chats button.</string>
+    <string name="MargeletAboutText">Sweetgram is a Telegram fork with a pile of its own: text formatting, music tags, streamer mode, delisted gifts and more.\n\n\n\nAlso: never tap the title on the main screen, and never spam the Chats button.</string>
     <string name="MargeletMarkupWarnTitle">Custom formatting</string>
     <string name="MargeletMarkupWarnText">Only Sweetgram understands this formatting. Everyone else gets plain text without it, plus a line linking to the fork at the start of the message.</string>
     <string name="MargeletDonate">Donate</string>

@@ -17,7 +17,7 @@ public class MargeletConfig {
     public static final int INPUT_LINES_DEFAULT = 6;
     public static final float INPUT_TEXT_SIZE_DEFAULT = 18f;
 
-    public static final String APP_NAME = "Margelet";
+    public static final String APP_NAME = "Sweetgram";
 
     /**
      * Номер этой сборки. По нему клиент понимает, что на гитхабе лежит версия
@@ -51,7 +51,7 @@ public class MargeletConfig {
         return updateIntervalMinutes() > 0;
     }
 
-    public static final String CHANNEL_URL = "https://github.com/mitherly/SweetGram";
+    public static final String CHANNEL_URL = "https://t.me/SweetGramOfficial";
     /**
      * Реквизиты для доната. Лежат здесь, а не в строках: это не перевод, а
      * данные владельца форка, и в каждом языке они одни и те же.
@@ -71,35 +71,14 @@ public class MargeletConfig {
     /** Свой набор стикеров: ставится обычной кнопкой, как любой другой набор. */
     public static final String STICKERS_URL = "";
 
-    public static final String SOURCE_URL = "https://github.com/mitherly/SweetGram";
-    public static final String FORUM_URL = "https://github.com/mitherly/SweetGram";
+    public static final String SOURCE_URL = "https://github.com/mitherly/sweetgram-fork";
+    public static final String FORUM_URL = "https://github.com/mitherly/sweetgram-fork";
     /**
      * Написать нам. Это тот же канал, но с ?direct: телеграм открывает не
      * ленту, а поле для сообщения — человек с жалобой не должен искать, куда
      * её деть.
      */
-    public static final String FEEDBACK_URL = "https://github.com/mitherly/SweetGram/issues";
-    /**
-     * Документация по плагинам. Ведёт на файл в репозитории, а не на страницу
-     * сайта: страницы гитхаба у репозитория не включены, а ссылка на
-     * несуществующий сайт — просто обман.
-     *
-     * Язык берётся из приложения. Английская — та, что без суффикса: она же
-     * открывается по ссылке из README, и с неё есть переходы на остальные.
-     */
-    public static String pluginsDocsUrl() {
-        final String base = "https://github.com/narezany/Margelet/blob/main/docs/plugins";
-        String language = null;
-        try {
-            language = org.telegram.messenger.LocaleController.getInstance()
-                    .getCurrentLocale().getLanguage();
-        } catch (Exception ignored) {
-        }
-        if ("ru".equals(language) || "zh".equals(language)) {
-            return base + "." + language + ".md";
-        }
-        return base + ".md";
-    }
+    public static final String FEEDBACK_URL = "https://t.me/tyrooooo";
 
     private static SharedPreferences prefs() {
         return ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -177,11 +156,10 @@ public class MargeletConfig {
      * нет: внутри форка она и так ни к чему, она для тех, у кого форка нет.
      */
     public static boolean showWatermarks() {
-        return prefs().getBoolean("watermarks", false);
+        return false;
     }
 
     public static void setShowWatermarks(boolean on) {
-        prefs().edit().putBoolean("watermarks", on).apply();
     }
 
     /**
@@ -226,7 +204,7 @@ public class MargeletConfig {
      * По умолчанию да: форк живёт тем, что о нём узнают.
      */
     public static boolean watermarkOnSend() {
-        return prefs().getBoolean("watermark_send", false);
+        return false;
     }
 
     public static void setWatermarkOnSend(boolean on) {
@@ -348,7 +326,7 @@ public class MargeletConfig {
 
     /** Мяуканье по нажатию на название — можно выключить совсем. */
     public static boolean meowEnabled() {
-        return prefs().getBoolean("meow_enabled", true);
+        return prefs().getBoolean("meow_enabled", false);
     }
 
     public static void setMeowEnabled(boolean enabled) {

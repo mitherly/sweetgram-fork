@@ -691,7 +691,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         // Свой раздел стоит первым — так просил владелец. Номер строки взят
         // с запасом от чужих: телеграм нумерует их подряд, и если однажды у
         // них появится одиннадцатая, наша тысяча первая с ней не столкнётся.
-        items.add(SettingCell.Factory.of(1001, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_features, "Margelet", "Настройки форка"));
+        items.add(SettingCell.Factory.of(1001, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_features, "Sweetgram", "Настройки форка"));
         items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account, getString(R.string.SettingsAccount), getString(R.string.SettingsAccountInfo)));
         items.add(SettingCell.Factory.of(2, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_chat, getString(R.string.SettingsChat), getString(R.string.SettingsChatInfo)));
         items.add(SettingCell.Factory.of(3, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_privacy, getString(R.string.SettingsPrivacySecurity), getString(R.string.SettingsPrivacySecurityInfo)));

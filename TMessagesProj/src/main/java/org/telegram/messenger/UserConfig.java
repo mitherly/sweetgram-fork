@@ -265,7 +265,7 @@ public class UserConfig extends BaseController {
                     if (doc != 0) {
                         int until = com.sweetgram.SweetgramConfig.localEmojiStatusUntil;
                         if (until != 0) {
-                            TLRPC.TL_emojiStatusUntil es = new TLRPC.TL_emojiStatusUntil();
+                            TLRPC.TL_emojiStatusUntil_layer197 es = new TLRPC.TL_emojiStatusUntil_layer197();
                             es.document_id = doc;
                             es.until = until;
                             currentUser.emoji_status = es;
