@@ -150,6 +150,15 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile file("config/release.keystore")
+            storePassword "android"
+            keyAlias "androidkey"
+            keyPassword "android"
+        }
+    }
+
     buildTypes {
         debug {
             jniDebuggable true
@@ -238,6 +247,7 @@ android {
             jniDebuggable false
             minifyEnabled true
             shrinkResources false
+            signingConfig signingConfigs.release
             multiDexEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro'
             ndk.debugSymbolLevel = 'FULL'

@@ -1,9 +1,12 @@
-name: Build Sweetgram Debug APK
+name: Build Sweetgram Release APK
 
 on:
   workflow_dispatch:
   push:
     branches: [rewrite]
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -40,16 +43,29 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
-      - name: Build debug APK
+      - name: Build release APK
         run: |
           chmod +x gradlew
-          ./gradlew :TMessagesProj_App:assembleAfatDebug --no-daemon
+          ./gradlew :TMessagesProj_App:assembleAfatRelease --no-daemon
 
       - name: Rename APK
-        run: cp TMessagesProj_App/build/outputs/apk/afat/debug/*.apk Sweetgram-debug.apk
+        run: cp TMessagesProj_App/build/outputs/apk/afat/release/*.apk Sweetgram-release.apk
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sweetgram-debug-apk
-          path: Sweetgram-debug.apk
+          name: sweetgram-release-apk
+          path: Sweetgram-release.apk
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.4
+          name: Sweetgram v0.4
+          body: |
+            Sweetgram форк Telegram — релизная сборка.
+            - Розовый ребренд, верификация (Firebase).
+            - Звук по тапу по слову Sweetgram.
+            - Админ-панель управления верификацией.
+          files: Sweetgram-release.apk
+          make_latest: true
