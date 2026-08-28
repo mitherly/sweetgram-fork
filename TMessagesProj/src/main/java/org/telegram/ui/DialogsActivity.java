@@ -3010,22 +3010,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     private MediaPlayer sweetgramClickPlayer;
 
     private void playSweetgramClickSound() {
-        try {
-            if (sweetgramClickPlayer != null) {
-                sweetgramClickPlayer.release();
-                sweetgramClickPlayer = null;
-            }
-            AssetFileDescriptor afd = getContext().getAssets().openFd("buru-nyaa.mp3");
-            MediaPlayer mp = new MediaPlayer();
-            mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-            afd.close();
-            mp.prepare();
-            mp.start();
-            mp.setOnCompletionListener(player -> player.release());
-            sweetgramClickPlayer = mp;
-        } catch (Exception e) {
-            FileLog.e(e);
-        }
+        org.telegram.sweetgram.SweetgramSound.playWordmark();
     }
 
     public void updateStatus(TLRPC.User user, boolean animated) {
