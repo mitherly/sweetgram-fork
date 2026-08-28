@@ -330,11 +330,11 @@ public class SweetgramHooks {
     private static void deliverReactions(Object[] args) {
         final long dialogId;
         final int messageId;
-        final TLRPC.Reactions reactions;
+        final TLRPC.MessageReactions reactions;
         try {
             dialogId = (Long) args[0];
             messageId = (Integer) args[1];
-            reactions = (TLRPC.Reactions) args[2];
+            reactions = (TLRPC.MessageReactions) args[2];
         } catch (Throwable ignored) {
             return;
         }

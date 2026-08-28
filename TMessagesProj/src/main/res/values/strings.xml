@@ -11286,7 +11286,7 @@
     <string name="SweetgramIconSparkle">Sparkle</string>
     <string name="SweetgramIconAirmail">Airmail</string>
     <string name="SweetgramIconBadge">Badge</string>
-    <string name="SweetgramIconRose">Hearts</string>
+    <string name="SweetgramIconHearts">Hearts</string>
     <string name="SweetgramGhost">Ghost mode</string>
     <string name="SweetgramGhostInfo">Be in the chat as if you were not there</string>
     <string name="SweetgramGhostTyping">Hide typing status</string>

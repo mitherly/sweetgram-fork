@@ -328,7 +328,7 @@
     <string name="SweetgramIconSparkle">Искра</string>
     <string name="SweetgramIconAirmail">Авиапочта</string>
     <string name="SweetgramIconBadge">Значок</string>
-    <string name="SweetgramIconRose">Сердечки</string>
+    <string name="SweetgramIconHearts">Сердечки</string>
     <string name="SweetgramGhost">Ghost-режим</string>
     <string name="SweetgramGhostInfo">Быть в чате так, будто тебя там нет</string>
     <string name="SweetgramGhostTyping">Не отправлять «печатает»</string>

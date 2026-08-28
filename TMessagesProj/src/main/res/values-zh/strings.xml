@@ -65,7 +65,7 @@
     <string name="SweetgramIconSparkle">星火</string>
     <string name="SweetgramIconAirmail">航空邮件</string>
     <string name="SweetgramIconBadge">徽章</string>
-    <string name="SweetgramIconRose">爱心</string>
+    <string name="SweetgramIconHearts">爱心</string>
     <string name="SweetgramGhost">幽灵模式</string>
     <string name="SweetgramGhostInfo">在聊天中仿佛不存在</string>
     <string name="SweetgramGhostTyping">不显示「正在输入」</string>
