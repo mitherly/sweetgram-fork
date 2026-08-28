@@ -71,7 +71,8 @@ android {
             debuggable true
             jniDebuggable true
             signingConfig signingConfigs.debug
-            applicationIdSuffix ".web"
+            // Суффикс .web убран: debug-сборка — то же приложение
+            // com.sweetgram.client, иначе Firebase не находит свой клиент.
             minifyEnabled false
             multiDexEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), '../TMessagesProj/proguard-rules.pro', '../TMessagesProj/proguard-rules-beta.pro'
