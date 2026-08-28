@@ -27,7 +27,7 @@ public class SweetgramConfig {
      * Забыть про него значит выпустить сборку, которая всю жизнь будет
      * предлагать обновиться сама на себя.
      */
-    public static final String APP_VERSION = "0.4";
+    public static final String APP_VERSION = "0.5";
 
     /**
      * Как часто спрашивать гитхаб про новую версию, в минутах. Ноль — не
@@ -79,6 +79,8 @@ public class SweetgramConfig {
      * её деть.
      */
     public static final String FEEDBACK_URL = "https://t.me/SweetgramHelper";
+    /** Канал с плагинами сообщества: кнопка «Библиотека плагинов» ведёт сюда. */
+    public static final String PLUGINS_LIBRARY_URL = "https://t.me/SweetGramPlugins";
 
     private static SharedPreferences prefs() {
         return ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);

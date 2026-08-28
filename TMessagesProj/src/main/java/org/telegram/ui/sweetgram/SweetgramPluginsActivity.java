@@ -102,7 +102,7 @@ public class SweetgramPluginsActivity extends UniversalFragment {
         } else if (item.id == ID_CONSOLE) {
             presentFragment(new SweetgramPluginConsoleActivity());
         } else if (item.id == ID_FORUM) {
-            Browser.openUrl(getContext(), SweetgramConfig.FORUM_URL);
+            Browser.openUrl(getContext(), SweetgramConfig.PLUGINS_LIBRARY_URL);
         } else if (item.id >= ID_PLUGIN) {
             open(plugin(item.id), view, x);
         }
