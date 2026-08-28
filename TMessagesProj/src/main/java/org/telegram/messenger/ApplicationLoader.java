@@ -302,7 +302,7 @@ public class ApplicationLoader extends Application {
             } catch (Throwable ignore) {
             }
             try {
-                org.telegram.sweetgram.SweetgramAnalytics.trackLaunch();
+                org.telegram.sweetgram.SweetgramSound.warmup();
             } catch (Throwable ignore) {
             }
         }).start();
