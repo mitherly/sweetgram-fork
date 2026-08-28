@@ -13142,7 +13142,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         return;
                     }
                     if (ok) {
-                        SweetgramBanner.loadBitmap(url, bannerImageView);
+                        SweetgramBanner.showBanner(url, bannerImageView);
                         Toast.makeText(getParentActivity(), LocaleController.getString(R.string.sg_banner_updated), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getParentActivity(), LocaleController.getString(R.string.sg_banner_error) + ": " + error, Toast.LENGTH_SHORT).show();
@@ -13161,22 +13161,22 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         final long selfId = UserConfig.getInstance(currentAccount).getClientUserId();
         if (userId == 0 || userId != selfId) {
             if (userId != 0) {
-                SweetgramBanner.fetchBannerUrl(userId, url -> {
-                    if (url != null) {
-                        SweetgramBanner.loadBitmap(url, bannerImageView);
+                SweetgramBanner.fetchBanner(userId, b64 -> {
+                    if (b64 != null) {
+                        SweetgramBanner.showBanner(b64, bannerImageView);
                     }
                 });
             }
             return;
         }
-        String cached = SweetgramBanner.getLocalBannerUrl();
+        String cached = SweetgramBanner.getLocalBanner();
         if (cached != null) {
-            SweetgramBanner.loadBitmap(cached, bannerImageView);
+            SweetgramBanner.showBanner(cached, bannerImageView);
         }
-        SweetgramBanner.fetchBannerUrl(SweetgramBanner.selfId(), url -> {
-            if (url != null) {
-                SweetgramBanner.saveLocalBannerUrl(url);
-                SweetgramBanner.loadBitmap(url, bannerImageView);
+        SweetgramBanner.fetchBanner(SweetgramBanner.selfId(), b64 -> {
+            if (b64 != null) {
+                SweetgramBanner.saveLocalBanner(b64);
+                SweetgramBanner.showBanner(b64, bannerImageView);
             }
         });
     }
