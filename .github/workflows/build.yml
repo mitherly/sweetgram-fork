@@ -79,7 +79,19 @@ jobs:
         if: steps.buildtype.outputs.type == 'debug'
         run: |
           chmod +x gradlew
-          ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug --no-daemon --stacktrace
+          ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug --no-daemon --stacktrace 2>&1 | tee build.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Show build errors in summary
+        if: failure()
+        run: |
+          {
+            echo "### Build errors"
+            grep -n -i -E "error:|FAILURE|Caused by|Exception" build.log | head -80 || true
+            echo ""
+            echo "### Log tail"
+            tail -80 build.log || true
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Rename debug APK
         if: steps.buildtype.outputs.type == 'debug'
