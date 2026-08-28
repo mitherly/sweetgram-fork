@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Кольцо с самолётиком внутри. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M28.5,54a25.5,25.5 0 1,0 51,0a25.5,25.5 0 1,0 -51,0"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="5"/>
+    <group
+        android:scaleX="0.58"
+        android:scaleY="0.58"
+        android:translateX="22.68"
+        android:translateY="25.77">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M54,29.88 L27.55,67.46 L52.05,59.11 L54,64.12 L55.95,59.11 L80.45,67.46 Z"/>
+    </group>
+</vector>

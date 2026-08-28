@@ -1646,7 +1646,7 @@ public class Theme {
             if (isDark != UNKNOWN) {
                 return isDark == DARK;
             }
-            if ("Dark Blue".equals(name) || "Night".equals(name)) {
+            if ("Dark Blue".equals(name) || "Night".equals(name) || "AMOLED".equals(name)) {
                 isDark = DARK;
             } else if ("Blue".equals(name) || "Arctic Blue".equals(name) || "Day".equals(name)) {
                 isDark = LIGHT;
@@ -4010,6 +4010,33 @@ public class Theme {
         themes.add(themeInfo);
         themesDict.put("Night", themeInfo);
 
+        // AMOLED — это Night, у которого фоны выжжены в чистый чёрный.
+        // Розовые акценты дорисовывает общая палитра форка, поэтому своих
+        // акцентов здесь нет: массивы нулевые, как у Day.
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "AMOLED";
+        themeInfo.assetName = "amoled.attheme";
+        themeInfo.previewBackgroundColor = 0xff000000;
+        themeInfo.previewInColor = 0xff1c1c1e;
+        themeInfo.previewOutColor = 0xffe59cb8;
+        themeInfo.sortIndex = 6;
+        themeInfo.setAccentColorOptions(
+                new int[] { 0x00000000 },
+                new int[] { 0x00000000 },
+                new int[] { 0x00000000 },
+                new int[] { 0x00000000 },
+                new int[] { 0x00000000 },
+                null,
+                null,
+                new int[] { 0 },
+                new String[] { "" },
+                new int[] { 0 },
+                new int[] { 0 }
+        );
+        sortAccents(themeInfo);
+        themes.add(themeInfo);
+        themesDict.put("AMOLED", themeInfo);
+
         String themesString = themeConfig.getString("themes2", null);
 
         int remoteVersion = themeConfig.getInt("remote_version", 0);
@@ -4357,6 +4384,30 @@ public class Theme {
         setColor(key_chat_outReplyNameText, pinkName, false);
         setColor(key_actionBarDefaultTitle, dark ? pinkBarDark : pinkTitle, false);
         setColor(key_actionBarDefaultSearch, dark ? pinkBarDark : pinkTitle, false);
+        // Голубое, оставшееся от оригинала: ссылки и подписи, галочки
+        // прочтения, бейджи, счётчики, вкладки. Ключи названы «Blue»
+        // исторически — розовеет всё, что было фирменно-синим.
+        setColor(key_windowBackgroundWhiteBlueText, pinkTextLink, false);
+        setColor(key_windowBackgroundWhiteBlueIcon, pinkIcon, false);
+        setColor(key_windowBackgroundWhiteBlueText2, pinkTextLink, false);
+        setColor(key_windowBackgroundWhiteBlueText3, pinkTextLink, false);
+        setColor(key_windowBackgroundWhiteBlueText4, pinkAccent, false);
+        setColor(key_windowBackgroundWhiteBlueText5, pinkTextLink, false);
+        setColor(key_windowBackgroundWhiteBlueText6, pinkTextLink, false);
+        setColor(key_windowBackgroundWhiteBlueText7, pinkTextLink, false);
+        setColor(key_windowBackgroundWhiteValueText, pinkTextLink, false);
+        setColor(key_dialogTextBlue, pinkTextLink, false);
+        setColor(key_dialogTextBlue2, pinkTextLink, false);
+        setColor(key_dialogTextBlue4, pinkTextLink, false);
+        setColor(key_dialogRoundCheckBox, pinkAccent, false);
+        setColor(key_checkboxSquareBackground, pinkAccent, false);
+        setColor(key_featuredStickers_addedIcon, pinkAccent, false);
+        setColor(key_chats_sentCheck, pinkAccent, false);
+        setColor(key_chats_sentReadCheck, pinkAccent, false);
+        setColor(key_actionBarTabLine, pinkAccent, false);
+        setColor(key_switchTrackBlueChecked, pinkAccent, false);
+        setColor(key_switchTrackBlueThumbChecked, pinkAccent, false);
+        setColor(key_windowBackgroundChecked, pinkAccent, false);
         if (dark) {
             return;
         }

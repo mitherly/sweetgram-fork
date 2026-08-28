@@ -48,6 +48,7 @@ public class SweetgramSettingsActivity extends UniversalFragment {
     private static final int ID_PLUGINS = 15;
     private static final int ID_FEEDBACK = 18;
     private static final int ID_ADMIN = 19;
+    private static final int ID_GHOST = 20;
 
     /** Объёмный значок в шапке. Пользы ноль, и в этом вся мысль. */
     private FrameLayout header;
@@ -90,6 +91,10 @@ public class SweetgramSettingsActivity extends UniversalFragment {
                 IconBackgroundColors.RED.top, IconBackgroundColors.RED.bottom,
                 R.drawable.settings_privacy, LocaleController.getString(R.string.SweetgramStreamer),
                 LocaleController.getString(R.string.SweetgramStreamerInfo)));
+        items.add(SettingsActivity.SettingCell.Factory.of(ID_GHOST,
+                IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom,
+                R.drawable.settings_policy, LocaleController.getString(R.string.SweetgramGhost),
+                LocaleController.getString(R.string.SweetgramGhostInfo)));
         items.add(SettingsActivity.SettingCell.Factory.of(ID_CONVENIENCES,
                 IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom,
                 R.drawable.settings_folders, LocaleController.getString(R.string.SweetgramConveniences),
@@ -190,6 +195,8 @@ public class SweetgramSettingsActivity extends UniversalFragment {
             presentFragment(new SweetgramGiftsActivity());
         } else if (item.id == ID_STREAMER) {
             presentFragment(new SweetgramStreamerActivity());
+        } else if (item.id == ID_GHOST) {
+            presentFragment(new SweetgramGhostActivity());
         } else if (item.id == ID_UPDATES) {
             presentFragment(new SweetgramUpdatesActivity());
         } else if (item.id == ID_CONVENIENCES) {
@@ -199,21 +206,9 @@ public class SweetgramSettingsActivity extends UniversalFragment {
         } else if (item.id == ID_FEEDBACK) {
             Browser.openUrl(getContext(), SweetgramConfig.FEEDBACK_URL);
         } else if (item.id == ID_ADMIN) {
-            final android.widget.EditText input = new android.widget.EditText(getContext());
-            input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            new org.telegram.ui.ActionBar.AlertDialog.Builder(getContext())
-                    .setTitle("Admin access")
-                    .setMessage("Enter password:")
-                    .setView(input)
-                    .setPositiveButton("Submit", (dialog, which) -> {
-                        if ("507143561213885610345637".equals(input.getText().toString())) {
-                            presentFragment(new com.sweetgram.SweetgramAdminActivity());
-                        } else {
-                            android.widget.Toast.makeText(getContext(), "Incorrect password", android.widget.Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show();
+            // Пароля в клиенте больше нет: панель сама спросит вход через
+            // Firebase Auth и сверится со списком админов в базе.
+            presentFragment(new com.sweetgram.SweetgramAdminActivity());
         } else if (item.id == ID_FORUM) {
             Browser.openUrl(getContext(), SweetgramConfig.FORUM_URL);
         }

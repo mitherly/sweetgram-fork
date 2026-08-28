@@ -5,6 +5,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.UserConfig;
+import org.telegram.tgnet.TLRPC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,9 @@ public class SweetgramHooks {
 
     private static volatile boolean wantsSend;
     private static volatile boolean wantsMessage;
+    private static volatile boolean wantsMedia;
+    private static volatile boolean wantsReactions;
+    private static volatile boolean wantsEdits;
     private static final List<Button> buttons = new ArrayList<>();
     private static boolean watching;
 
@@ -73,8 +77,25 @@ public class SweetgramHooks {
         watch();
     }
 
+    public static void wantMedia() {
+        wantsMedia = true;
+    }
+
+    public static void wantReactions() {
+        wantsReactions = true;
+        watch();
+    }
+
+    public static void wantEdits() {
+        wantsEdits = true;
+    }
+
     public static boolean hasSend() {
         return wantsSend;
+    }
+
+    public static boolean hasMedia() {
+        return wantsMedia;
     }
 
     /**
@@ -163,6 +184,41 @@ public class SweetgramHooks {
         }
     }
 
+    /**
+     * Человек отправляет фото, видео или файл. Текстового ответа у медиа
+     * нет, зато есть подпись — её плагин может заменить; изменить сам файл
+     * на лету нельзя, поэтому двери две: отпустить или отменить.
+     *
+     * Ждёт, как и sending(): подпись нужна до того, как сообщение ушло.
+     *
+     * @param kind    что именно едет: photo, video, gif, voice, round,
+     *                sticker, audio или file.
+     * @param caption подпись, если человек её набрал, иначе пустая строка.
+     * @return новая подпись, null — не отправлять.
+     */
+    public static String sendingMedia(String kind, String caption, long dialogId) {
+        if (!wantsMedia) {
+            return caption;
+        }
+        try {
+            final Object answer = SweetgramPluginHost.pythonValue("sendingMedia",
+                    new Class<?>[]{String.class, String.class, long.class},
+                    kind, caption == null ? "" : caption, dialogId);
+            if (answer == null) {
+                return caption;
+            }
+            final String result = String.valueOf(answer);
+            if (CANCEL.equals(result) || result.indexOf(' ') >= 0) {
+                return null;
+            }
+            return result;
+        } catch (Throwable t) {
+            FileLog.e(t);
+            SweetgramPluginHost.log("sweetgram", String.valueOf(t), true);
+            return caption;
+        }
+    }
+
     // --- приход сообщений ---
 
     /**
@@ -183,6 +239,8 @@ public class SweetgramHooks {
                     deliver(args);
                 } else if (id == NotificationCenter.messagesDeleted && args != null && args.length >= 1) {
                     deliverDeleted(args);
+                } else if (id == NotificationCenter.didUpdateReactions && wantsReactions && args != null && args.length >= 3) {
+                    deliverReactions(args);
                 }
             };
             for (int account = 0; account < UserConfig.MAX_ACCOUNT_COUNT; account++) {
@@ -190,6 +248,8 @@ public class SweetgramHooks {
                         .addObserver(delegate, NotificationCenter.didReceiveNewMessages);
                 NotificationCenter.getInstance(account)
                         .addObserver(delegate, NotificationCenter.messagesDeleted);
+                NotificationCenter.getInstance(account)
+                        .addObserver(delegate, NotificationCenter.didUpdateReactions);
             }
         });
     }
@@ -211,6 +271,7 @@ public class SweetgramHooks {
             if (message == null) {
                 continue;
             }
+            deliverService(message, dialogId);
             final String text = message.messageText == null ? "" : message.messageText.toString();
             final int messageId = message.getId();
             final boolean out = message.isOut();
@@ -224,6 +285,107 @@ public class SweetgramHooks {
                 }
             });
         }
+    }
+
+    /**
+     * Служебные сообщения о входе и выходе — они тоже приходят сообщениями,
+     * только без текста: у них внутри действие с номером участника. Отдаём
+     * плагину именно его, а не пустую строку.
+     */
+    private static void deliverService(MessageObject message, long dialogId) {
+        final TLRPC.MessageAction action = message.messageOwner != null ? message.messageOwner.action : null;
+        if (action instanceof TLRPC.TL_messageActionChatAddUser) {
+            final List<Long> users = ((TLRPC.TL_messageActionChatAddUser) action).users;
+            for (int i = 0; i < users.size(); i++) {
+                final long userId = users.get(i);
+                SweetgramPluginHost.post(() -> {
+                    try {
+                        SweetgramPluginHost.python("member",
+                                new Class<?>[]{long.class, long.class, boolean.class},
+                                dialogId, userId, true);
+                    } catch (Throwable t) {
+                        FileLog.e(t);
+                    }
+                });
+            }
+        } else if (action instanceof TLRPC.TL_messageActionChatDeleteUser) {
+            final long userId = ((TLRPC.TL_messageActionChatDeleteUser) action).user_id;
+            SweetgramPluginHost.post(() -> {
+                try {
+                    SweetgramPluginHost.python("member",
+                            new Class<?>[]{long.class, long.class, boolean.class},
+                            dialogId, userId, false);
+                } catch (Throwable t) {
+                    FileLog.e(t);
+                }
+            });
+        }
+    }
+
+    /**
+     * Реакции на сообщение изменились. Плагину уходит короткая сводка вида
+     * «👍=3,🔥=1» — не объект телеграма: разбирать его из питона было бы
+     * мучением, а по строке видно всё, что нужно.
+     */
+    private static void deliverReactions(Object[] args) {
+        final long dialogId;
+        final int messageId;
+        final TLRPC.Reactions reactions;
+        try {
+            dialogId = (Long) args[0];
+            messageId = (Integer) args[1];
+            reactions = (TLRPC.Reactions) args[2];
+        } catch (Throwable ignored) {
+            return;
+        }
+        String summary = "";
+        if (reactions != null && reactions.results != null) {
+            final StringBuilder line = new StringBuilder();
+            for (int i = 0; i < reactions.results.size(); i++) {
+                final TLRPC.ReactionCount count = reactions.results.get(i);
+                if (count == null || count.reaction == null) {
+                    continue;
+                }
+                if (line.length() > 0) {
+                    line.append(',');
+                }
+                if (count.reaction instanceof TLRPC.TL_reactionEmoji) {
+                    line.append(((TLRPC.TL_reactionEmoji) count.reaction).emoticon);
+                } else if (count.reaction instanceof TLRPC.TL_reactionCustomEmoji) {
+                    line.append("custom:").append(((TLRPC.TL_reactionCustomEmoji) count.reaction).document_id);
+                } else {
+                    continue;
+                }
+                line.append('=').append(count.count);
+            }
+            summary = line.toString();
+        }
+        final String text = summary;
+        SweetgramPluginHost.post(() -> {
+            try {
+                SweetgramPluginHost.python("reactions",
+                        new Class<?>[]{long.class, int.class, String.class},
+                        dialogId, messageId, text);
+            } catch (Throwable t) {
+                FileLog.e(t);
+            }
+        });
+    }
+
+    /** Сообщение отредактировано. Тело плагин может дочитать сам, если надо. */
+    public static void messageEdited(long dialogId, int messageId) {
+        if (!wantsEdits || dialogId == 0 || messageId == 0) {
+            return;
+        }
+        SweetgramPluginHost.post(() -> {
+            try {
+                SweetgramPluginHost.python("edited",
+                        new Class<?>[]{long.class, int.class},
+                        dialogId, messageId);
+            } catch (Throwable t) {
+                FileLog.e(t);
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")

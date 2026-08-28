@@ -11407,6 +11407,11 @@ public class MessagesController extends BaseController implements NotificationCe
         if (dialogId == selfId) {
             return false;
         }
+        // Ghost-режим: никаких «печатает» и «записывает». Статусы, которые
+        // не отправлены, не нужно и отменять, поэтому режем всё сразу.
+        if (org.telegram.sweetgram.SweetgramGhost.hideTyping()) {
+            return false;
+        }
         if (dialogId < 0) {
             if (ChatObject.getSendAsPeerId(getChat(-dialogId), getChatFull(-dialogId)) != selfId) {
                 return false;
@@ -14653,6 +14658,8 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public void markDialogAsReadNow(long dialogId, long replyId) {
+        // Явное «отметить прочитанным» ghost-режим не переспорит.
+        org.telegram.sweetgram.SweetgramGhost.flushDialog(dialogId);
         Utilities.stageQueue.postRunnable(() -> {
             if (replyId != 0) {
                 String key = dialogId + "_" + replyId;
@@ -14690,6 +14697,12 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public void markDialogAsRead(long dialogId, int maxPositiveId, int maxNegativeId, int maxDate, boolean popup, long threadId, int countDiff, boolean readNow, int scheduledCount) {
+        // Ghost-режим: пока человек в чате, собеседник видит «непрочитано».
+        // Вызов запоминается и доигрывается при выходе из чата.
+        if (org.telegram.sweetgram.SweetgramGhost.suppressRead(dialogId, maxPositiveId, maxNegativeId,
+                maxDate, popup, threadId, countDiff, scheduledCount)) {
+            return;
+        }
         boolean createReadTask;
 
         if (threadId != 0) {
@@ -19446,6 +19459,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         message.out = true;
                     }
                 }
+                org.telegram.sweetgram.SweetgramHooks.messageEdited(MessageObject.getDialogId(message), message.id);
                 if (!message.out) {
                     long from_id = DialogObject.getPeerDialogId(message.from_id);
                     if (from_id == clientUserId) {

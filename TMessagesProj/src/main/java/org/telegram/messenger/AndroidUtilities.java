@@ -4292,7 +4292,7 @@ public class AndroidUtilities {
             // поставить. Перехват стоит здесь, потому что через это место
             // проходит открытие любого файла: и из переписки, и из кэша.
             if (!restrict && activity != null && fileName != null
-                    && fileName.toLowerCase().endsWith(".marp")
+                    && org.telegram.sweetgram.SweetgramPlugins.isPluginFile(fileName)
                     && org.telegram.sweetgram.SweetgramPlugins.offerInstall(activity, f)) {
                 return true;
             }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Месяц и сердечко. «Укус» сделан кругом цвета фона этой иконки
+     (#2A2D33, icon_2_background_sa): передний слой рисуется поверх заднего,
+     и круг просто откусывает часть диска. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M25,54a27,27 0 1,0 54,0a27,27 0 1,0 -54,0"/>
+    <path
+        android:fillColor="#FF2A2D33"
+        android:pathData="M41,44a23,23 0 1,0 46,0a23,23 0 1,0 -46,0"/>
+    <group
+        android:scaleX="0.8259"
+        android:scaleY="0.8259"
+        android:translateX="70.06"
+        android:translateY="61.51">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M10.4,20.6l-1.17,-1.06C4.66,15.39 1.75,12.76 1.75,9.5C1.75,6.87 3.81,4.81 6.44,4.81c0.94,0 1.83,0.28 2.59,0.78L9.62,5.95l0.59,-0.37c0.76,-0.49 1.65,-0.77 2.59,-0.77c2.63,0 4.69,2.06 4.69,4.69c0,3.26 -2.91,5.89 -7.48,10.04L10.4,20.6z"/>
+    </group>
+</vector>

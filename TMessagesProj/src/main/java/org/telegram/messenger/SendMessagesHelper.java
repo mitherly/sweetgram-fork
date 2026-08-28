@@ -4256,6 +4256,39 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         });
     }
 
+    /** Как назвать посылаемое медиа одним словом: им плагин и оперирует. */
+    private static String mediaKindOf(SendMessageParams params) {
+        if (params.photo != null) {
+            return "photo";
+        }
+        if (params.videoEditedInfo != null) {
+            return "video";
+        }
+        final TLRPC.TL_document document = params.document;
+        if (document == null) {
+            return null;
+        }
+        if (MessageObject.isVoiceDocument(document)) {
+            return "voice";
+        }
+        if (MessageObject.isRoundVideoDocument(document)) {
+            return "round";
+        }
+        if (MessageObject.isVideoDocument(document)) {
+            return "video";
+        }
+        if (MessageObject.isStickerDocument(document) || MessageObject.isAnimatedStickerDocument(document, true)) {
+            return "sticker";
+        }
+        if (MessageObject.isGifDocument(document)) {
+            return "gif";
+        }
+        if (MessageObject.isMusicDocument(document)) {
+            return "audio";
+        }
+        return "file";
+    }
+
     public void sendMessage(SendMessageParams sendMessageParams) {
         if (sendMessageParams.message != null && org.telegram.sweetgram.SweetgramHooks.hasSend()) {
             final String hooked = org.telegram.sweetgram.SweetgramHooks.sending(
@@ -4264,6 +4297,22 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 return;
             }
             sendMessageParams.message = hooked;
+        }
+        // Медиа-дверь: плагин может дописать подпись или не отпустить файл.
+        // Без подписи тоже зовём: отмена должна работать на любом файле.
+        if (org.telegram.sweetgram.SweetgramHooks.hasMedia()) {
+            final String mediaKind = mediaKindOf(sendMessageParams);
+            if (mediaKind != null) {
+                final String hooked = org.telegram.sweetgram.SweetgramHooks.sendingMedia(
+                        mediaKind, sendMessageParams.caption == null ? "" : sendMessageParams.caption,
+                        sendMessageParams.peer);
+                if (hooked == null) {
+                    return;
+                }
+                if (!hooked.isEmpty()) {
+                    sendMessageParams.caption = hooked;
+                }
+            }
         }
         final SendMessageChatArguments sendMessageChatArguments = sendMessageParams.sendMessageChatArguments != null ?
                 sendMessageParams.sendMessageChatArguments : SendMessageChatArguments.EMPTY;

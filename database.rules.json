@@ -1,0 +1,37 @@
+{
+  "rules": {
+    "verified_users": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".validate": "newData.isString()"
+      }
+    },
+    "verified_meta": {
+      ".read": false,
+      ".write": false
+    },
+    "admins": {
+      ".read": false,
+      ".write": false,
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "tg_admins": {
+      ".read": false,
+      ".write": false,
+      "$tg": {
+        ".read": "auth != null"
+      }
+    },
+    "stats": {
+      ".read": true,
+      ".write": true
+    },
+    "profiles": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}

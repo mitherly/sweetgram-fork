@@ -45,6 +45,34 @@ public class sweetgramPython {
         host.callAttr("received", text, dialogId, messageId, out);
     }
 
+    /**
+     * Человек отправляет медиа. Ответ нужен до отправки, поэтому — как и
+     * sending() — ждём по-честному. Пустая строка значит «подписи не было».
+     */
+    public static String sendingMedia(String kind, String caption, long dialogId) {
+        final PyObject host = Python.getInstance().getModule("sweetgram_host");
+        final PyObject answer = host.callAttr("sending_media", kind, caption, dialogId);
+        return answer == null ? null : answer.toString();
+    }
+
+    /** У сообщения изменились реакции. Сводка вида «👍=3,🔥=1». */
+    public static void reactions(long dialogId, int messageId, String summary) {
+        final PyObject host = Python.getInstance().getModule("sweetgram_host");
+        host.callAttr("reactions", dialogId, messageId, summary);
+    }
+
+    /** Сообщение отредактировано. */
+    public static void edited(long dialogId, int messageId) {
+        final PyObject host = Python.getInstance().getModule("sweetgram_host");
+        host.callAttr("edited", dialogId, messageId);
+    }
+
+    /** Участник вошёл (joined) или вышел из чата. */
+    public static void member(long dialogId, long userId, boolean joined) {
+        final PyObject host = Python.getInstance().getModule("sweetgram_host");
+        host.callAttr("member", dialogId, userId, joined);
+    }
+
     /** Нажали кнопку плагина в меню чата. */
     public static void buttonClicked(String pluginId, String key, Object fragment) {
         final PyObject host = Python.getInstance().getModule("sweetgram_host");

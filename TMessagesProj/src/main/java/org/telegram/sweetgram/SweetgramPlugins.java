@@ -33,7 +33,7 @@ import java.util.zip.ZipInputStream;
 /**
  * Плагины Sweetgram: установка, список, включение.
  *
- * Плагин — это архив .marp: манифест, код на питоне, иконка и всё, что автор
+ * Плагин — это архив .swp: манифест, код на питоне, иконка и всё, что автор
  * захотел положить рядом. Код лежит исходником и читается кем угодно; это не
  * техническая мера, а условие форума, и владелец форка выбрал именно её.
  *
@@ -207,7 +207,7 @@ public class SweetgramPlugins {
     }
 
     /**
-     * Распаковывает .marp во временную папку и возвращает, что там лежит.
+     * Распаковывает .swp во временную папку и возвращает, что там лежит.
      * Ставить сразу нельзя: человек должен сначала увидеть, кто автор и что
      * плагин о себе заявляет, — а это написано внутри архива.
      *
@@ -314,7 +314,7 @@ public class SweetgramPlugins {
         }
         try {
             final Context context = ApplicationLoader.applicationContext;
-            final Plugin plugin = install(context, context.getAssets().open("sweetgram_example.marp"));
+            final Plugin plugin = install(context, context.getAssets().open("sweetgram_example.swp"));
             if (plugin != null) {
                 SweetgramConfig.setPluginEnabled(plugin.id, false);
             }
@@ -383,7 +383,7 @@ public class SweetgramPlugins {
      * заявленное никем не проверяется.
      *
      * Живёт здесь, а не на экране плагинов, потому что ставить умеют оба
-     * входа — экран настроек и нажатие на файл .marp прямо в переписке.
+     * входа — экран настроек и нажатие на файл .swp прямо в переписке.
      * Один текст на два места лучше, чем два текста, которые разойдутся.
      *
      * @param whenInstalled что сделать после установки; может быть null.
@@ -586,7 +586,7 @@ public class SweetgramPlugins {
             final File folder = new File(context.getFilesDir(), "cache");
             folder.mkdirs();
             // Имя одно на всех: смотрят архив по одному, и копить их незачем.
-            final File file = new File(folder, "sweetgram_plugin.marp");
+            final File file = new File(folder, "sweetgram_plugin.swp");
             final FileOutputStream out = new FileOutputStream(file);
             final byte[] buffer = new byte[8192];
             int read;
@@ -634,7 +634,7 @@ public class SweetgramPlugins {
     }
 
     /**
-     * Нажали на файл .marp в переписке. Открывать его нечем — это наш
+     * Нажали на файл .swp в переписке. Открывать его нечем — это наш
      * формат, — поэтому предлагаем поставить.
      */
     public static boolean offerInstall(Context context, File file) {
@@ -644,5 +644,14 @@ public class SweetgramPlugins {
             FileLog.e(e);
             return false;
         }
+    }
+
+    /** Наш ли это формат. Старые архивы .marp тоже считаем своими. */
+    public static boolean isPluginFile(String fileName) {
+        if (fileName == null) {
+            return false;
+        }
+        final String name = fileName.toLowerCase();
+        return name.endsWith(".swp") || name.endsWith(".marp");
     }
 }

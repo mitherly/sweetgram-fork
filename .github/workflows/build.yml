@@ -1,9 +1,20 @@
-name: Build Sweetgram Release APK
+name: Sweetgram Build
 
 on:
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'debug — AppStandalone с плагинами, на проверку; release — релизный App'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
   push:
-    branches: [rewrite]
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
 
 permissions:
   contents: write
@@ -12,7 +23,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 360
+
     steps:
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/lib/android/sdk/ndk/25* || true
+          sudo rm -rf /usr/local/lib/android/sdk/ndk/26* || true
+          df -h
+
       - name: Checkout (with submodules)
         uses: actions/checkout@v4
         with:
@@ -27,45 +49,69 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Install SDK packages (platform, build-tools, NDK)
         run: |
-          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018"
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
           yes | sdkmanager --licenses
 
       - name: Inject real google-services.json from secret
         run: |
           echo "$GOOGLE_SERVICES_JSON" | base64 -d > TMessagesProj_App/google-services.json
           echo "$GOOGLE_SERVICES_JSON" | base64 -d > TMessagesProj/google-services.json
+          echo "$GOOGLE_SERVICES_JSON" | base64 -d > TMessagesProj_AppStandalone/google-services.json
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
-      - name: Build release APK
+      - name: Resolve build type
+        id: buildtype
+        run: |
+          TYPE="${{ github.event.inputs.build_type }}"
+          if [ -z "$TYPE" ]; then TYPE="debug"; fi
+          echo "type=$TYPE" >> "$GITHUB_OUTPUT"
+          echo "building: $TYPE"
+
+      - name: Build debug APK (AppStandalone, plugins included)
+        if: steps.buildtype.outputs.type == 'debug'
         run: |
           chmod +x gradlew
-          ./gradlew :TMessagesProj_App:assembleAfatRelease --no-daemon
+          ./gradlew :TMessagesProj_AppStandalone:assembleAfatDebug --no-daemon --stacktrace
 
-      - name: Rename APK
+      - name: Rename debug APK
+        if: steps.buildtype.outputs.type == 'debug'
+        run: |
+          mkdir -p out
+          cp TMessagesProj_AppStandalone/build/outputs/apk/afat/debug/*.apk Sweetgram-debug.apk
+
+      - name: Build release APK (App)
+        if: steps.buildtype.outputs.type == 'release'
+        run: |
+          chmod +x gradlew
+          ./gradlew :TMessagesProj_App:assembleAfatRelease --no-daemon --stacktrace
+
+      - name: Rename release APK
+        if: steps.buildtype.outputs.type == 'release'
         run: cp TMessagesProj_App/build/outputs/apk/afat/release/*.apk Sweetgram-release.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sweetgram-release-apk
-          path: Sweetgram-release.apk
+          name: sweetgram-apk-${{ steps.buildtype.outputs.type }}
+          path: Sweetgram-*.apk
 
       - name: Publish GitHub Release
+        if: steps.buildtype.outputs.type == 'release' && github.ref == 'refs/heads/rewrite' && github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.4
-          name: Sweetgram v0.4
+          tag_name: v0.5
+          name: Sweetgram v0.5
           body: |
             Sweetgram форк Telegram — релизная сборка.
-            - Розовый ребренд, верификация (Firebase).
-            - Звук по тапу по слову Sweetgram.
-            - Админ-панель управления верификацией.
+            - Ghost-режим, новые двери плагинов, AMOLED-тема.
+            - Новые иконки приложения, формат плагинов .swp.
+            - Админка: вход по Firebase + телеграм-ID (пароля в приложении больше нет).
           files: Sweetgram-release.apk
-          make_latest: true

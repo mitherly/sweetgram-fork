@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -17,22 +19,33 @@ import org.telegram.messenger.UserConfig;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Верификация Sweetgram.
+ *
+ * Публичная половина — verified_users: читать её может кто угодно, там
+ * номер и подпись галочки. Приватная половина — право писать туда. Раньше
+ * это право охранял секрет, зашитый в APK, — то есть не охранял вовсе:
+ * секрет вытекает из любой сборки. Теперь право проверяют правила базы по
+ * auth.uid: записать может только тот, кто вошёл по Firebase Auth и чей
+ * номер лежит в admins. Ни пароля, ни секрета в приложении нет.
+ *
+ * Разовая настройка (владельцу форка):
+ *  1. Firebase Console → Authentication → Sign-in method → Email/Password.
+ *  2. Там же → Users → добавить админа (почта + пароль).
+ *  3. Realtime Database → в узел admins записать admins/<UID> = true,
+ *     где UID — скопированный из консоли номер пользователя.
+ *  4. Задеплоить database.rules.json из корня репозитория.
+ */
 public class SweetgramAuth {
     private static volatile SweetgramAuth Instance;
 
     // Public, readable by anyone: verified_users/<uid> = "verification text".
     private static final String DB_VERIFIED = "verified_users";
-    // Private, never readable: verified_meta/<uid>/k holds the write secret.
-    private static final String DB_META = "verified_meta";
-
-    // Secret that must accompany every write. It is sent in verified_meta/<uid>/k,
-    // which has ".read": false, so it never leaks to readers. The database rules
-    // only allow writing verified_users/<uid> when verified_meta/<uid>/k equals
-    // this value (within the same atomic update), so verifications cannot be
-    // granted by writing to the database directly without knowing the secret.
-    // NOTE: this lives in the APK, so it stops casual abuse, not a determined
-    // reverse-engineer. For real protection, move grant/revoke to a server.
-    private static final String ADMIN_SECRET = "sweetgram_admin_secret_9f3a21c7";
+    // Allowlist: admins/<uid> = true. Читается только самим этим uid
+    // (правилами), приложение сверяется с ним при входе.
+    private static final String DB_ADMINS = "admins";
+    // Allowlist по телеграм-ID: tg_admins/<телеграм_id> = true.
+    private static final String DB_TG_ADMINS = "tg_admins";
 
     private final Map<Long, String> verifiedUsers = new HashMap<>();
     private DatabaseReference rootReference;
@@ -41,7 +54,6 @@ public class SweetgramAuth {
         SweetgramAuth localInstance = Instance;
         if (localInstance == null) {
             synchronized (SweetgramAuth.class) {
-                localInstance = Instance;
                 if (localInstance == null) {
                     Instance = localInstance = new SweetgramAuth();
                 }
@@ -113,8 +125,123 @@ public class SweetgramAuth {
         void onResult(boolean ok, String error);
     }
 
+    // --- вход админа ---
+
+    private FirebaseAuth auth() {
+        return FirebaseAuth.getInstance();
+    }
+
+    /**
+     * Есть ли живая сессия Firebase Auth. Это проверка «вошёл ли», а не
+     * «админ ли»: список админов живёт в базе и проверяется при входе.
+     */
+    public boolean isAdminSignedIn() {
+        try {
+            return auth().getCurrentUser() != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Вход по почте и паролю. Успех ещё не значит «админ»: сразу сверяемся
+     * с admins/ — чужого выходим и отказываем.
+     */
+    public void adminSignIn(String email, String password, WriteCallback cb) {
+        if (rootReference == null) {
+            if (cb != null) cb.onResult(false, "Firebase is not initialized");
+            return;
+        }
+        try {
+            auth().signInWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(result -> {
+                        final FirebaseUser user = auth().getCurrentUser();
+                        if (user == null) {
+                            if (cb != null) cb.onResult(false, "no user after sign-in");
+                            return;
+                        }
+                        rootReference.child(DB_ADMINS).child(user.getUid()).get()
+                                .addOnSuccessListener(snapshot -> {
+                                    if (snapshot.exists()) {
+                                        ensureTelegramAdmin(cb);
+                                    } else {
+                                        auth().signOut();
+                                        if (cb != null) cb.onResult(false, "not in the admins list");
+                                    }
+                                })
+                                .addOnFailureListener(error -> {
+                                    auth().signOut();
+                                    if (cb != null) cb.onResult(false, error.getMessage());
+                                });
+                    })
+                    .addOnFailureListener(error -> {
+                        if (cb != null) cb.onResult(false, error.getMessage());
+                    });
+        } catch (Exception e) {
+            if (cb != null) cb.onResult(false, e.getMessage());
+        }
+    }
+
+    /**
+     * Проверка по телеграм-ID. Список живёт в tg_admins/<телеграм_id>, и
+     * войти может только тот, чей номер активного аккаунта там записан.
+     *
+     * Проверка эта клиентская, и врать ей может только распатченный клиент:
+     * свой телеграм-ID приложение знает из входа в телеграм, а не со слов
+     * человека. Сервер телеграм-ID проверить не может вообще, поэтому право
+     * записи по-прежнему держат правила базы через вход Firebase — проверка
+     * здесь отвечает на вопрос «чья панель», а правила — «кто может писать».
+     */
+    public void ensureTelegramAdmin(WriteCallback cb) {
+        if (rootReference == null) {
+            if (cb != null) cb.onResult(false, "Firebase is not initialized");
+            return;
+        }
+        final long myId = UserConfig.getInstance(UserConfig.selectedAccount).clientUserId;
+        if (myId == 0) {
+            if (cb != null) cb.onResult(false, "no telegram account on this device");
+            return;
+        }
+        try {
+            rootReference.child(DB_TG_ADMINS).child(String.valueOf(myId)).get()
+                    .addOnSuccessListener(snapshot -> {
+                        if (snapshot.exists()) {
+                            if (cb != null) cb.onResult(true, null);
+                        } else {
+                            auth().signOut();
+                            if (cb != null) cb.onResult(false,
+                                    "Telegram ID " + myId + " is not in tg_admins");
+                        }
+                    })
+                    .addOnFailureListener(error -> {
+                        auth().signOut();
+                        if (cb != null) cb.onResult(false, error.getMessage());
+                    });
+        } catch (Exception e) {
+            if (cb != null) cb.onResult(false, e.getMessage());
+        }
+    }
+
+    /** Телеграм-ID активного аккаунта — панель показывает его в подсказке. */
+    public static long myTelegramId() {
+        try {
+            return UserConfig.getInstance(UserConfig.selectedAccount).clientUserId;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public void adminSignOut() {
+        try {
+            auth().signOut();
+        } catch (Exception ignored) {
+        }
+    }
+
+    // --- выдача и отзыв ---
+
     public void grantVerification(long userId, String text) {
-        write(userId, text);
+        write(userId, text, null);
     }
 
     public void grantVerification(long userId, String text, WriteCallback cb) {
@@ -122,28 +249,26 @@ public class SweetgramAuth {
     }
 
     public void revokeVerification(long userId) {
-        write(userId, "");
+        write(userId, "", null);
     }
 
     public void revokeVerification(long userId, WriteCallback cb) {
         write(userId, "", cb);
     }
 
-    private void write(long userId, String text) {
-        write(userId, text, null);
-    }
-
+    /**
+     * Пишет напрямую в verified_users. Право решают правила базы: без
+     * admins/<uid> = true у вошедшего запись не пройдёт, и приложение
+     * честно покажет ошибку.
+     */
     private void write(long userId, String text, WriteCallback cb) {
         if (rootReference == null) {
             if (cb != null) cb.onResult(false, "Firebase is not initialized");
             return;
         }
         String id = String.valueOf(userId);
-        Map<String, Object> updates = new HashMap<>();
-        updates.put(DB_VERIFIED + "/" + id, text);
-        updates.put(DB_META + "/" + id + "/k", ADMIN_SECRET);
         org.telegram.messenger.FileLog.d("SweetgramAuth: writing " + DB_VERIFIED + "/" + id);
-        rootReference.updateChildren(updates, (error, ref) -> {
+        rootReference.child(DB_VERIFIED).child(id).setValue(text, (error, ref) -> {
             if (error != null) {
                 org.telegram.messenger.FileLog.e("SweetgramAuth: write failed - " + error.getMessage());
                 if (cb != null) cb.onResult(false, error.getMessage());

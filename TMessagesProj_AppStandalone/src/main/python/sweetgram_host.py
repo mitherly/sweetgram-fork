@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Прослойка между приложением и плагинами sweetgram.
+"""Прослойка между приложением и плагинами Sweetgram.
 
 Каждый плагин исполняется здесь: печать перехватывается и уходит в консоль
 приложения, ошибки не роняют ни другие плагины, ни само приложение.
@@ -18,15 +18,15 @@ import traceback
 from java import dynamic_proxy, jclass
 from java.lang import Runnable
 
-_Host = jclass("org.telegram.sweetgram.sweetgramPluginHost")
-_Hooks = jclass("org.telegram.sweetgram.sweetgramHooks")
-_Fetch = jclass("org.telegram.sweetgram.sweetgramHooks$FetchCallback")
+_Host = jclass("org.telegram.sweetgram.SweetgramPluginHost")
+_Hooks = jclass("org.telegram.sweetgram.SweetgramHooks")
+_Fetch = jclass("org.telegram.sweetgram.SweetgramHooks$FetchCallback")
 _Android = jclass("org.telegram.messenger.AndroidUtilities")
-_sweetgramHook = jclass("org.telegram.sweetgram.hook.sweetgramHook")
+_SweetgramHook = jclass("org.telegram.sweetgram.hook.SweetgramHook")
 _IHookCallback = jclass("org.telegram.sweetgram.hook.IHookCallback")
 
 # Ответ, по которому приложение понимает «не отправляй это сообщение».
-# Такой же строки нет в sweetgramHooks.CANCEL по случайности: она там же и
+# Такой же строки нет в SweetgramHooks.CANCEL по случайности: она там же и
 # записана, и обычным текстом её не набрать.
 _CANCEL = "\u0000sweetgram-cancel"
 
@@ -82,7 +82,7 @@ class _Console:
             self._buffer = ""
 
 
-class sweetgram:
+class Sweetgram:
     """То, что плагин видит под именем sweetgram."""
 
     def __init__(self, plugin_id, name, folder):
@@ -91,8 +91,12 @@ class sweetgram:
         self.folder = folder
         self._on_chat_opened = []
         self._on_send = []
+        self._on_media = []
         self._on_message = []
         self._on_deleted = []
+        self._on_reactions = []
+        self._on_edited = []
+        self._on_member = []
         self._on_settings = []
         self._buttons = {}
         self._actions = {}
@@ -255,6 +259,54 @@ class sweetgram:
         self._on_message.append(call)
         _Hooks.wantMessage()
 
+    def on_send_media(self, call):
+        """Позвать перед отправкой фото, видео или файла: call(kind, caption, dialog_id).
+
+        kind — одно слово о том, что едет: photo, video, gif, voice, round,
+        sticker, audio или file. caption — набранная подпись, пустая строка,
+        если её нет.
+
+        Что вернуть:
+          строку — она и уйдёт подписью вместо набранной;
+          False  — не отправлять вовсе;
+          ничего — оставить как есть.
+
+        Ждёт, как и on_send: пока обработчик думает, человек смотрит на
+        неотправленное. Сам файл поменять нельзя — у плагина выбор между
+        «отпустить с другой подписью» и «не отпустить».
+        """
+        self._on_media.append(call)
+        _Hooks.wantMedia()
+
+    def on_reactions(self, call):
+        """Позвать, когда у сообщения изменились реакции:
+        call(dialog_id, message_id, summary).
+
+        summary — строка вида «👍=3,🔥=1»: какая реакция и сколько их стало.
+        Своя реакция пишется так же, как все. Событие и про свои реакции тоже.
+        """
+        self._on_reactions.append(call)
+        _Hooks.wantReactions()
+
+    def on_edited(self, call):
+        """Позвать, когда сообщение отредактировано: call(dialog_id, message_id).
+
+        Текст плагин дочитывает сам, если ему это нужно: дверь только
+        сообщает, что правка случилась.
+        """
+        self._on_edited.append(call)
+        _Hooks.wantEdits()
+
+    def on_member(self, call):
+        """Позвать, когда кто-то вошёл в чат или вышел: call(dialog_id, user_id, joined).
+
+        joined — True для входа, False для выхода. В группах и каналах.
+        """
+        self._on_member.append(call)
+        # Вход и выход приходят служебными сообщениями, а те доезжают до
+        # плагина только когда поднят наблюдатель за сообщениями.
+        _Hooks.wantMessage()
+
     def on_deleted(self, call):
         """Позвать, когда собеседник или сервер удалил сообщение: call(message_id, channel_id)."""
         self._on_deleted.append(call)
@@ -270,10 +322,10 @@ class sweetgram:
         """Позвать, когда человек поменял настройку: call(key, value)."""
         self._on_settings.append(call)
 
-    # --- Динамические хуки Java-методов (sweetgramHook Engine) ---
+    # --- Динамические хуки Java-методов (SweetgramHook Engine) ---
 
     def hook(self, target_class, method_name, before=None, after=None, priority=50):
-        """Хук Java-метода через sweetgramHook Engine.
+        """Хук Java-метода через SweetgramHook Engine.
 
         :param target_class: имя класса (строка) или Java-класс
         :param method_name: имя метода
@@ -284,7 +336,7 @@ class sweetgram:
         plugin_id = self.id
 
         if isinstance(target_class, str):
-            clazz = _sweetgramHook.findClass(target_class, None)
+            clazz = _SweetgramHook.findClass(target_class, None)
         else:
             clazz = target_class
 
@@ -292,7 +344,7 @@ class sweetgram:
             _Host.log(name, f"Класс {target_class} не найден для хука {method_name}", True)
             return None
 
-        method = _sweetgramHook.findMethod(clazz, str(method_name), None)
+        method = _SweetgramHook.findMethod(clazz, str(method_name), None)
         if method is None:
             _Host.log(name, f"Метод {method_name} не найден в {target_class}", True)
             return None
@@ -312,7 +364,7 @@ class sweetgram:
                     except Exception:
                         _Host.log(name, traceback.format_exc(), True)
 
-        return _sweetgramHook.hookMethod(plugin_id, method, _PyHookCallback())
+        return _SweetgramHook.hookMethod(plugin_id, method, _PyHookCallback())
 
     def before_method(self, target_class, method_name, priority=50):
         """Декоратор для вызова перед методом."""
@@ -391,7 +443,7 @@ class sweetgram:
 
 
 # Кому раздавать события: номер плагина -> его объект sweetgram.
-_sweetgrams = {}
+_plugins = {}
 
 
 def chat_opened(fragment):
@@ -400,7 +452,7 @@ def chat_opened(fragment):
     Ошибка одного плагина не должна отменить остальных: каждый зовётся
     отдельно, и упавший получает свой разбор в консоли.
     """
-    for plugin_id, sweetgram in list(_sweetgrams.items()):
+    for plugin_id, sweetgram in list(_plugins.items()):
         for call in list(sweetgram._on_chat_opened):
             try:
                 call(fragment)
@@ -416,7 +468,7 @@ def sending(text, dialog_id):
     человеку отправку сообщений.
     """
     result = text
-    for sweetgram in list(_sweetgrams.values()):
+    for sweetgram in list(_plugins.values()):
         for call in list(sweetgram._on_send):
             sweetgram._cancel_send = False
             try:
@@ -434,9 +486,30 @@ def sending(text, dialog_id):
     return result
 
 
+def sending_media(kind, caption, dialog_id):
+    """Перед отправкой медиа. Правила те же, что у sending: обработчики
+    зовутся по очереди, каждый видит подпись после предыдущего, упавший
+    пропускается. Подписи не было — едет пустая строка, её же вернём.
+    """
+    result = caption if caption is not None else ""
+    for sweetgram in list(_plugins.values()):
+        for call in list(sweetgram._on_media):
+            sweetgram._cancel_send = False
+            try:
+                answer = call(kind, result, dialog_id)
+            except Exception:
+                _Host.log(sweetgram.name, traceback.format_exc(), True)
+                continue
+            if answer is False or sweetgram._cancel_send:
+                return _CANCEL
+            if isinstance(answer, str):
+                result = answer
+    return result
+
+
 def received(text, dialog_id, message_id, out):
     """Пришло сообщение."""
-    for sweetgram in list(_sweetgrams.values()):
+    for sweetgram in list(_plugins.values()):
         for call in list(sweetgram._on_message):
             try:
                 call(text, dialog_id, message_id, out)
@@ -444,9 +517,39 @@ def received(text, dialog_id, message_id, out):
                 _Host.log(sweetgram.name, traceback.format_exc(), True)
 
 
+def reactions(dialog_id, message_id, summary):
+    """У сообщения изменились реакции."""
+    for sweetgram in list(_plugins.values()):
+        for call in list(sweetgram._on_reactions):
+            try:
+                call(dialog_id, message_id, summary)
+            except Exception:
+                _Host.log(sweetgram.name, traceback.format_exc(), True)
+
+
+def edited(dialog_id, message_id):
+    """Сообщение отредактировано."""
+    for sweetgram in list(_plugins.values()):
+        for call in list(sweetgram._on_edited):
+            try:
+                call(dialog_id, message_id)
+            except Exception:
+                _Host.log(sweetgram.name, traceback.format_exc(), True)
+
+
+def member(dialog_id, user_id, joined):
+    """Кто-то вошёл в чат или вышел."""
+    for sweetgram in list(_plugins.values()):
+        for call in list(sweetgram._on_member):
+            try:
+                call(dialog_id, user_id, joined)
+            except Exception:
+                _Host.log(sweetgram.name, traceback.format_exc(), True)
+
+
 def deleted(message_id, channel_id):
     """Удалено сообщение."""
-    for sweetgram in list(_sweetgrams.values()):
+    for sweetgram in list(_plugins.values()):
         for call in list(sweetgram._on_deleted):
             try:
                 call(message_id, channel_id)
@@ -456,7 +559,7 @@ def deleted(message_id, channel_id):
 
 def button_clicked(plugin_id, key, fragment):
     """Нажали строчку плагина в меню чата."""
-    sweetgram = _sweetgrams.get(plugin_id)
+    sweetgram = _plugins.get(plugin_id)
     if sweetgram is None:
         return
     call = sweetgram._buttons.get(key)
@@ -470,7 +573,7 @@ def button_clicked(plugin_id, key, fragment):
 
 def settings_changed(plugin_id, key, value):
     """Человек тронул настройку. Сначала кнопки-действия, потом подписчики."""
-    sweetgram = _sweetgrams.get(plugin_id)
+    sweetgram = _plugins.get(plugin_id)
     if sweetgram is None:
         return
     action = sweetgram._actions.get(key)
@@ -510,8 +613,11 @@ def run_plugin(plugin_id, name, folder):
         spec = importlib.util.spec_from_file_location(
             "sweetgram_plugin_" + plugin_id, folder + "/main.py")
         module = importlib.util.module_from_spec(spec)
-        module.sweetgram = sweetgram(plugin_id, name, folder)
-        _sweetgrams[plugin_id] = module.sweetgram
+        module.sweetgram = Sweetgram(plugin_id, name, folder)
+        # Старые плагины писаны под прошлым именем; пусть живут, пока не
+        # перепишутся. Новые пишут под sweetgram.
+        module.sweetgram = module.sweetgram
+        _plugins[plugin_id] = module.sweetgram
         spec.loader.exec_module(module)
         _loaded[plugin_id] = module
         if hasattr(module, "on_start"):

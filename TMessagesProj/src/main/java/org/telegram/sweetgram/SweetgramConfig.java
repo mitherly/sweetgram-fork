@@ -497,4 +497,30 @@ public class SweetgramConfig {
     public static void setAntiDelete(boolean on) {
         prefs().edit().putBoolean("anti_delete", on).apply();
     }
+
+    /**
+     * Ghost-режим: не отправлять «печатает» и «записывает голосовое».
+     * Собеседник не узнаёт, что человек набрал текст, — но и отменять
+     * нечего: пока режим включён, статусы не отправляются вовсе.
+     */
+    public static boolean ghostTyping() {
+        return prefs().getBoolean("ghost_typing", false);
+    }
+
+    public static void setGhostTyping(boolean on) {
+        prefs().edit().putBoolean("ghost_typing", on).apply();
+    }
+
+    /**
+     * Ghost-режим: не отмечать чаты прочитанными сразу. Отметка ставится
+     * один раз — при выходе из чата. Явное «отметить прочитанным» в меню
+     * работает как раньше.
+     */
+    public static boolean ghostRead() {
+        return prefs().getBoolean("ghost_read", false);
+    }
+
+    public static void setGhostRead(boolean on) {
+        prefs().edit().putBoolean("ghost_read", on).apply();
+    }
 }
