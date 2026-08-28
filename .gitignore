@@ -15,3 +15,7 @@ TMessagesProj_AppStandalone/afat/
 TMessagesProj_AppHuawei/afat/
 TMessagesProj/jni/ffmpeg/build_android
 __pycache__/
+
+# подпись и конфиг не живут в публичном репозитории
+TMessagesProj/config/release.keystore
+TMessagesProj_AppStandalone/google-services.json

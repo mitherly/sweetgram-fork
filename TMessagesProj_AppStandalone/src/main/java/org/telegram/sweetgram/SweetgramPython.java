@@ -15,7 +15,7 @@ import com.chaquo.python.android.AndroidPlatform;
  * зовёт этот класс по имени, через отражение: так она собирается и там, где
  * питона нет вовсе.
  */
-public class sweetgramPython {
+public class SweetgramPython {
 
     public static void start(Context context) {
         if (!Python.isStarted()) {

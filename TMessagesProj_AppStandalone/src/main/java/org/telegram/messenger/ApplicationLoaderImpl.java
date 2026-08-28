@@ -114,7 +114,7 @@ public class ApplicationLoaderImpl extends ApplicationLoader {
      */
     @Override
     public IUpdateLayout takeUpdateLayout(Activity activity, ViewGroup sideMenuContainer) {
-        return new org.telegram.ui.sweetgramUpdateLayout(activity, sideMenuContainer);
+        return new org.telegram.ui.SweetgramUpdateLayout(activity, sideMenuContainer);
     }
 
     @Override

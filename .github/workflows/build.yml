@@ -67,6 +67,17 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
+      - name: Restore release keystore from secret
+        run: |
+          if [ -n "$RELEASE_KEYSTORE" ]; then
+            echo "$RELEASE_KEYSTORE" | base64 -d > TMessagesProj/config/release.keystore
+            echo "keystore restored"
+          else
+            echo "WARNING: secret RELEASE_KEYSTORE is not set - release builds will fail"
+          fi
+        env:
+          RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+
       - name: Resolve build type
         id: buildtype
         run: |
