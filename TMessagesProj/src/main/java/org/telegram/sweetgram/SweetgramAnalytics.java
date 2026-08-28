@@ -38,6 +38,10 @@ public class SweetgramAnalytics {
             return;
         }
         called = true;
+        SweetgramFirebaseAuth.ensureSignedIn(() -> trackLaunchInternal());
+    }
+
+    private static void trackLaunchInternal() {
         try {
             DatabaseReference root = SweetgramDb.ref("");
 

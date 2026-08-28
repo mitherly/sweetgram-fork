@@ -71,6 +71,10 @@ public class SweetgramBanner {
 
     /** Загружает файл в Storage/profiles/<id>/banner и пишет URL в RTDB/profiles/<id>/bannerUrl. */
     public static void uploadBanner(File file, UploadCallback cb) {
+        SweetgramFirebaseAuth.ensureSignedIn(() -> uploadBannerInternal(file, cb));
+    }
+
+    private static void uploadBannerInternal(File file, UploadCallback cb) {
         try {
             final String id = idStr(selfId());
             StorageReference ref = FirebaseStorage.getInstance().getReference()
@@ -108,6 +112,10 @@ public class SweetgramBanner {
 
     /** Читает profiles/<userId>/bannerUrl из RTDB (для чужого пользователя или себя). */
     public static void fetchBannerUrl(long userId, UrlCallback cb) {
+        SweetgramFirebaseAuth.ensureSignedIn(() -> fetchBannerUrlInternal(userId, cb));
+    }
+
+    private static void fetchBannerUrlInternal(long userId, UrlCallback cb) {
         final String id = idStr(userId);
         try {
             FirebaseDatabase.getInstance().getReference().child("profiles").child(id).child("bannerUrl")

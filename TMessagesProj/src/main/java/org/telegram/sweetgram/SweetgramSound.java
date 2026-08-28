@@ -18,6 +18,7 @@ public class SweetgramSound {
 
     public static void playWordmark() {
         try {
+            FileLog.d("SweetgramSound.playWordmark called");
             final String path = ensureCached();
             if (TextUtils.isEmpty(path)) {
                 return;
@@ -26,8 +27,8 @@ public class SweetgramSound {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 try {
                     mp.setAudioAttributes(new android.media.AudioAttributes.Builder()
-                            .setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
                             .build());
                 } catch (Throwable ignore) {
                 }
