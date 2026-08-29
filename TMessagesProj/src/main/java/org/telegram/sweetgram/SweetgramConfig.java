@@ -12,7 +12,9 @@ import org.telegram.messenger.ApplicationLoader;
  */
 public class SweetgramConfig {
 
-    private static final String PREFS = "sweetgram";
+    /** Имя файла настроек. Без private: классы пакета (например, баннеры)
+     *  держат в нём же свои мелкие пометки, чтобы не плодить файлы. */
+    static final String PREFS = "sweetgram";
 
     public static final int INPUT_LINES_DEFAULT = 6;
     public static final float INPUT_TEXT_SIZE_DEFAULT = 18f;
@@ -27,7 +29,7 @@ public class SweetgramConfig {
      * Забыть про него значит выпустить сборку, которая всю жизнь будет
      * предлагать обновиться сама на себя.
      */
-    public static final String APP_VERSION = "0.5";
+    public static final String APP_VERSION = "0.6";
 
     /**
      * Как часто спрашивать гитхаб про новую версию, в минутах. Ноль — не
@@ -277,6 +279,15 @@ public class SweetgramConfig {
 
     public static void setShowIds(boolean on) {
         prefs().edit().putBoolean("show_ids", on).apply();
+    }
+
+    /** Показывать баннеры за аватарками в профилях. */
+    public static boolean bannersEnabled() {
+        return prefs().getBoolean("profile_banners", true);
+    }
+
+    public static void setBannersEnabled(boolean on) {
+        prefs().edit().putBoolean("profile_banners", on).apply();
     }
 
     /**

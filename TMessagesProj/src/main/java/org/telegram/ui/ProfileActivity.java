@@ -1363,6 +1363,48 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
         }
 
+        private android.graphics.Paint sweetgramScrim;
+
+        /**
+         * Баннер человека поверх заливки, но под всем остальным.
+         *
+         * Рисуем здесь, потому что это ровно то место, где телеграм закрашивает
+         * верх профиля цветом. Картинку вписываем по большей стороне и
+         * обрезаем: баннеры приходят какие угодно, а место под них всегда одной
+         * формы.
+         *
+         * Сверху — затемнение. Без него белое имя и белые значки теряются на
+         * светлой картинке, и выглядеть это будет виной того, кто поставил
+         * баннер, хотя виноваты мы.
+         *
+         * Порт из Margy; хранилище баннеров — общая группа, см. SweetgramBanner.
+         */
+        private void drawSweetgramBanner(Canvas canvas, int y1) {
+            if (y1 <= 0 || userId == 0) {
+                return;
+            }
+            final android.graphics.Bitmap banner =
+                    org.telegram.sweetgram.SweetgramBanner.of(userId, this::invalidate);
+            if (banner == null || banner.isRecycled()) {
+                return;
+            }
+            final int width = getMeasuredWidth();
+            final float scale = Math.max((float) width / banner.getWidth(),
+                    (float) y1 / banner.getHeight());
+            canvas.save();
+            canvas.clipRect(0, 0, width, y1);
+            canvas.translate((width - banner.getWidth() * scale) / 2f,
+                    (y1 - banner.getHeight() * scale) / 2f);
+            canvas.scale(scale, scale);
+            canvas.drawBitmap(banner, 0, 0, null);
+            canvas.restore();
+            if (sweetgramScrim == null) {
+                sweetgramScrim = new android.graphics.Paint();
+                sweetgramScrim.setColor(0x55000000);
+            }
+            canvas.drawRect(0, 0, width, y1, sweetgramScrim);
+        }
+
         @Override
         protected void onDraw(Canvas canvas) {
             final int height = ActionBar.getCurrentActionBarHeight() + (actionBar.getOccupyStatusBar() ? AndroidUtilities.statusBarHeight : 0);
@@ -1381,6 +1423,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     backgroundPaint.setAlpha((int) (0xFF * progressToGradient));
                     canvas.drawRect(0, 0, getMeasuredWidth(), y1, backgroundPaint);
                 }
+                drawSweetgramBanner(canvas, y1);
                 if (hasEmoji) {
                     final float loadedScale = emojiLoadedT.set(isEmojiLoaded());
                     boolean shoudIgnore = openAnimationInProgress && playProfileAnimation == 2;

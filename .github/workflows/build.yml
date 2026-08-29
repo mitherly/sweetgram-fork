@@ -130,11 +130,12 @@ jobs:
         if: steps.buildtype.outputs.type == 'release' && github.ref == 'refs/heads/rewrite' && github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.5
-          name: Sweetgram v0.5
+          tag_name: v0.6
+          name: Sweetgram v0.6
           body: |
             Sweetgram форк Telegram — релизная сборка.
             - Ghost-режим, новые двери плагинов, AMOLED-тема.
             - Новые иконки приложения, формат плагинов .swp.
-            - Админка: вход по Firebase + телеграм-ID (пароля в приложении больше нет).
+            - Админка: вход по Firebase + телеграм-ID.
+            - Баннеры профиля — картинка за аватаркой.
           files: Sweetgram-release.apk

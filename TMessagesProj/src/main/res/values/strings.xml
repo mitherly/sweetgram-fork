@@ -11315,6 +11315,16 @@
     <string name="SweetgramProfilesInfo">What else to show on a profile page</string>
     <string name="SweetgramShowIds">Show ID</string>
     <string name="SweetgramShowIdsAbout">A line with the numeric id in profiles of people, bots, groups and channels. Tap to copy.</string>
+    <string name="SweetgramBannerHeader">Banner</string>
+    <string name="SweetgramBannerPick">Choose a picture</string>
+    <string name="SweetgramBannerRemove">Remove banner</string>
+    <string name="SweetgramBannerAbout">The picture behind your avatar. Everyone with Sweetgram sees it; for everyone else nothing changes.</string>
+    <string name="SweetgramBannerWarn">The picture goes into the public group @margy_underground. Anyone can see it there, including people without Sweetgram. You can delete it yourself, in the group.</string>
+    <string name="SweetgramBannerShow">Show other people\'s banners</string>
+    <string name="SweetgramBannerSaved">Banner sent</string>
+    <string name="SweetgramBannerRemoved">Banner removed</string>
+    <string name="SweetgramBannerNone">There was no banner to remove.</string>
+    <string name="SweetgramGroupUnreachable">Could not reach the group. Try again when the connection is back.</string>
     <string name="SweetgramBadgeTitle">Sweetgram creator</string>
     <string name="SweetgramBadgeAbout">Sweetgram badge.</string>
     <string name="SweetgramBadgeFriendTitle">Sweetgram team</string>
