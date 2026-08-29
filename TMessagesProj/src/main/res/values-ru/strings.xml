@@ -361,7 +361,7 @@
     <string name="SweetgramBannerPick">Выбрать картинку</string>
     <string name="SweetgramBannerRemove">Убрать баннер</string>
     <string name="SweetgramBannerAbout">Картинка за вашей аватаркой. Её видят все, у кого стоит Sweetgram; у остальных ничего не меняется.</string>
-    <string name="SweetgramBannerWarn">Картинка уходит в публичную группу @margy_underground. Там её видит кто угодно, в том числе те, у кого Sweetgram нет. Удалить её вы можете сами, прямо в группе.</string>
+    <string name="SweetgramBannerWarn">Картинка уходит в публичную группу @sweetgrambanners. Там её видит кто угодно, в том числе те, у кого Sweetgram нет. Удалить её вы можете сами, прямо в группе.</string>
     <string name="SweetgramBannerShow">Показывать чужие баннеры</string>
     <string name="SweetgramBannerSaved">Баннер отправлен</string>
     <string name="SweetgramBannerRemoved">Баннер убран</string>

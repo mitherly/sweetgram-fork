@@ -27,10 +27,10 @@ import java.util.List;
 public class SweetgramBannerGroup {
 
     /** Где всё лежит. Публичная группа, читать может кто угодно. */
-    public static final String USERNAME = "margy_underground";
+    public static final String USERNAME = "sweetgrambanners";
 
     /** Метка баннера. Одна на всех: чей баннер — видно по автору сообщения. */
-    public static final String TAG_BANNER = "#margy_banner";
+    public static final String TAG_BANNER = "#sweetgram_banner";
 
     private static long groupId;
     private static boolean resolving;

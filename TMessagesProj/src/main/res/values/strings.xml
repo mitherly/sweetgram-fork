@@ -11319,7 +11319,7 @@
     <string name="SweetgramBannerPick">Choose a picture</string>
     <string name="SweetgramBannerRemove">Remove banner</string>
     <string name="SweetgramBannerAbout">The picture behind your avatar. Everyone with Sweetgram sees it; for everyone else nothing changes.</string>
-    <string name="SweetgramBannerWarn">The picture goes into the public group @margy_underground. Anyone can see it there, including people without Sweetgram. You can delete it yourself, in the group.</string>
+    <string name="SweetgramBannerWarn">The picture goes into the public group @sweetgrambanners. Anyone can see it there, including people without Sweetgram. You can delete it yourself, in the group.</string>
     <string name="SweetgramBannerShow">Show other people\'s banners</string>
     <string name="SweetgramBannerSaved">Banner sent</string>
     <string name="SweetgramBannerRemoved">Banner removed</string>
