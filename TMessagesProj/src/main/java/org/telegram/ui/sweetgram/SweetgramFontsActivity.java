@@ -61,6 +61,7 @@ public class SweetgramFontsActivity extends UniversalFragment {
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramFontsAbout)));
         items.add(UItem.asButton(ID_ADD, LocaleController.getString(R.string.SweetgramFontsAdd)));
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramFontsAddAbout)));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

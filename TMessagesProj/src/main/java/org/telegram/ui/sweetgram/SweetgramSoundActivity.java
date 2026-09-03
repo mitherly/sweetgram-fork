@@ -51,6 +51,7 @@ public class SweetgramSoundActivity extends UniversalFragment {
         items.add(UItem.asRadio(ID_OWN, own ? LocaleController.getString(R.string.SweetgramSoundOwn) : LocaleController.getString(R.string.SweetgramSoundChoose)).setChecked(own));
         items.add(UItem.asButton(ID_PLAY, LocaleController.getString(R.string.SweetgramSoundPlay)));
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramSoundAbout)));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

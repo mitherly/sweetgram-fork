@@ -493,6 +493,92 @@ public class ChatActivity extends BaseFragment implements
     private AnimatedTextView selectedMessagesCountTextView;
     private RecyclerListView.OnItemClickListener mentionsOnItemClickListener;
     private SuggestEmojiView suggestEmojiPanel;
+
+    // Стена: порт из Margy. Метка стены, если этот экран открыт как стена;
+    // пусто — обычная переписка. Стена — это и есть обычная переписка, у
+    // которой убрано всё чужое: тот же список, то же поле ввода, то же меню.
+    private String sweetgramWallTag;
+    /** Самый старый номер из принесённых — до отбора по метке; курсор догрузки. */
+    private int sweetgramWallOldest;
+    /** Сколько страниц дочитано само. Ограничение против бесконечного хода. */
+    private int sweetgramWallPages;
+    /** Номер самого старого сообщения этой стены — по ответу сервера. */
+    private int sweetgramWallTarget;
+    /** Найденное поиском до открытия экрана: подставляется в первую страницу. */
+    private java.util.ArrayList<MessageObject> sweetgramWallFound;
+    private boolean sweetgramWallPut;
+    /** Чья это стена и как его звать — для шапки. */
+    private String sweetgramWallName;
+    private long sweetgramWallPeer;
+
+    /** Предел страниц догрузки: защита от бесконечного хода, не мера достаточности. */
+    private static final int SWEETGRAM_WALL_MAX_PAGES = 60;
+
+    /** Отдать экрану найденное поиском. Зовётся до presentFragment. */
+    public void sweetgramFound(java.util.List<MessageObject> found) {
+        sweetgramWallFound = found == null ? null : new java.util.ArrayList<>(found);
+    }
+
+    /**
+     * Дочитать стену, если принесённого не хватило.
+     *
+     * Обычная переписка добирает историю при прокрутке. На стене прокручивать
+     * нечего: из полусотни принесённых сообщений с меткой бывает одно, список
+     * выходит короче экрана, и проверка «пора догружать» не срабатывает
+     * никогда. Поэтому просим следующую страницу сами и от своего курсора.
+     */
+    private void sweetgramFillWall() {
+        if (sweetgramWallTag == null || loading || endReached[0]) {
+            return;
+        }
+        if (sweetgramWallPages >= SWEETGRAM_WALL_MAX_PAGES || sweetgramWallOldest <= 1) {
+            return;
+        }
+        // Дошли до самого старого сообщения стены — дальше в истории её нет.
+        if (sweetgramWallTarget > 0 && sweetgramWallOldest <= sweetgramWallTarget) {
+            return;
+        }
+        sweetgramWallPages++;
+        loading = true;
+        waitingForLoad.add(lastLoadIndex);
+        getMessagesController().loadMessages(dialog_id, mergeDialogId, false, 50,
+                sweetgramWallOldest, 0, !cacheEndReached[0], 0, classGuid, 0, 0,
+                chatMode, threadMessageId, replyMaxReadId, lastLoadIndex++, isTopic);
+    }
+
+    /**
+     * Нажали на запись в самой группе стены, а в ней метка чьей-то стены —
+     * открываем эту стену. Только в группе: на стене все сообщения и так об
+     * одном человеке, открывать нечего.
+     */
+    private boolean sweetgramOpenWall(View view) {
+        if (!(view instanceof ChatMessageCell) || currentChat == null) {
+            return false;
+        }
+        if (!org.telegram.sweetgram.SweetgramWallGroup.USERNAME.equals(currentChat.username)) {
+            return false;
+        }
+        final MessageObject message = ((ChatMessageCell) view).getMessageObject();
+        final long peerId = org.telegram.sweetgram.SweetgramWallGroup.wallOf(message);
+        if (peerId == 0) {
+            return false;
+        }
+        String name = "";
+        if (peerId > 0) {
+            final TLRPC.User who = getMessagesController().getUser(peerId);
+            if (who != null) {
+                name = UserObject.getFirstName(who);
+            }
+        } else {
+            final TLRPC.Chat where = getMessagesController().getChat(-peerId);
+            if (where != null) {
+                name = where.title;
+            }
+        }
+        SweetgramWallActivity.open(ChatActivity.this, peerId, name);
+        return true;
+    }
+
     private ActionBarMenuItem.Item muteItem;
     private ActionBarMenuItem.Item muteItemGap;
     private ActionBarMenuItem.Item feeItemGap;
@@ -1844,6 +1930,12 @@ public class ChatActivity extends BaseFragment implements
             if (inPreviewMode) {
                 return;
             }
+            // Переход на стену — из самой группы, но не с уже открытой стены:
+            // иначе нажатие уводило бы со стены на стену. Всё остальное, что
+            // нажатие делает в обычной переписке, на стене работает как везде.
+            if (sweetgramWallTag == null && sweetgramOpenWall(view)) {
+                return;
+            }
             wasManualScroll = true;
             if (view instanceof ChatActionCell && ((ChatActionCell) view).getMessageObject().isDateObject) {
                 if (isInsideContainer) {
@@ -2676,6 +2768,30 @@ public class ChatActivity extends BaseFragment implements
 
     @Override
     public boolean onFragmentCreate() {
+        // Стена: метка и хозяин приходят в аргументах от SweetgramWallActivity.
+        sweetgramWallTag = arguments.getString("sweetgramWallTag", null);
+        if (sweetgramWallTag != null) {
+            // Один запрос на всю стену: сервер ищет по метке по всей группе и
+            // отвечает, где лежит самое старое. Дальше история дочитывается
+            // ровно до этого номера — не больше и не меньше.
+            org.telegram.sweetgram.SweetgramWallGroup.find(sweetgramWallTag, 0, 100,
+                    (found, problem) -> {
+                        int oldest = 0;
+                        for (MessageObject one : found) {
+                            final int id = one == null ? 0 : one.getId();
+                            if (id > 0 && (oldest == 0 || id < oldest)) {
+                                oldest = id;
+                            }
+                        }
+                        final int target = oldest;
+                        AndroidUtilities.runOnUIThread(() -> {
+                            sweetgramWallTarget = target;
+                            sweetgramFillWall();
+                        });
+                    });
+        }
+        sweetgramWallName = arguments.getString("sweetgramWallName", "");
+        sweetgramWallPeer = arguments.getLong("sweetgramWallPeer", 0);
         final long chatId = arguments.getLong("chat_id", 0);
         final long userId = arguments.getLong("user_id", 0);
         final int encId = arguments.getInt("enc_id", 0);
@@ -13859,7 +13975,13 @@ public class ChatActivity extends BaseFragment implements
                     loading = true;
                     waitingForLoad.add(lastLoadIndex);
                     if (messagesByDays.size() != 0) {
-                        getMessagesController().loadMessages(dialog_id, mergeDialogId, false, 50, maxMessageId[0], 0, !cacheEndReached[0], minDate[0], classGuid, 0, 0, chatMode, threadMessageId, replyMaxReadId, lastLoadIndex++, isTopic);
+                        // На стене курсор свой: maxMessageId посчитан по
+                        // отобранному, и просьба «старше него» вернула бы тот
+                        // же кусок снова. minDate тоже нулевой: записи стены
+                        // могут быть старее любой даты переписки.
+                        final int sweetgramFrom = sweetgramWallTag != null && sweetgramWallOldest > 0
+                                ? sweetgramWallOldest : maxMessageId[0];
+                        getMessagesController().loadMessages(dialog_id, mergeDialogId, false, 50, sweetgramFrom, 0, !cacheEndReached[0], sweetgramWallTag != null ? 0 : minDate[0], classGuid, 0, 0, chatMode, threadMessageId, replyMaxReadId, lastLoadIndex++, isTopic);
                     } else {
                         getMessagesController().loadMessages(dialog_id, mergeDialogId, false, 50, 0, 0, !cacheEndReached[0], minDate[0], classGuid, 0, 0, chatMode, threadMessageId, replyMaxReadId, lastLoadIndex++, isTopic);
                     }
@@ -15667,6 +15789,12 @@ public class ChatActivity extends BaseFragment implements
             cacheEndReached[a] = false;
             forwardEndReached[a] = true;
         }
+        // Курсор стены сбрасывается вместе с остальными: он такой же курсор
+        // истории, просто свой. Цель и флаг «найденное подставлено» не трогаем:
+        // первая про то, где в группе лежит стена, вторая — уже случившееся
+        // дело; повторная подстановка задвоила бы записи.
+        sweetgramWallOldest = 0;
+        sweetgramWallPages = 0;
         if (full) {
             first = true;
             firstLoading = true;
@@ -19488,6 +19616,31 @@ public class ChatActivity extends BaseFragment implements
         if (avatarContainer == null) {
             return;
         }
+        if (sweetgramWallTag != null) {
+            // Шапка стены: имя того, о ком стена, и подпись про саму стену.
+            // Стоит до всех прочих веток: это тот же updateTitle, что и у
+            // переписки, и любой обычный апдейт заголовка группы вернул бы
+            // «N участников», не встань эта ветка первой.
+            avatarContainer.setTitle(LocaleController.formatString(
+                    R.string.SweetgramWallOf, sweetgramWallName));
+            avatarContainer.setSubtitle(LocaleController.getString(R.string.SweetgramWallSubtitle));
+            try {
+                if (sweetgramWallPeer > 0) {
+                    final TLRPC.User who = getMessagesController().getUser(sweetgramWallPeer);
+                    if (who != null) {
+                        avatarContainer.setUserAvatar(who, true);
+                    }
+                } else if (sweetgramWallPeer < 0) {
+                    final TLRPC.Chat where = getMessagesController().getChat(-sweetgramWallPeer);
+                    if (where != null) {
+                        avatarContainer.setChatAvatar(where);
+                    }
+                }
+            } catch (Throwable t) {
+                FileLog.e(t);
+            }
+            return;
+        }
         if (chatMode == MODE_SUGGESTIONS && currentChat != null) {
             if (isSubscriberSuggestions) {
                 avatarContainer.setTitle(ForumUtilities.getMonoForumTitle(currentAccount, currentChat), currentChat.scam, currentChat.fake, currentChat.verified, false, null, animated);
@@ -20585,6 +20738,47 @@ public class ChatActivity extends BaseFragment implements
         }
         ArrayList<MessageObject> messArr = (ArrayList<MessageObject>) args[2];
 
+        // Стена: из принесённого оставляем только помеченное. Отбираем здесь,
+        // на входе, а не при показе: дальше по коду сообщения расходятся по
+        // десятку списков, и вычесть их оттуда потом было бы куда труднее.
+        //
+        // Но два числа снимаем ДО отбора: сколько сообщений принесли на самом
+        // деле и какое из них самое старое. По первому телеграм решает,
+        // кончилась ли история, по второму просит следующую страницу. После
+        // отбора оба стали бы про метку, а не про историю группы.
+        final int sweetgramLoadedCount = messArr.size();
+        if (sweetgramWallTag != null) {
+            for (MessageObject one : messArr) {
+                final int id = one == null ? 0 : one.getId();
+                if (id > 0 && (sweetgramWallOldest == 0 || id < sweetgramWallOldest)) {
+                    sweetgramWallOldest = id;
+                }
+            }
+            messArr = org.telegram.sweetgram.SweetgramWallGroup.onlyWall(messArr, sweetgramWallTag);
+            if (!sweetgramWallPut && sweetgramWallFound != null) {
+                sweetgramWallPut = true;
+                final java.util.HashSet<Integer> already = new java.util.HashSet<>();
+                for (MessageObject one : messArr) {
+                    if (one != null) {
+                        already.add(one.getId());
+                    }
+                }
+                for (MessageObject one : sweetgramWallFound) {
+                    if (one != null && one.messageOwner != null && already.add(one.getId())) {
+                        messArr.add(one);
+                    }
+                }
+                // Порядок как у сервера: от новых к старым. Телеграм на него
+                // опирается, раскладывая сообщения по дням.
+                java.util.Collections.sort(messArr,
+                        (a, b) -> Integer.compare(b.getId(), a.getId()));
+                // Больше просить нечего: поиск знает всю группу, и всё, что
+                // есть у этой стены, уже здесь.
+                endReached[0] = true;
+                cacheEndReached[0] = true;
+            }
+        }
+
         boolean universalNotify = false;
         HashMap<Integer, MessageObject> oldMessages = null;
         if (clearOnLoad && (mode == MODE_DEFAULT || mode == MODE_SUGGESTIONS)) {
@@ -21468,7 +21662,9 @@ public class ChatActivity extends BaseFragment implements
             }
             loadingForward = false;
         } else {
-            if (messArr.size() < count && load_type != 3 && load_type != 4) {
+            // Стена: решение «кончилась ли история» принимаем по тому, сколько
+            // принесли на самом деле, а не по тому, что осталось после отбора.
+            if (sweetgramLoadedCount < count && load_type != 3 && load_type != 4) {
                 if (isCache) {
                     if (currentEncryptedChat != null || loadIndex == 1 && mergeDialogId != 0 && isEnd) {
                         endReached[loadIndex] = true;
@@ -21476,11 +21672,12 @@ public class ChatActivity extends BaseFragment implements
                     if (load_type != 2) {
                         cacheEndReached[loadIndex] = true;
                     }
-                } else if (load_type != 2 || messArr.size() == 0 && messages.isEmpty()) {
+                } else if (load_type != 2 || sweetgramLoadedCount == 0 && messages.isEmpty()) {
                     endReached[loadIndex] = true;
                 }
             }
             loading = false;
+            sweetgramFillWall();
             if (onChatMessagesLoaded != null) {
                 onChatMessagesLoaded.run();
                 onChatMessagesLoaded = null;
@@ -22010,6 +22207,9 @@ public class ChatActivity extends BaseFragment implements
             FileLog.d("ChatActivity didReceiveNewMessages start");
             long did = (Long) args[0];
             ArrayList<MessageObject> arr = (ArrayList<MessageObject>) args[1];
+            // Стена: свежепришедшее тоже проходит через отбор по метке, иначе
+            // на стене оказались бы и все прочие сообщения группы.
+            arr = org.telegram.sweetgram.SweetgramWallGroup.onlyWall(arr, sweetgramWallTag);
             if (isInsideContainer) return;
             if (did == dialog_id) {
                 boolean scheduled = (Boolean) args[2];
@@ -28371,6 +28571,15 @@ public class ChatActivity extends BaseFragment implements
 
     private void updatePinnedMessageView(boolean animated, int animateToNext) {
         if (currentEncryptedChat != null || chatMode != 0) {
+            return;
+        }
+        if (sweetgramWallTag != null) {
+            // На стене закреплённое ни при чём: оно закреплено в группе, а
+            // человек пришёл читать про конкретного человека. Полоска сверху
+            // тут только отнимает место и уводит не туда.
+            if (pinnedMessageView != null) {
+                pinnedMessageView.setVisibility(View.GONE);
+            }
             return;
         }
         int pinned_msg_id;

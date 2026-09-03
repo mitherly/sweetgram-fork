@@ -339,6 +339,15 @@ public class MessageObject {
 
     public int currentAccount;
 
+    /**
+     * Где в этом сообщении стоят служебные метки стены.
+     *
+     * Само сообщение остаётся с метками: по ним собирается стена, и вырезать
+     * их из него нельзя — правленое сообщение уходит в базу, и метка пропала
+     * бы навсегда. Прячем только при показе, по этим отсчётам.
+     */
+    public java.util.List<int[]> sweetgramCuts;
+
     public TLRPC.TL_channelAdminLogEvent currentEvent;
 
     public boolean forceUpdate;
@@ -1921,6 +1930,18 @@ public class MessageObject {
 
         currentAccount = accountNum;
         messageOwner = message;
+        // Служебные метки стены убираем здесь, до того как из сообщения
+        // соберут текст и разметку: вырезать их потом, из готового текста,
+        // значит оставить отсчёты разметки на прежних местах. Этот код стоит
+        // на пути КАЖДОГО сообщения, поэтому любая ошибка здесь гасится —
+        // пряталка меток не стоит того, чтобы из-за неё нельзя было прочитать
+        // переписку.
+        try {
+            sweetgramCuts = org.telegram.sweetgram.SweetgramWallGroup.cutsIn(messageOwner);
+        } catch (Throwable t) {
+            sweetgramCuts = null;
+            FileLog.e(t);
+        }
         replyMessageObject = replyToMessage;
         eventId = eid;
         wasUnread = !messageOwner.out && messageOwner.unread;
@@ -3529,6 +3550,10 @@ public class MessageObject {
         if (messageText == null) {
             messageText = "";
         }
+        // Прячем служебные метки: читать их человеку незачем. Здесь все
+        // ветки разбора текста сходятся в одну — значит, и прятать надо здесь,
+        // а не на экранах: экранов много, и про один можно забыть.
+        messageText = org.telegram.sweetgram.SweetgramWallGroup.applyCuts(messageText, sweetgramCuts);
 
         TextPaint paint;
         if (getMedia(messageOwner) instanceof TLRPC.TL_messageMediaGame) {
@@ -3748,6 +3773,9 @@ public class MessageObject {
     }
 
     public void applyNewText(CharSequence text) {
+        if (!TextUtils.isEmpty(text)) {
+            text = org.telegram.sweetgram.SweetgramWallGroup.applyCuts(text, sweetgramCuts);
+        }
         if (TextUtils.isEmpty(text)) {
             return;
         }
@@ -6078,6 +6106,9 @@ public class MessageObject {
         if (messageText == null) {
             messageText = "";
         }
+        // И здесь тоже: это второе место, где сходятся ветки разбора текста, а
+        // проходит сообщение то через одно, то через другое.
+        messageText = org.telegram.sweetgram.SweetgramWallGroup.applyCuts(messageText, sweetgramCuts);
 
         isEmbedVideoCached = null;
         cachedStartsTimestamp = null;
@@ -7630,6 +7661,10 @@ public class MessageObject {
             captionTranslated = false;
         }
         if (!isMediaEmpty() && !(getMedia(messageOwner) instanceof TLRPC.TL_messageMediaGame) && !TextUtils.isEmpty(text)) {
+            // Метка записи на стене живёт в тексте сообщения, а подпись к
+            // медиа готовится отдельно от текста. Прячем до разбора смайликов
+            // и разметки: после отсчёты уже посчитаны, и вырезание их сдвинет.
+            text = String.valueOf(org.telegram.sweetgram.SweetgramWallGroup.applyCuts(text, sweetgramCuts));
             caption = Emoji.replaceEmoji(text, Theme.chat_msgTextPaint.getFontMetricsInt(), false);
             caption = replaceAnimatedEmoji(caption, entities, Theme.chat_msgTextPaint.getFontMetricsInt(), false);
 
@@ -7975,7 +8010,15 @@ public class MessageObject {
                 return messageOwner.translatedText != null ? messageOwner.translatedText.entities : null;
             }
         }
-        return messageOwner.entities;
+        // Отсчёты разметки сдвигаем ровно настолько, насколько спрятали
+        // текста. Здесь, а не на каждом экране: это единственное место, откуда
+        // разметку берут для показа.
+        try {
+            return org.telegram.sweetgram.SweetgramWallGroup.shiftEntities(messageOwner.entities, sweetgramCuts);
+        } catch (Throwable t) {
+            FileLog.e(t);
+            return messageOwner.entities;
+        }
     }
 
     public Spannable replaceAnimatedEmoji(CharSequence text, Paint.FontMetricsInt fontMetricsInt) {

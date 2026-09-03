@@ -23,6 +23,7 @@ public class SweetgramProfilesActivity extends UniversalFragment {
     private static final int ID_BANNER = 2;
     private static final int ID_BANNER_OFF = 3;
     private static final int ID_BANNERS_SHOW = 4;
+    private static final int ID_WALLS = 5;
 
     private static final int PICK_BANNER = 4833;
 
@@ -50,6 +51,12 @@ public class SweetgramProfilesActivity extends UniversalFragment {
         items.add(UItem.asCheck(ID_BANNERS_SHOW, LocaleController.getString(R.string.SweetgramBannerShow))
                 .setChecked(SweetgramConfig.bannersEnabled()));
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramBannerAbout)));
+
+        items.add(UItem.asHeader(LocaleController.getString(R.string.SweetgramWallHeader)));
+        items.add(UItem.asCheck(ID_WALLS, LocaleController.getString(R.string.SweetgramWallShow))
+                .setChecked(SweetgramConfig.wallsEnabled()));
+        items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramWallAbout)));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override
@@ -75,6 +82,9 @@ public class SweetgramProfilesActivity extends UniversalFragment {
             });
         } else if (item.id == ID_BANNERS_SHOW) {
             SweetgramConfig.setBannersEnabled(!SweetgramConfig.bannersEnabled());
+            listView.adapter.update(true);
+        } else if (item.id == ID_WALLS) {
+            SweetgramConfig.setWallsEnabled(!SweetgramConfig.wallsEnabled());
             listView.adapter.update(true);
         }
     }

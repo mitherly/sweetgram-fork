@@ -448,6 +448,10 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         // начнут строиться кисти и картинки, иначе первый экран нарисуется
         // старыми цветами и перекрасится уже на глазах.
         org.telegram.sweetgram.SweetgramTheme.applyOnFirstLaunch();
+        // Праздничные темы: в окно праздника тема ставится сама, после —
+        // возвращается прежняя. Рядом с первой темой: тот же момент «до того,
+        // как из темы начнут строиться кисти».
+        org.telegram.sweetgram.SweetgramHoliday.onLaunch();
         Theme.createCommonChatResources();
         Theme.createDialogsResources(this);
         if (SharedConfig.passcodeHash.length() != 0 && SharedConfig.appLocked) {

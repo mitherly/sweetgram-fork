@@ -4290,6 +4290,19 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     public void sendMessage(SendMessageParams sendMessageParams) {
+        // Стена: пока её экран открыт, дописываем метку сама отправка. Это то
+        // же единственное место, через которое проходит всё отправляемое, —
+        // поэтому и стоит здесь, а не в своём поле ввода, которого у стены
+        // больше нет.
+        if (sendMessageParams.message != null && org.telegram.sweetgram.SweetgramWallGroup.writing()) {
+            final String walled = org.telegram.sweetgram.SweetgramWallGroup.tagged(
+                    sendMessageParams.message, sendMessageParams.peer);
+            if (walled == null) {
+                org.telegram.sweetgram.SweetgramWallGroup.refuse();
+                return;
+            }
+            sendMessageParams.message = walled;
+        }
         if (sendMessageParams.message != null && org.telegram.sweetgram.SweetgramHooks.hasSend()) {
             final String hooked = org.telegram.sweetgram.SweetgramHooks.sending(
                     sendMessageParams.message, sendMessageParams.peer);

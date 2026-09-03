@@ -107,6 +107,7 @@ public class SweetgramMarkupActivity extends UniversalFragment {
         items.add(UItem.asCheck(ID_M3_SWITCHES, LocaleController.getString(R.string.SweetgramM3SwitchStyle))
                 .setChecked(SweetgramConfig.m3SwitchStyle()));
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramM3SwitchStyleAbout)));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

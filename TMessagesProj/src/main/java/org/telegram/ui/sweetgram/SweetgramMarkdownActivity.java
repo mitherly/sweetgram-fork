@@ -51,6 +51,7 @@ public class SweetgramMarkdownActivity extends UniversalFragment {
                     .setChecked(SweetgramConfig.markdownEnabled(KINDS[i])));
         }
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramMarkdownAbout)));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

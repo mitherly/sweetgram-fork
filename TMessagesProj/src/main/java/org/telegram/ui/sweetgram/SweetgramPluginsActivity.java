@@ -89,6 +89,7 @@ public class SweetgramPluginsActivity extends UniversalFragment {
         items.add(UItem.asShadow(null));
         items.add(UItem.asButton(ID_FORUM, LocaleController.getString(R.string.SweetgramPluginLibrary)));
         items.add(UItem.asShadow(null));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

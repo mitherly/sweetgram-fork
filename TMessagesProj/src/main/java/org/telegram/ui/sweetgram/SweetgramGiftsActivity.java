@@ -41,6 +41,7 @@ public class SweetgramGiftsActivity extends UniversalFragment {
         // сами.
         items.add(UItem.asButton(ID_AUTHOR, LocaleController.getString(R.string.SweetgramGiftsAuthor)));
         items.add(UItem.asShadow(null));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

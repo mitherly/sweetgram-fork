@@ -127,6 +127,7 @@ public class SweetgramUpdatesActivity extends UniversalFragment {
         } else if (list != null && !list.isEmpty()) {
             items.add(UItem.asFullyCustom(buildReleasesView(list)));
         }
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

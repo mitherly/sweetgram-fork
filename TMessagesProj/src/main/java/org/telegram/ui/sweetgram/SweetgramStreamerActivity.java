@@ -44,6 +44,7 @@ public class SweetgramStreamerActivity extends UniversalFragment {
                     .setChecked(SweetgramConfig.streamerHidesUsername()));
         }
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramStreamerAbout)));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

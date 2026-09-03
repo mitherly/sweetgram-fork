@@ -49,6 +49,8 @@ public class SweetgramSettingsActivity extends UniversalFragment {
     private static final int ID_FEEDBACK = 18;
     private static final int ID_ADMIN = 19;
     private static final int ID_GHOST = 20;
+    private static final int ID_BUBBLES = 21;
+    private static final int ID_BADGES = 22;
 
     /** Объёмный значок в шапке. Пользы ноль, и в этом вся мысль. */
     private FrameLayout header;
@@ -103,6 +105,14 @@ public class SweetgramSettingsActivity extends UniversalFragment {
                 IconBackgroundColors.CYAN.top, IconBackgroundColors.CYAN.bottom,
                 R.drawable.settings_language, LocaleController.getString(R.string.SweetgramMarkup),
                 LocaleController.getString(R.string.SweetgramMarkupInfo)));
+        items.add(SettingsActivity.SettingCell.Factory.of(ID_BUBBLES,
+                IconBackgroundColors.PINK.top, IconBackgroundColors.PINK.bottom,
+                R.drawable.settings_chat, LocaleController.getString(R.string.SweetgramBubbles),
+                LocaleController.getString(R.string.SweetgramBubblesInfo)));
+        items.add(SettingsActivity.SettingCell.Factory.of(ID_BADGES,
+                IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom,
+                R.drawable.settings_premium, LocaleController.getString(R.string.SweetgramBadgesMenu),
+                LocaleController.getString(R.string.SweetgramBadgesMenuInfo)));
         items.add(SettingsActivity.SettingCell.Factory.of(ID_PROFILES,
                 IconBackgroundColors.BLUE_DEEP.top, IconBackgroundColors.BLUE_DEEP.bottom,
                 R.drawable.settings_account, LocaleController.getString(R.string.SweetgramProfiles),
@@ -139,6 +149,7 @@ public class SweetgramSettingsActivity extends UniversalFragment {
                 LocaleController.getString(R.string.SweetgramSourceInfo)));
         items.add(UItem.asButton(ID_ADMIN, "Admin panel"));
         items.add(UItem.asShadow(null));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override
@@ -191,6 +202,10 @@ public class SweetgramSettingsActivity extends UniversalFragment {
             Browser.openUrl(getContext(), SweetgramConfig.CHANNEL_URL);
         } else if (item.id == ID_PROFILES) {
             presentFragment(new SweetgramProfilesActivity());
+        } else if (item.id == ID_BUBBLES) {
+            presentFragment(new SweetgramBubblesActivity());
+        } else if (item.id == ID_BADGES) {
+            presentFragment(new SweetgramBadgeGalleryActivity());
         } else if (item.id == ID_GIFTS) {
             presentFragment(new SweetgramGiftsActivity());
         } else if (item.id == ID_STREAMER) {

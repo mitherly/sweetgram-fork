@@ -56,6 +56,7 @@ public class SweetgramInputActivity extends UniversalFragment {
 
         items.add(UItem.asCheck(ID_TOP, LocaleController.getString(R.string.SweetgramInputOnTop)).setChecked(SweetgramConfig.inputOnTop()));
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramInputOnTopAbout)));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override

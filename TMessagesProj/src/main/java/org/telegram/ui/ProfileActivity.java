@@ -629,6 +629,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int languageRow;
     private int sweetgramRow;   // свой раздел настроек форка
     private int sweetgramIdRow;  // строка с айди в профиле
+    private int sweetgramWallRow;   // строка «открыть стену»
     // Блок значков. Их может быть несколько, поэтому не одна строка, а отрезок:
     // начало включительно, конец нет — как у списка участников рядом.
     private int sweetgramBadgesStartRow;
@@ -4603,6 +4604,16 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 AndroidUtilities.addToClipboard(String.valueOf(userId != 0 ? userId : chatId));
                 BulletinFactory.of(ProfileActivity.this).createCopyBulletin(
                         LocaleController.getString(R.string.TextCopied)).show();
+            } else if (position == sweetgramWallRow) {
+                if (userId != 0) {
+                    final TLRPC.User who = getMessagesController().getUser(userId);
+                    SweetgramWallActivity.open(ProfileActivity.this, userId,
+                            who != null ? UserObject.getFirstName(who) : "");
+                } else {
+                    final TLRPC.Chat where = getMessagesController().getChat(chatId);
+                    SweetgramWallActivity.open(ProfileActivity.this, -chatId,
+                            where != null ? where.title : "");
+                }
             } else if (position == sweetgramRow) {
                 presentFragment(new SweetgramSettingsActivity());
             } else if (position == chatRow) {
@@ -9114,6 +9125,12 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     public void didReceivedNotification(int id, int account, final Object... args) {
         if (id == NotificationCenter.uploadStoryEnd || id == NotificationCenter.chatWasBoostedByUser) {
             checkCanSendStoryForPosting();
+        } else if (id == NotificationCenter.mainUserInfoChanged) {
+            // Значки приезжают асинхронно: свой значок у этого человека мог
+            // только что найтись в общей группе — перестроим список строк.
+            if (userId != 0 || chatId != 0) {
+                updateListAnimated(false);
+            }
         } else if (id == NotificationCenter.updateInterfaces) {
             int mask = (Integer) args[0];
             boolean infoChanged = (mask & MessagesController.UPDATE_MASK_AVATAR) != 0 || (mask & MessagesController.UPDATE_MASK_NAME) != 0 || (mask & MessagesController.UPDATE_MASK_STATUS) != 0 || (mask & MessagesController.UPDATE_MASK_EMOJI_STATUS) != 0;
@@ -10541,6 +10558,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         languageRow = -1;
         sweetgramRow = -1;
         sweetgramIdRow = -1;
+        sweetgramWallRow = -1;
         sweetgramBadgesStartRow = -1;
         sweetgramBadgesEndRow = -1;
         sweetgramBadgeSectionRow = -1;
@@ -10812,6 +10830,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (org.telegram.sweetgram.SweetgramConfig.showIds() && userId != 0) {
                     sweetgramIdRow = rowCount++;
                 }
+                if (org.telegram.sweetgram.SweetgramConfig.wallsEnabled() && userId != 0) {
+                    // И у ботов тоже. Бот обманывает ровно так же, как человек,
+                    // а жаловаться на него было некуда.
+                    sweetgramWallRow = rowCount++;
+                }
                 infoEndRow = rowCount - 1;
                 infoSectionRow = rowCount++;
 
@@ -10976,6 +10999,9 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             }
             if (org.telegram.sweetgram.SweetgramConfig.showIds() && chatId != 0) {
                 sweetgramIdRow = rowCount++;
+            }
+            if (org.telegram.sweetgram.SweetgramConfig.wallsEnabled() && chatId != 0) {
+                sweetgramWallRow = rowCount++;
             }
             if (rowCount > 0) {
                 infoSectionRow = rowCount++;
@@ -11353,6 +11379,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private void updateProfileData(boolean reload) {
         if (avatarContainer == null || nameTextView == null || getParentActivity() == null) {
             return;
+        }
+        // Свой значок: спрашиваем у группы при каждом открытом профиле, пока
+        // не узнаем. Спросит один раз — дальше молчит из кэша.
+        if (userId != 0) {
+            org.telegram.sweetgram.SweetgramOwnBadge.request(userId);
         }
         String onlineTextOverride;
         int currentConnectionState = getConnectionsManager().getConnectionState();
@@ -13639,6 +13670,10 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         // виде его ждут боты и ссылки, а «-100…» это внутренняя
                         // запись клиента.
                         detailCell.setTextAndValue(String.valueOf(userId != 0 ? userId : chatId), "ID", false);
+                    } else if (position == sweetgramWallRow) {
+                        detailCell.setTextAndValue(
+                                LocaleController.getString(R.string.SweetgramWallOpen),
+                                LocaleController.getString(R.string.SweetgramWallSubtitle), false);
                     } else if (position == birthdayRow) {
                         TLRPC.UserFull userFull = getMessagesController().getUserFull(userId);
                         if (userFull != null && userFull.birthday != null) {
@@ -14478,7 +14513,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         position == addToGroupButtonRow || position == premiumRow || position == premiumGiftingRow ||
                         position == businessRow || position == liteModeRow || position == birthdayRow || position == channelRow ||
                         position == starsRow || position == tonRow || position == linkedCommunityRow ||
-                        position == sweetgramRow || position == sweetgramIdRow
+                        position == sweetgramRow || position == sweetgramIdRow || position == sweetgramWallRow
                         || (sweetgramBadgesStartRow != -1 && position >= sweetgramBadgesStartRow && position < sweetgramBadgesEndRow);
             }
             if (holder.itemView instanceof UserCell) {
@@ -14508,6 +14543,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     position == numberSectionRow || position == helpHeaderRow || position == debugHeaderRow || position == botPermissionsHeader) {
                 return VIEW_TYPE_HEADER;
             } else if (position == phoneRow || position == locationRow || position == numberRow || position == birthdayRow || position == sweetgramIdRow
+                    || position == sweetgramWallRow
                     || (sweetgramBadgesStartRow != -1 && position >= sweetgramBadgesStartRow && position < sweetgramBadgesEndRow)) {
                 return VIEW_TYPE_TEXT_DETAIL;
             } else if (position == usernameRow || position == setUsernameRow) {

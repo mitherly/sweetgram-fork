@@ -30,6 +30,7 @@ public class SweetgramConveniencesActivity extends UniversalFragment {
     private static final int ID_HIDE_SEND_AS = 7;
     private static final int ID_HIDE_BOT_BUTTON = 8;
     private static final int ID_ANTI_DELETE = 9;
+    private static final int ID_HOLIDAY = 10;
 
     @Override
     protected CharSequence getTitle() {
@@ -67,12 +68,16 @@ public class SweetgramConveniencesActivity extends UniversalFragment {
         items.add(UItem.asCheck(ID_TRACKS, LocaleController.getString(R.string.SweetgramTracksEnabled))
                 .setChecked(SweetgramConfig.tagsEnabled()));
         items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramTracksEnabledAbout)));
+        items.add(UItem.asCheck(ID_HOLIDAY, LocaleController.getString(R.string.SweetgramHoliday))
+                .setChecked(SweetgramConfig.holidayThemes()));
+        items.add(UItem.asShadow(LocaleController.getString(R.string.SweetgramHolidayAbout)));
         items.add(UItem.asCheck(ID_SEIZURE, LocaleController.getString(R.string.SweetgramSeizure))
                 .setChecked(SweetgramSeizure.enabled()));
         items.add(UItem.asShadow(null));
         items.add(UItem.asButton(ID_FONTS, LocaleController.getString(R.string.SweetgramFonts),
                 LocaleController.getString(R.string.SweetgramFontsInfo)));
         items.add(UItem.asShadow(null));
+        items.add(UItem.asShadow("Based on Margy (@margeletter , github.com/narezany/Margelet)"));
     }
 
     @Override
@@ -100,6 +105,12 @@ public class SweetgramConveniencesActivity extends UniversalFragment {
             listView.adapter.update(true);
         } else if (item.id == ID_TRACKS) {
             SweetgramConfig.setTagsEnabled(!SweetgramConfig.tagsEnabled());
+            listView.adapter.update(true);
+        } else if (item.id == ID_HOLIDAY) {
+            SweetgramConfig.setHolidayThemes(!SweetgramConfig.holidayThemes());
+            // В обе стороны сразу: включили в день праздника — применяем не
+            // дожидаясь перезапуска; выключили в праздник — возвращаем прежнюю.
+            org.telegram.sweetgram.SweetgramHoliday.onLaunch();
             listView.adapter.update(true);
         } else if (item.id == ID_SEIZURE) {
             toggleSeizure();

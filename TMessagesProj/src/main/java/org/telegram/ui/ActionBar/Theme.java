@@ -4037,6 +4037,70 @@ public class Theme {
         themes.add(themeInfo);
         themesDict.put("AMOLED", themeInfo);
 
+        // Праздничные темы Sweetgram: готовые .attheme из assets, свои обои
+        // вложены в сам файл. Акцентов у них нет нарочно: нулевой массив, как
+        // у AMOLED, — файл красит всё сам. Включаются сами по датам
+        // (SweetgramHoliday) и видны в каталоге тем для ручного выбора.
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "Sweetgram 1 сентября";
+        themeInfo.assetName = "sweetgram_sept1.attheme";
+        themeInfo.previewBackgroundColor = 0xff28504a;
+        themeInfo.previewInColor = 0xff2c4a47;
+        themeInfo.previewOutColor = 0xff5d7a3a;
+        themeInfo.sortIndex = 7;
+        setHolidayAccentOptions(themeInfo);
+        sortAccents(themeInfo);
+        themes.add(themeInfo);
+        themesDict.put(themeInfo.name, themeInfo);
+
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "Sweetgram Хеллоуин";
+        themeInfo.assetName = "sweetgram_halloween.attheme";
+        themeInfo.previewBackgroundColor = 0xff2a1440;
+        themeInfo.previewInColor = 0xff33203f;
+        themeInfo.previewOutColor = 0xff5c2a1e;
+        themeInfo.sortIndex = 8;
+        setHolidayAccentOptions(themeInfo);
+        sortAccents(themeInfo);
+        themes.add(themeInfo);
+        themesDict.put(themeInfo.name, themeInfo);
+
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "Sweetgram Новый год";
+        themeInfo.assetName = "sweetgram_newyear.attheme";
+        themeInfo.previewBackgroundColor = 0xff16294f;
+        themeInfo.previewInColor = 0xff1e2c46;
+        themeInfo.previewOutColor = 0xff274f80;
+        themeInfo.sortIndex = 9;
+        setHolidayAccentOptions(themeInfo);
+        sortAccents(themeInfo);
+        themes.add(themeInfo);
+        themesDict.put(themeInfo.name, themeInfo);
+
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "Sweetgram 23 февраля";
+        themeInfo.assetName = "sweetgram_defender.attheme";
+        themeInfo.previewBackgroundColor = 0xff20262e;
+        themeInfo.previewInColor = 0xff262c34;
+        themeInfo.previewOutColor = 0xff3b454f;
+        themeInfo.sortIndex = 10;
+        setHolidayAccentOptions(themeInfo);
+        sortAccents(themeInfo);
+        themes.add(themeInfo);
+        themesDict.put(themeInfo.name, themeInfo);
+
+        themeInfo = new ThemeInfo();
+        themeInfo.name = "Sweetgram 8 марта";
+        themeInfo.assetName = "sweetgram_women.attheme";
+        themeInfo.previewBackgroundColor = 0xff471a30;
+        themeInfo.previewInColor = 0xff45202f;
+        themeInfo.previewOutColor = 0xff7c3050;
+        themeInfo.sortIndex = 11;
+        setHolidayAccentOptions(themeInfo);
+        sortAccents(themeInfo);
+        themes.add(themeInfo);
+        themesDict.put(themeInfo.name, themeInfo);
+
         String themesString = themeConfig.getString("themes2", null);
 
         int remoteVersion = themeConfig.getInt("remote_version", 0);
@@ -4424,6 +4488,28 @@ public class Theme {
         setColor(key_avatar_actionBarSelectorBlue, 0x20E59CB8, false);
         setColor(key_windowBackgroundWhiteBlueText, pinkTextLink, false);
         setColor(key_windowBackgroundWhiteBlueIcon, pinkIcon, false);
+    }
+
+    /**
+     * Праздничным темам акценты не нужны: нулевой массив, как у AMOLED.
+     * Красит сам .attheme-файл, целиком.
+     */
+    private static void setHolidayAccentOptions(ThemeInfo themeInfo) {
+        themeInfo.firstAccentIsDefault = true;
+        themeInfo.currentAccentId = DEFALT_THEME_ACCENT_ID;
+        themeInfo.setAccentColorOptions(
+                new int[] { 0x00000000 },
+                new int[] { 0x00000000 },
+                new int[] { 0x00000000 },
+                new int[] { 0x00000000 },
+                new int[] { 0x00000000 },
+                null,
+                null,
+                new int[] { 0 },
+                new String[] { "" },
+                new int[] { 0 },
+                new int[] { 0 }
+        );
     }
 
     private static void sortAccents(ThemeInfo info) {
@@ -9102,10 +9188,15 @@ public class Theme {
         if (provider != null) {
             // Приступ перехватывает и здесь: у ячеек с собственным набором
             // цветов путь до темы свой, и без этой строки половина экранов
-            // осталась бы обычной.
+            // осталась бы обычной. Свой пузырь — тоже: цвет исходящих должен
+            // стоять и в ячейках со своим набором.
             final int seizure = org.telegram.sweetgram.SweetgramSeizure.colorFor(key);
             if (seizure != 0) {
                 return seizure;
+            }
+            final int ownBubble = org.telegram.sweetgram.SweetgramBubbles.colorFor(key);
+            if (ownBubble != 0) {
+                return ownBubble;
             }
             return provider.getColor(key);
         }
@@ -9131,6 +9222,12 @@ public class Theme {
         final int seizure = org.telegram.sweetgram.SweetgramSeizure.colorFor(key);
         if (seizure != 0) {
             return seizure;
+        }
+        // Свой пузырь: ключи исходящих пузырей и их начинки отдают выбранный
+        // цвет. Тема не трогается — выключил, и всё вернулось само.
+        final int ownBubble = org.telegram.sweetgram.SweetgramBubbles.colorFor(key);
+        if (ownBubble != 0) {
+            return ownBubble;
         }
         if (!ignoreAnimation && animatingColors != null) {
             int index = animatingColors.indexOfKey(key);

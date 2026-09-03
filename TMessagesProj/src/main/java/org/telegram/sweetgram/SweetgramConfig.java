@@ -290,6 +290,60 @@ public class SweetgramConfig {
         prefs().edit().putBoolean("profile_banners", on).apply();
     }
 
+    /** Показывать кнопку «Стена» в профилях. */
+    public static boolean wallsEnabled() {
+        return prefs().getBoolean("walls", true);
+    }
+
+    public static void setWallsEnabled(boolean on) {
+        prefs().edit().putBoolean("walls", on).apply();
+    }
+
+    /** Праздничные темы: сами включаются в свой день и сами уходят после. */
+    public static boolean holidayThemes() {
+        return prefs().getBoolean("holiday_themes", true);
+    }
+
+    public static void setHolidayThemes(boolean on) {
+        prefs().edit().putBoolean("holiday_themes", on).apply();
+    }
+
+    /** Свой пузырь: красить ли свои исходящие сообщения выбранным цветом. */
+    public static boolean ownBubbleOn() {
+        return prefs().getBoolean("own_bubble", false);
+    }
+
+    public static void setOwnBubbleOn(boolean on) {
+        prefs().edit().putBoolean("own_bubble", on).apply();
+    }
+
+    /** Первый цвет своего пузыря (верх перехода). */
+    public static int ownBubbleColor1() {
+        return prefs().getInt("own_bubble_color1", 0xFFE59CB8);
+    }
+
+    public static void setOwnBubbleColor1(int color) {
+        prefs().edit().putInt("own_bubble_color1", color).apply();
+    }
+
+    /** Второй цвет своего пузыря; ноль — без перехода. */
+    public static int ownBubbleColor2() {
+        return prefs().getInt("own_bubble_color2", 0);
+    }
+
+    public static void setOwnBubbleColor2(int color) {
+        prefs().edit().putInt("own_bubble_color2", color).apply();
+    }
+
+    /** Переход: второй цвет выводится из первого сам. */
+    public static boolean ownBubbleGradient() {
+        return prefs().getBoolean("own_bubble_gradient", false);
+    }
+
+    public static void setOwnBubbleGradient(boolean on) {
+        prefs().edit().putBoolean("own_bubble_gradient", on).apply();
+    }
+
     /**
      * «Приступ»: весь текст переливается радугой. Выключено по умолчанию и
      * включается только через предупреждение — мигающая картинка бывает опасна

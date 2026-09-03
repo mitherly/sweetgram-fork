@@ -210,6 +210,13 @@ public class SweetgramAdminActivity extends BaseFragment {
         hint.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
         hint.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         contentLayout.addView(hint, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+
+        TextView attribution = new TextView(context);
+        attribution.setText("Based on Margy (@margeletter , github.com/narezany/Margelet)");
+        attribution.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
+        attribution.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12);
+        attribution.setPadding(0, AndroidUtilities.dp(16), 0, 0);
+        contentLayout.addView(attribution, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 
     private void grant() {
