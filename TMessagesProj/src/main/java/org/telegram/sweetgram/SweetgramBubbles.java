@@ -62,8 +62,11 @@ public class SweetgramBubbles {
         }
         // Выделенное — заметно, но не «другой цвет»: сдвигаем к белому или к
         // чёрному, смотря что читается на этом фоне.
-        final boolean blackText =
-                android.util.ColorUtils.computePerceivedBrightness(plain) > 0.705f;
+        final double r = Color.red(plain) / 255.0;
+        final double g = Color.green(plain) / 255.0;
+        final double b = Color.blue(plain) / 255.0;
+        final double perceivedBrightness = 0.299 * r + 0.587 * g + 0.114 * b;
+        final boolean blackText = perceivedBrightness > 0.705;
         selected = blackText ? mix(plain, Color.BLACK, 0.16f) : mix(plain, Color.WHITE, 0.18f);
         // Текст: чёрный на светлом, белый на тёмном — по воспринимаемой
         // яркости, те же правила, которыми телеграм красит свои градиентные

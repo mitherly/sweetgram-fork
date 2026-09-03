@@ -184,7 +184,7 @@ public class SweetgramOwnBadge {
         private final RectF field = new RectF();
         private final float radius = AndroidUtilities.dp(24) * 5f / 24f;
 
-        BadgeDrawable(Kind kind) {
+        public BadgeDrawable(Kind kind) {
             this.kind = kind;
             fieldPaint.setColor(kind.color);
             glyphPaint.setColor(0xFFFFFFFF);

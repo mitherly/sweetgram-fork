@@ -17,6 +17,8 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.UItem;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalFragment;
+import org.telegram.ui.sweetgram.SweetgramBubblesActivity;
+import org.telegram.ui.sweetgram.SweetgramBadgeGalleryActivity;
 
 import java.util.ArrayList;
 

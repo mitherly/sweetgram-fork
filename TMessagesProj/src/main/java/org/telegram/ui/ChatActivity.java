@@ -20749,9 +20749,9 @@ public class ChatActivity extends BaseFragment implements
         final int sweetgramLoadedCount = messArr.size();
         if (sweetgramWallTag != null) {
             for (MessageObject one : messArr) {
-                final int id = one == null ? 0 : one.getId();
-                if (id > 0 && (sweetgramWallOldest == 0 || id < sweetgramWallOldest)) {
-                    sweetgramWallOldest = id;
+                final int wallId = one == null ? 0 : one.getId();
+                if (wallId > 0 && (sweetgramWallOldest == 0 || wallId < sweetgramWallOldest)) {
+                    sweetgramWallOldest = wallId;
                 }
             }
             messArr = org.telegram.sweetgram.SweetgramWallGroup.onlyWall(messArr, sweetgramWallTag);

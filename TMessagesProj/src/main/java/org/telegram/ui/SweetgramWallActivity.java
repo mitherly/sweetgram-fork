@@ -3,6 +3,7 @@ package org.telegram.ui;
 import android.os.Bundle;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.R;
 import org.telegram.sweetgram.SweetgramWallGroup;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.Components.BulletinFactory;

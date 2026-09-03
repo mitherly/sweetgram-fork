@@ -62,7 +62,7 @@ public class SweetgramBadge {
         // не сам человек. Порядок здесь и есть порядок старшинства.
         final SweetgramOwnBadge.Kind own = ownKind(peerId);
         if (own != null) {
-            result.add(new Badge(peerId, SweetgramOwnBadge.icon(own), own.title + ". " + own.about));
+            result.add(new Badge(peerId, SweetgramOwnBadge.icon(own), own.title() + ". " + own.about()));
         }
         return result;
     }
@@ -88,7 +88,7 @@ public class SweetgramBadge {
     public static String title(long peerId) {
         final SweetgramOwnBadge.Kind own = ownKind(peerId);
         if (own != null && !SweetgramAuth.getInstance().isUserVerified(absPeer(peerId))) {
-            return own.title;
+            return own.title();
         }
         return SweetgramAuth.getInstance().getVerificationText(absPeer(peerId));
     }

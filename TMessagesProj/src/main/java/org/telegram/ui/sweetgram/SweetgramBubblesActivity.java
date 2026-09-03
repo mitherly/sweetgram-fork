@@ -154,6 +154,13 @@ public class SweetgramBubblesActivity extends UniversalFragment {
         return gradient ? companionColor(first) : 0;
     }
 
+    private static float perceivedBrightness(int color) {
+        final float r = android.graphics.Color.red(color) / 255f;
+        final float g = android.graphics.Color.green(color) / 255f;
+        final float b = android.graphics.Color.blue(color) / 255f;
+        return 0.299f * r + 0.587f * g + 0.114f * b;
+    }
+
     /** Два пузыря: как будут выглядеть свои сообщения. */
     private static class Preview extends View {
 
@@ -195,7 +202,7 @@ public class SweetgramBubblesActivity extends UniversalFragment {
                 bubblePaint.setColor(Theme.getColor(Theme.key_chat_outBubble));
             }
             final int ink = SweetgramBubbles.on()
-                    ? (android.util.ColorUtils.computePerceivedBrightness(color1 | 0xFF000000) > 0.705f
+                    ? (perceivedBrightness(color1 | 0xFF000000) > 0.705f
                             ? 0xff000000 : 0xffffffff)
                     : Theme.getColor(Theme.key_chat_messageTextOut);
 
